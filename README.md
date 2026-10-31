@@ -4,6 +4,7 @@
 Kids ask questions about planets, stars, rockets and astronauts. Cosmo answers in simple
 words, shows NASA fact cards, and rewards curiosity with ⭐ stars.
 
+- **Live site:** https://cosmic-juniors.vercel.app
 - **Design (Figma):** https://www.figma.com/design/xlAc0KK9rGCb5eSgOFLlaP
 - **Stack:** Next.js (App Router) + TypeScript, hosted on Vercel
 
