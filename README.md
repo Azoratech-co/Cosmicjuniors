@@ -1,99 +1,76 @@
-# Cosmic Juniors · Cosmo
+# Cosmic Juniors 🚀
 
-**Cosmo** is a space guide for young explorers, built for the **NASA Space Apps Challenge 2026
-(Beirut)**. Kids ask about planets, missions and rovers. Cosmo answers in clear, simple language using
-**verified facts from NASA** and shows the NASA page and photo each answer comes from.
+**Cosmo** is a friendly AI space buddy for kids, built for the NASA Space Apps Challenge.
+Kids ask questions about planets, stars, rockets and astronauts. Cosmo answers in simple
+words, shows NASA fact cards, and rewards curiosity with ⭐ stars.
 
 - **Live site:** https://cosmic-juniors.vercel.app
-- **Chatbot:** https://cosmic-juniors.vercel.app/chat
-- **Design (Figma):** homepage https://www.figma.com/design/bVXS5uIe7RDFs1eTmT12QT · chatbot https://www.figma.com/design/xlAc0KK9rGCb5eSgOFLlaP (page **v3 · Cosmo (homepage theme)**)
-- **Stack:** Next.js (App Router) + TypeScript on Vercel, Groq for the language model
+- **Design (Figma):** https://www.figma.com/design/xlAc0KK9rGCb5eSgOFLlaP
+- **Stack:** Next.js (App Router) + TypeScript, hosted on Vercel
 
 ## Run it locally
 
 ```bash
 npm install
-cp .env.example .env.local   # then paste your Groq key (optional)
-npm run dev                  # http://localhost:3000/chat
-npm run build                # production build (what Vercel runs)
-npm run lint                 # type check
+npm run dev        # http://localhost:3000
+npm run build      # production build (what Vercel runs)
+npm run lint       # type check
 ```
-
-Without a key the app still works: it answers straight from the NASA notes.
 
 ## How the project is split
 
-The **frontend** (what kids see) and **Cosmo's brain** (the AI) are separate.
+The **frontend** (what kids see) and **Cosmo's brain** (the AI) are separate, so they can be
+worked on in parallel.
 
 ```
 app/
-  page.tsx                → homepage (redirects to /chat until the homepage is built)
-  chat/page.tsx           → the chatbot page
-  layout.tsx              → Inter font, as in the homepage design
-  globals.css             → all styles; tokens match the homepage Figma
+  page.tsx                → the chat page
+  layout.tsx              → fonts (Fredoka + Nunito) and page metadata
+  globals.css             → all styles; color tokens match the Figma variables
   api/chat/route.ts       → POST /api/chat: origin check, rate limit, input validation
 components/               → UI pieces, one per Figma component
 lib/
   types.ts                → the API contract (shared by UI and API)
-  cosmo/              → 🧠 COSMO'S BRAIN (server only)
-    knowledge.ts          →   verified NASA facts, source links and photos  ← add topics here
-    prompt.ts             →   personality and rules (tune the tone here)
-    brain.ts              →   the flow: safety → NASA notes → model → source card
-    sources.ts            →   builds the source card under each answer
-    safety.ts             →   kid-safety checks and the careful pre-written replies
+  cosmo/                  → 🧠 COSMO'S BRAIN (server only)
+    brain.ts              →   the flow: safety checks → Groq model → clean reply
+    prompt.ts             →   Cosmo's personality and rules (tune the "human touch" here)
+    safety.ts             →   kid-safety checks and the gentle pre-written replies
+    links.ts              →   the only links Cosmo can show (trusted NASA pages)
     config.ts             →   which models to use, limits
     groq.ts               →   tiny Groq client
-  mockBrain.ts            → answers from the NASA notes when the AI is unavailable
+  mockBrain.ts            → canned answers, used when there is no API key or Groq is down
   rateLimit.ts            → per-visitor request limit
 ```
 
-## Where the facts come from
-
-`lib/cosmo/knowledge.ts` holds facts copied from these NASA pages (checked October 2026).
-For each question, the matching notes are given to the model, which may only use numbers, dates
-and names from them. The page is then shown under the answer, with a public-domain photo from the
-[NASA Image and Video Library](https://images.nasa.gov).
-
-| Topic | NASA source | Photo |
-| --- | --- | --- |
-| Mars Pathfinder & the Sojourner rover | [science.nasa.gov/mission/mars-pathfinder](https://science.nasa.gov/mission/mars-pathfinder/) | PIA04318 |
-| Mars | [science.nasa.gov/mars/facts](https://science.nasa.gov/mars/facts/) | PIA00407 |
-| Perseverance & Ingenuity | [science.nasa.gov/mission/mars-2020-perseverance](https://science.nasa.gov/mission/mars-2020-perseverance/) | PIA24542 |
-| The Moon | [science.nasa.gov/moon/facts](https://science.nasa.gov/moon/facts/) | as11-40-5903 |
-| Artemis | [nasa.gov/humans-in-space/artemis](https://www.nasa.gov/humans-in-space/artemis/) | art002e021278 |
-| Saturn | [science.nasa.gov/saturn/facts](https://science.nasa.gov/saturn/facts/) | PIA06193 |
-| Jupiter | [science.nasa.gov/jupiter/facts](https://science.nasa.gov/jupiter/facts/) | PIA22965 |
-| The Sun | [science.nasa.gov/sun/facts](https://science.nasa.gov/sun/facts/) | PIA26681 |
-| Space Station | [nasa.gov/…/space-station-facts-and-figures](https://www.nasa.gov/international-space-station/space-station-facts-and-figures/) | s118e09341 |
-| Black holes | [science.nasa.gov/universe/black-holes](https://science.nasa.gov/universe/black-holes/) | PIA23122 |
-| James Webb Space Telescope | [science.nasa.gov/mission/webb](https://science.nasa.gov/mission/webb/) | carina_nebula |
-
-**To add a topic:** copy facts from a NASA page into a new entry in `knowledge.ts`, add the page
-URL and keywords, and pick a photo ID from images.nasa.gov.
-
 ## Running with the real AI
 
-The key is **only** read on the server from the `GROQ_API_KEY` environment variable. It is never in
-the code and never sent to the browser. On Vercel it is set in Project → Settings → Environment
-Variables (type: Sensitive).
+The AI uses [Groq](https://console.groq.com). The key is **only** read on the server from the
+`GROQ_API_KEY` environment variable. It is never in the code and never sent to the browser.
+
+- **On Vercel:** already set in Project → Settings → Environment Variables (type: Sensitive).
+- **Locally:** copy `.env.example` to `.env.local` and paste your key. `.env.local` is git-ignored.
+- **No key?** The app still works, using the canned answers in `lib/mockBrain.ts`.
 
 ## How Cosmo keeps kids safe
+
+Every question goes through these layers (see `lib/cosmo/brain.ts`):
 
 1. **Front door** (`app/api/chat/route.ts`): blocks calls from other websites, limits each visitor
    to 10 questions a minute, rejects malformed or overly long messages.
 2. **Instant pattern check:** catches phone numbers, emails, addresses and self-harm phrases
-   before any AI is called, and answers with a careful pre-written reply.
+   before any AI is called, and answers with a caring pre-written reply.
 3. **Trick check:** Meta's Prompt Guard model spots attempts to make Cosmo break its rules.
 4. **The model labels every question** as ok / self_harm / personal_info / unsafe; anything
    not "ok" gets a pre-written reply instead of the AI's text.
-5. **Answer filter:** replies are scanned for bad words or links. The model can't write links;
-   source cards only point to the NASA pages in `knowledge.ts`.
-6. **Fail safe:** if anything breaks, Cosmo answers from the NASA notes. Kids' messages are
+5. **Answer filter:** Cosmo's reply is scanned for bad words or links before kids see it.
+   Cosmo can't write links at all; fact-card buttons only point to fixed NASA pages.
+6. **Fail safe:** if anything breaks, Cosmo falls back to canned answers. Kids' messages are
    never logged.
 
-**Groq free tier:** about 8,000 tokens a minute per model (roughly 5 questions a minute).
-Cosmo uses `gpt-oss-120b` and switches to `gpt-oss-20b` when the first is busy. Upgrade to
-Groq's Dev Tier for a busy demo day.
+**Groq free-tier note:** each model allows about 8,000 tokens a minute (roughly 5 questions a
+minute). Cosmo uses `gpt-oss-120b` and switches to `gpt-oss-20b` when the first one is busy.
+For a busy demo day, upgrade to Groq's Dev Tier. For a hard, shared rate limit across all
+servers, add a Vercel Firewall rate-limit rule.
 
 ## The chat API contract
 
@@ -105,27 +82,26 @@ Groq's Dev Tier for a busy demo day.
 
 // response
 {
-  "text": "Mars looks red because iron minerals in its dirt rust…",
-  "source": {                              // optional: the NASA page the answer is based on
-    "id": "mars",
-    "title": "Mars: Facts",
-    "publisher": "NASA Science",
-    "url": "https://science.nasa.gov/mars/facts/",
-    "fact": "Olympus Mons on Mars is the largest volcano in the solar system…",
-    "image": { "src": "https://images-assets.nasa.gov/…", "alt": "…", "credit": "NASA/JPL", "nasaId": "PIA00407" }
+  "text": "Mars is covered in dust full of iron oxide — that's rust!",
+  "card": {                       // optional NASA fact card
+    "title": "Mars, the Red Planet",
+    "body": "A day on Mars lasts 24 hours and 37 minutes…",
+    "image": "mars",              // mars | saturn | moon | sun | earth | rocket | blackhole
+    "button": { "label": "See real Mars photos 📸", "href": "https://science.nasa.gov/mars/" }
   },
-  "suggestions": ["How tall is Olympus Mons?", "How long is a day on Mars?"]
+  "suggestions": ["Can I visit Mars? 🚀", "Quiz me! 🧠"]   // optional follow-up chips
 }
 ```
 
 ## Design → code mapping
 
-| Figma component (v3 · Cosmo (homepage theme)) | Code |
-| --- | --- |
-| Header (same as homepage) | `SiteHeader` in `components/ChatParts.tsx` |
-| Avatar/Cosmo (✦ from the logo) | `Avatar` |
-| Message/Cosmo, Message/User | `MessageRow` |
-| Card/Source (like homepage mission cards) | `SourceCard` |
-| Button/Follow-up | `Pills` |
-| Message/Typing | `Typing` |
-| Composer | `components/Composer.tsx` |
+| Figma component     | Code                                  |
+| ------------------- | ------------------------------------- |
+| Avatar/Cosmo        | `components/Cosmo.tsx`                |
+| Chat Header         | `ChatHeader` in `ChatParts.tsx`       |
+| Message/Bot, User   | `MessageRow` in `ChatParts.tsx`       |
+| Message/Typing      | `Typing` in `ChatParts.tsx`           |
+| Card/Space Fact     | `FactCardView` in `ChatParts.tsx`     |
+| Chip/Quick Reply    | `QuickReplies` in `ChatParts.tsx`     |
+| Card/Suggestion     | `Welcome` in `ChatParts.tsx`          |
+| Composer            | `components/Composer.tsx`             |

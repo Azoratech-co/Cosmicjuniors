@@ -1,36 +1,36 @@
 // Shared types between the chat UI and the /api/chat endpoint.
+// The API team can swap the mock brain for a real AI model as long as
+// it keeps returning a `ChatReply`.
 
 export type Role = "user" | "bot";
 
-/** The NASA page an answer is based on, shown as a source card. */
-export interface Source {
-  id: string;
+/** Which illustration to show on a fact card. */
+export type CardImage = "mars" | "saturn" | "moon" | "sun" | "earth" | "rocket" | "blackhole";
+
+export interface FactCard {
   title: string;
-  publisher: string;
-  url: string;
-  /** One extra fact from that page. */
-  fact: string;
-  image?: { src: string; alt: string; credit: string; nasaId: string };
+  body: string;
+  image: CardImage;
+  /** Optional link button, e.g. to a NASA page. */
+  button?: { label: string; href: string };
 }
 
 export interface ChatMessage {
   id: string;
   role: Role;
   text: string;
-  source?: Source;
-  /** Time the message was created (ms since epoch). */
-  at: number;
+  card?: FactCard;
 }
 
 /** POST /api/chat request body. */
 export interface ChatRequest {
-  messages: { role: Role; text: string }[];
+  messages: Pick<ChatMessage, "role" | "text">[];
 }
 
 /** POST /api/chat response body. */
 export interface ChatReply {
   text: string;
-  source?: Source;
-  /** Follow-up questions shown as buttons. */
+  card?: FactCard;
+  /** Follow-up questions shown as tappable chips. */
   suggestions?: string[];
 }

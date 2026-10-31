@@ -1,24 +1,24 @@
 import type { Metadata, Viewport } from "next";
-import { Inter } from "next/font/google";
+import { Fredoka, Nunito } from "next/font/google";
 import "./globals.css";
 
-// Inter, as used in the Figma homepage "Cosmic Juniors — Homepage".
-const inter = Inter({ subsets: ["latin"], weight: ["400", "500", "700"], variable: "--font-inter" });
+const fredoka = Fredoka({ subsets: ["latin"], weight: ["500", "600", "700"], variable: "--font-heading" });
+const nunito = Nunito({ subsets: ["latin"], weight: ["400", "600", "700"], variable: "--font-body" });
 
 export const metadata: Metadata = {
-  title: "Cosmic Juniors",
-  description: "Cosmic Juniors: the next generation of space explorers. Built for the NASA Space Apps Challenge 2026.",
+  title: "Cosmic Juniors · Ask Cosmo",
+  description: "Cosmo is a friendly AI space buddy that answers kids' questions about planets, stars, rockets and astronauts.",
 };
 
 export const viewport: Viewport = {
-  themeColor: "#06152F",
+  themeColor: "#0B1026",
   width: "device-width",
   initialScale: 1,
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="en" className={inter.variable}>
+    <html lang="en" className={`${fredoka.variable} ${nunito.variable}`}>
       <body>{children}</body>
     </html>
   );

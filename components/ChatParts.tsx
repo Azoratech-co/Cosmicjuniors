@@ -1,101 +1,128 @@
 "use client";
 
-import Link from "next/link";
-import { StarIcon } from "./Icons";
-import type { ChatMessage, Source } from "@/lib/types";
+import { useEffect, useMemo, useRef, useState } from "react";
+import Cosmo from "./Cosmo";
+import CardArt from "./CardArt";
+import type { ChatMessage, FactCard } from "@/lib/types";
 
-// Chat building blocks. Each maps to a component in the Figma page "v3 · Cosmo (homepage theme)".
+// Small chat building blocks. Each one maps to a Figma component of the same name.
 
-/** Figma: Header (same as the homepage header). */
-export function SiteHeader() {
+/** Figma: Chat Header */
+export function ChatHeader({ stars }: { stars: number }) {
   return (
-    <header className="site-header">
-      <div className="site-header__accent" />
-      <div className="site-header__row">
-        <Link href="/" className="brand">
-          ✦ COSMIC JUNIORS
-        </Link>
-        <nav className="site-nav" aria-label="Main">
-          <Link href="/">HOME</Link>
-          <Link href="/#mission">OUR MISSION</Link>
-          <Link href="/#explore-mars">EXPLORE MARS</Link>
-        </nav>
+    <header className="chat-header">
+      <Cosmo size={44} />
+      <div className="chat-header__name">
+        <span className="t-title">Cosmo</span>
+        <span className="chat-header__status t-caption">
+          <span className="dot" aria-hidden="true" /> Online · your space buddy
+        </span>
       </div>
+      <span className="stars-badge t-label" aria-label={`${stars} stars collected`}>
+        ⭐ {stars}
+      </span>
     </header>
   );
 }
 
-/** Figma: Avatar/Cosmo */
-export function Avatar() {
+/** Figma: Card/Space Fact */
+export function FactCardView({ card }: { card: FactCard }) {
   return (
-    <span className="avatar" aria-hidden="true">
-      <StarIcon />
-    </span>
+    <article className="fact-card">
+      <CardArt image={card.image} />
+      <div className="fact-card__content">
+        <span className="t-caption c-star">🔭 NASA FACT</span>
+        <h3 className="t-title">{card.title}</h3>
+        <p className="t-body-sm c-muted">{card.body}</p>
+        {card.button && (
+          <a className="btn-cyan t-label" href={card.button.href} target="_blank" rel="noreferrer">
+            {card.button.label}
+          </a>
+        )}
+      </div>
+    </article>
   );
 }
 
-/** Figma: Card/Source (styled like the homepage mission cards). */
-export function SourceCard({ source }: { source: Source }) {
-  return (
-    <a className="source" href={source.url} target="_blank" rel="noopener noreferrer">
-      {source.image && (
-        // eslint-disable-next-line @next/next/no-img-element
-        <img className="source__photo" src={source.image.src} alt={source.image.alt} loading="lazy" />
-      )}
-      <span className="source__text">
-        <span className="label c-sky">Source · {source.publisher}</span>
-        <span className="card-title">{source.title}</span>
-        <span className="small c-muted">{source.fact}</span>
-        <span className="link">Read on NASA.gov →</span>
-      </span>
-    </a>
-  );
+/** Reveals text a few letters at a time, like Cosmo is typing it. */
+function useTypewriter(text: string, enabled: boolean, onDone?: () => void) {
+  const chars = useMemo(() => Array.from(text), [text]); // Array.from keeps emojis whole
+  const [count, setCount] = useState(enabled ? 0 : chars.length);
+  const doneRef = useRef(onDone);
+  doneRef.current = onDone;
+
+  useEffect(() => {
+    if (!enabled) return;
+    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
+      setCount(chars.length);
+      doneRef.current?.();
+      return;
+    }
+    let i = 0;
+    const id = window.setInterval(() => {
+      i = Math.min(i + 3, chars.length);
+      setCount(i);
+      if (i >= chars.length) {
+        window.clearInterval(id);
+        doneRef.current?.();
+      }
+    }, 22);
+    return () => window.clearInterval(id);
+  }, [chars, enabled]);
+
+  return { shown: chars.slice(0, count).join(""), done: count >= chars.length };
 }
 
-/** Figma: Message/Cosmo and Message/User */
-export function MessageRow({ message }: { message: ChatMessage }) {
+/** Figma: Message/Bot and Message/User */
+export function MessageRow({ message, animate, onDone }: { message: ChatMessage; animate?: boolean; onDone?: () => void }) {
+  const { shown, done } = useTypewriter(message.text, Boolean(animate) && message.role === "bot", onDone);
+
   if (message.role === "user") {
     return (
       <div className="row row--end">
-        <div className="bubble-user">{message.text}</div>
+        <div className="bubble bubble--user t-body">{message.text}</div>
       </div>
     );
   }
   return (
-    <article className="cosmo">
-      <div className="cosmo__head">
-        <Avatar />
-        <span className="label c-sky">Cosmo</span>
+    <>
+      <div className="row bot-row">
+        <Cosmo size={32} className="bot-row__avatar" />
+        <div className="bubble bubble--bot t-body">
+          <span className="sr-only">{message.text}</span>
+          <span aria-hidden="true">{shown}</span>
+        </div>
       </div>
-      <div className="cosmo__body">
-        <p>{message.text}</p>
-        {message.source && <SourceCard source={message.source} />}
-      </div>
-    </article>
+      {done && message.card && (
+        <div className="row indent">
+          <FactCardView card={message.card} />
+        </div>
+      )}
+    </>
   );
 }
 
 /** Figma: Message/Typing */
 export function Typing() {
   return (
-    <div className="typing" role="status">
-      <Avatar />
-      <span className="label c-sky">Checking NASA sources</span>
-      <span className="typing__dots" aria-hidden="true">
+    <div className="row bot-row bot-row--center" aria-live="polite">
+      <Cosmo size={32} />
+      <div className="bubble bubble--bot typing" aria-hidden="true">
         <span />
         <span />
         <span />
-      </span>
+      </div>
+      <span className="t-caption c-muted">Cosmo is thinking…</span>
     </div>
   );
 }
 
-/** Figma: Button/Follow-up */
-export function Pills({ items, onPick, indent }: { items: string[]; onPick: (q: string) => void; indent?: boolean }) {
+/** Figma: Chip/Quick Reply */
+export function QuickReplies({ items, onPick }: { items: string[]; onPick: (q: string) => void }) {
   return (
-    <div className={`pills${indent ? " pills--indent" : ""}`}>
+    <div className="chips indent">
       {items.map((q) => (
-        <button key={q} className="pill" onClick={() => onPick(q)}>
+        <button key={q} className="chip t-label" onClick={() => onPick(q)}>
           {q}
         </button>
       ))}
@@ -103,16 +130,36 @@ export function Pills({ items, onPick, indent }: { items: string[]; onPick: (q: 
   );
 }
 
-const STARTERS = ["What did Sojourner do on Mars?", "Is any rover still driving today?", "Why is Mars red?"];
+const starters: [string, string][] = [
+  ["🪐", "Why does Saturn have rings?"],
+  ["🚀", "How do rockets fly to space?"],
+  ["🌙", "Why does the Moon change shape?"],
+  ["👩‍🚀", "What do astronauts eat?"],
+];
 
-/** Start screen: title and three example questions. */
+/** Welcome screen with Card/Suggestion grid */
 export function Welcome({ onPick }: { onPick: (q: string) => void }) {
   return (
     <section className="welcome">
-      <span className="eyebrow">03 · AI Chatbot</span>
-      <h1 className="title">Ask Cosmo</h1>
-      <p className="c-muted">Ask anything about Mars and space missions. Every answer comes from NASA.</p>
-      <Pills items={STARTERS} onPick={onPick} />
+      <div className="welcome__hero">
+        <div className="welcome__glow" aria-hidden="true" />
+        <Cosmo size={112} />
+      </div>
+      <h1 className="t-display">Hi, Explorer! 👋</h1>
+      <p className="t-body c-muted welcome__intro">
+        I’m Cosmo, your space buddy. Ask me anything about planets, stars, rockets and astronauts!
+      </p>
+      <p className="t-label c-star welcome__try">✨ Try asking…</p>
+      <div className="suggestions">
+        {starters.map(([emoji, q]) => (
+          <button key={q} className="suggestion" onClick={() => onPick(q)}>
+            <span className="t-display" aria-hidden="true">
+              {emoji}
+            </span>
+            <span className="t-label">{q}</span>
+          </button>
+        ))}
+      </div>
     </section>
   );
 }

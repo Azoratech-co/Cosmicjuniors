@@ -1,0 +1,55 @@
+"use client";
+
+import Cosmo from "./Cosmo";
+
+// Desktop-only sidebar: new chat, recent topics, and the Explorer Level card.
+
+const STARS_PER_LEVEL = 10;
+
+export default function Sidebar({
+  stars,
+  history,
+  onNew,
+  onPick,
+}: {
+  stars: number;
+  history: string[];
+  onNew: () => void;
+  onPick: (q: string) => void;
+}) {
+  const level = Math.floor(stars / STARS_PER_LEVEL) + 1;
+  const into = stars % STARS_PER_LEVEL;
+  const toNext = STARS_PER_LEVEL - into;
+
+  return (
+    <aside className="sidebar">
+      <div className="sidebar__logo">
+        <Cosmo size={36} />
+        <span className="t-title">Cosmic Juniors</span>
+      </div>
+      <button className="btn-purple t-label" onClick={onNew}>
+        ＋&nbsp; New adventure
+      </button>
+
+      <nav className="history" aria-label="Recent adventures">
+        <span className="t-caption c-muted">RECENT ADVENTURES</span>
+        {history.length === 0 && <span className="t-body-sm c-muted">Your questions will show up here 🚀</span>}
+        {history.map((h, i) => (
+          <button key={h + i} className={`history__item t-label${i === 0 ? " is-active" : ""}`} onClick={() => onPick(h)}>
+            {h}
+          </button>
+        ))}
+      </nav>
+
+      <div className="level-card">
+        <span className="t-subtitle">🏅 Explorer Level {level}</span>
+        <div className="progress" role="progressbar" aria-valuemin={0} aria-valuemax={STARS_PER_LEVEL} aria-valuenow={into}>
+          <div className="progress__fill" style={{ width: `${(into / STARS_PER_LEVEL) * 100}%` }} />
+        </div>
+        <span className="t-caption c-muted">
+          ⭐ {stars} stars · {toNext} more to Level {level + 1}!
+        </span>
+      </div>
+    </aside>
+  );
+}
