@@ -92,7 +92,7 @@ export default function ChatApp() {
         <div className="composer-wrap">
           <Composer onSend={ask} disabled={thinking} />
           <p className="t-small c-tertiary disclaimer">
-            Sojourner can make mistakes. Check the NASA links for the full story.
+            Cosmo can make mistakes. Check the NASA links for the full story.
           </p>
         </div>
       </main>

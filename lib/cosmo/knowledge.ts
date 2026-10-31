@@ -31,7 +31,7 @@ const img = (nasaId: string, file: string, alt: string, credit: string): NasaIma
 export const TOPICS: Topic[] = [
   {
     id: "pathfinder",
-    keywords: ["sojourner", "pathfinder", "first rover", "first mars rover", "ares vallis", "1997", "your name", "who are you", "named after"],
+    keywords: ["sojourner", "pathfinder", "first rover", "first mars rover", "ares vallis", "1997"],
     title: "Mars Pathfinder",
     publisher: "NASA Science",
     url: "https://science.nasa.gov/mission/mars-pathfinder/",

@@ -8,11 +8,11 @@ import { SAFE_REPLIES, isTrickAttempt, screenAnswer, screenQuestion, type Safety
 import { mockReply } from "../mockBrain";
 import type { ChatReply, ChatRequest } from "../types";
 
-// Sojourner's brain: safety checks + verified NASA notes + the Groq model.
+// Cosmo's brain: safety checks + verified NASA notes + the Groq model.
 //
 // Flow for every question:
 //   1. Instant pattern check in our own code. Blocked → careful pre-written reply, no AI call.
-//   2. Find the NASA reference notes that match the question (lib/sojourner/knowledge.ts).
+//   2. Find the NASA reference notes that match the question (lib/cosmo/knowledge.ts).
 //   3. Trick check (Prompt Guard) runs at the same time as the answer is written.
 //   4. The model labels the question's safety itself; anything not "ok" gets a pre-written reply.
 //   5. The answer goes through a word filter, then gets its NASA source card attached.
@@ -20,7 +20,7 @@ import type { ChatReply, ChatRequest } from "../types";
 
 type History = ChatRequest["messages"];
 
-export async function askSojourner(history: History): Promise<ChatReply> {
+export async function askCosmo(history: History): Promise<ChatReply> {
   const question = history[history.length - 1].text;
 
   const quick = screenQuestion(question);
@@ -39,7 +39,7 @@ export async function askSojourner(history: History): Promise<ChatReply> {
     return draft.reply;
   } catch (err) {
     // Log only the error, never the kid's message.
-    console.error("Sojourner brain error:", err instanceof Error ? err.message : err);
+    console.error("Cosmo brain error:", err instanceof Error ? err.message : err);
     return mockReply(question);
   }
 }

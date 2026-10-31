@@ -4,9 +4,9 @@ import { ArrowRightIcon, ExternalIcon, PlusIcon, RoverIcon } from "./Icons";
 import { STARTERS } from "@/lib/starters";
 import type { ChatMessage, Source } from "@/lib/types";
 
-// Chat building blocks. Each maps to a component in the Figma page "v2 · Sojourner".
+// Chat building blocks. Each maps to a component in the Figma page "v2 · Cosmo".
 
-/** Figma: Avatar/Sojourner */
+/** Figma: Avatar/Cosmo */
 export function Avatar({ size = 32 }: { size?: number }) {
   return (
     <span className="avatar" style={{ width: size, height: size }} aria-hidden="true">
@@ -21,7 +21,7 @@ export function TopBar({ onNew }: { onNew: () => void }) {
     <header className="topbar">
       <Avatar />
       <div className="topbar__title">
-        <span className="t-heading">Sojourner</span>
+        <span className="t-heading">Cosmo</span>
         <span className="t-small c-secondary">Answers from NASA sources</span>
       </div>
       <button className="btn-outline t-button" onClick={onNew}>
@@ -68,7 +68,7 @@ export function MessageRow({ message }: { message: ChatMessage }) {
     <article className="assistant">
       <div className="assistant__head">
         <Avatar size={28} />
-        <span className="t-body-strong">Sojourner</span>
+        <span className="t-body-strong">Cosmo</span>
         <time className="t-label c-tertiary">{time(message.at)}</time>
       </div>
       <div className="assistant__body">
@@ -114,8 +114,7 @@ export function Welcome({ onPick }: { onPick: (q: string) => void }) {
       <span className="t-label c-accent">Cosmic Juniors · NASA Space Apps 2026</span>
       <h1 className="t-display">What would you like to explore today?</h1>
       <p className="t-body c-secondary">
-        I’m Sojourner, named after the first rover to drive on Mars. I answer with facts from NASA and show you where
-        each one comes from.
+        I’m Cosmo, your guide to space. I answer with facts from NASA and show you where each one comes from.
       </p>
 
       <button className="featured" onClick={() => onPick("What did Sojourner do on Mars?")}>

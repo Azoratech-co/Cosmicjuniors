@@ -51,7 +51,7 @@ export default function Sidebar({
       )}
 
       <p className="sidebar__foot t-small c-tertiary">
-        Sojourner answers with facts from NASA and links every source. Built for the NASA Space Apps Challenge 2026.
+        Cosmo answers with facts from NASA and links every source. Built for the NASA Space Apps Challenge 2026.
       </p>
     </aside>
   );

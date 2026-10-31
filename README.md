@@ -1,12 +1,11 @@
-# Cosmic Juniors · Sojourner
+# Cosmic Juniors · Cosmo
 
-**Sojourner** is a space guide for young explorers, built for the **NASA Space Apps Challenge 2026
-(Beirut)**. It is named after Sojourner, the first rover to drive on Mars (Mars Pathfinder, 1997).
-Kids ask about planets, missions and rovers. Sojourner answers in clear, simple language using
+**Cosmo** is a space guide for young explorers, built for the **NASA Space Apps Challenge 2026
+(Beirut)**. Kids ask about planets, missions and rovers. Cosmo answers in clear, simple language using
 **verified facts from NASA** and shows the NASA page and photo each answer comes from.
 
 - **Live site:** https://cosmic-juniors.vercel.app
-- **Design (Figma):** https://www.figma.com/design/xlAc0KK9rGCb5eSgOFLlaP (page **v2 · Sojourner**)
+- **Design (Figma):** https://www.figma.com/design/xlAc0KK9rGCb5eSgOFLlaP (page **v2 · Cosmo**)
 - **Stack:** Next.js (App Router) + TypeScript on Vercel, Groq for the language model
 
 ## Run it locally
@@ -23,7 +22,7 @@ Without a key the app still works: it answers straight from the NASA notes.
 
 ## How the project is split
 
-The **frontend** (what kids see) and **Sojourner's brain** (the AI) are separate.
+The **frontend** (what kids see) and **Cosmo's brain** (the AI) are separate.
 
 ```
 app/
@@ -35,7 +34,7 @@ components/               → UI pieces, one per Figma component
 lib/
   types.ts                → the API contract (shared by UI and API)
   starters.ts             → starter questions and sidebar topics
-  sojourner/              → 🧠 SOJOURNER'S BRAIN (server only)
+  cosmo/              → 🧠 COSMO'S BRAIN (server only)
     knowledge.ts          →   verified NASA facts, source links and photos  ← add topics here
     prompt.ts             →   personality and rules (tune the tone here)
     brain.ts              →   the flow: safety → NASA notes → model → source card
@@ -49,14 +48,14 @@ lib/
 
 ## Where the facts come from
 
-`lib/sojourner/knowledge.ts` holds facts copied from these NASA pages (checked October 2026).
+`lib/cosmo/knowledge.ts` holds facts copied from these NASA pages (checked October 2026).
 For each question, the matching notes are given to the model, which may only use numbers, dates
 and names from them. The page is then shown under the answer, with a public-domain photo from the
 [NASA Image and Video Library](https://images.nasa.gov).
 
 | Topic | NASA source | Photo |
 | --- | --- | --- |
-| Mars Pathfinder & Sojourner | [science.nasa.gov/mission/mars-pathfinder](https://science.nasa.gov/mission/mars-pathfinder/) | PIA04318 |
+| Mars Pathfinder & the Sojourner rover | [science.nasa.gov/mission/mars-pathfinder](https://science.nasa.gov/mission/mars-pathfinder/) | PIA04318 |
 | Mars | [science.nasa.gov/mars/facts](https://science.nasa.gov/mars/facts/) | PIA00407 |
 | Perseverance & Ingenuity | [science.nasa.gov/mission/mars-2020-perseverance](https://science.nasa.gov/mission/mars-2020-perseverance/) | PIA24542 |
 | The Moon | [science.nasa.gov/moon/facts](https://science.nasa.gov/moon/facts/) | as11-40-5903 |
@@ -77,22 +76,22 @@ The key is **only** read on the server from the `GROQ_API_KEY` environment varia
 the code and never sent to the browser. On Vercel it is set in Project → Settings → Environment
 Variables (type: Sensitive).
 
-## How Sojourner keeps kids safe
+## How Cosmo keeps kids safe
 
 1. **Front door** (`app/api/chat/route.ts`): blocks calls from other websites, limits each visitor
    to 10 questions a minute, rejects malformed or overly long messages.
 2. **Instant pattern check:** catches phone numbers, emails, addresses and self-harm phrases
    before any AI is called, and answers with a careful pre-written reply.
-3. **Trick check:** Meta's Prompt Guard model spots attempts to make Sojourner break its rules.
+3. **Trick check:** Meta's Prompt Guard model spots attempts to make Cosmo break its rules.
 4. **The model labels every question** as ok / self_harm / personal_info / unsafe; anything
    not "ok" gets a pre-written reply instead of the AI's text.
 5. **Answer filter:** replies are scanned for bad words or links. The model can't write links;
    source cards only point to the NASA pages in `knowledge.ts`.
-6. **Fail safe:** if anything breaks, Sojourner answers from the NASA notes. Kids' messages are
+6. **Fail safe:** if anything breaks, Cosmo answers from the NASA notes. Kids' messages are
    never logged.
 
 **Groq free tier:** about 8,000 tokens a minute per model (roughly 5 questions a minute).
-Sojourner uses `gpt-oss-120b` and switches to `gpt-oss-20b` when the first is busy. Upgrade to
+Cosmo uses `gpt-oss-120b` and switches to `gpt-oss-20b` when the first is busy. Upgrade to
 Groq's Dev Tier for a busy demo day.
 
 ## The chat API contract
@@ -120,9 +119,9 @@ Groq's Dev Tier for a busy demo day.
 
 ## Design → code mapping
 
-| Figma component (v2 · Sojourner) | Code |
+| Figma component (v2 · Cosmo) | Code |
 | --- | --- |
-| Avatar/Sojourner | `Avatar` in `components/ChatParts.tsx` (`RoverIcon` in `Icons.tsx`) |
+| Avatar/Cosmo | `Avatar` in `components/ChatParts.tsx` (`RoverIcon` in `Icons.tsx`) |
 | Top Bar | `TopBar` |
 | Message/Assistant, Message/User | `MessageRow` |
 | Card/Source | `SourceCard` |

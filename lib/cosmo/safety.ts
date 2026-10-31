@@ -5,9 +5,9 @@ import type { ChatReply } from "../types";
 
 // Kid-safety layers, cheapest first:
 //   1. screenQuestion: instant pattern checks in our own code (no AI, no cost).
-//   2. isTrickAttempt: Prompt Guard model spots attempts to break Sojourner's rules.
+//   2. isTrickAttempt: Prompt Guard model spots attempts to break Cosmo's rules.
 //   3. The chat model labels each question with a "safety" field (see prompt.ts).
-//   4. screenAnswer: a word filter on Sojourner's reply before it is shown.
+//   4. screenAnswer: a word filter on Cosmo's reply before it is shown.
 
 export type SafetyCategory = "ok" | "self_harm" | "personal_info" | "unsafe" | "trick";
 
@@ -38,7 +38,7 @@ export function screenQuestion(text: string): SafetyCategory {
   return "ok";
 }
 
-/** Last check on Sojourner's own answer before a kid sees it. */
+/** Last check on Cosmo's own answer before a kid sees it. */
 export function screenAnswer(reply: ChatReply): boolean {
   const all = [reply.text, ...(reply.suggestions ?? [])].join(" ");
   return !UNSAFE_WORDS.test(all) && !/https?:\/\//i.test(all);

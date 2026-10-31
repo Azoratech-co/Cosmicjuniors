@@ -1,8 +1,8 @@
-// Line icons used across the app (Figma: v2 · Sojourner). All inherit currentColor.
+// Line icons used across the app (Figma: v2 · Cosmo). All inherit currentColor.
 
 type P = { size?: number; className?: string };
 
-/** The Sojourner mark: a line drawing of the 1997 Mars Pathfinder rover. */
+/** Cosmo's mark: a line drawing of a Mars rover, a nod to NASA's Sojourner (1997). */
 export function RoverIcon({ size = 20, className }: P) {
   return (
     <svg width={size} height={size} viewBox="0 0 24 24" fill="none" className={className} aria-hidden="true">

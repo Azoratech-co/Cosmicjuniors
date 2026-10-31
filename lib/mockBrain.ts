@@ -1,5 +1,5 @@
-import { findTopics } from "./sojourner/knowledge";
-import { toSource } from "./sojourner/sources";
+import { findTopics } from "./cosmo/knowledge";
+import { toSource } from "./cosmo/sources";
 import type { ChatReply } from "./types";
 
 // Offline answers built straight from the verified NASA notes. Used when there is no
