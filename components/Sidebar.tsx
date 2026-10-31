@@ -1,55 +1,58 @@
 "use client";
 
-import Cosmo from "./Cosmo";
+import { STARTERS } from "@/lib/starters";
 
-// Desktop-only sidebar: new chat, recent topics, and the Explorer Level card.
-
-const STARS_PER_LEVEL = 10;
+// Desktop sidebar (Figma: Desktop · Conversation → Sidebar).
 
 export default function Sidebar({
-  stars,
-  history,
+  recent,
+  activeTopic,
   onNew,
   onPick,
 }: {
-  stars: number;
-  history: string[];
+  recent: string[];
+  activeTopic: string | null;
   onNew: () => void;
   onPick: (q: string) => void;
 }) {
-  const level = Math.floor(stars / STARS_PER_LEVEL) + 1;
-  const into = stars % STARS_PER_LEVEL;
-  const toNext = STARS_PER_LEVEL - into;
-
   return (
     <aside className="sidebar">
-      <div className="sidebar__logo">
-        <Cosmo size={36} />
-        <span className="t-title">Cosmic Juniors</span>
+      <div className="sidebar__brand">
+        <span className="t-display sidebar__wordmark">Cosmic Juniors</span>
+        <span className="t-label c-tertiary">Space Apps 2026 · Beirut</span>
       </div>
-      <button className="btn-purple t-label" onClick={onNew}>
-        ＋&nbsp; New adventure
+
+      <button className="btn-solid t-button" onClick={onNew}>
+        New conversation
       </button>
 
-      <nav className="history" aria-label="Recent adventures">
-        <span className="t-caption c-muted">RECENT ADVENTURES</span>
-        {history.length === 0 && <span className="t-body-sm c-muted">Your questions will show up here 🚀</span>}
-        {history.map((h, i) => (
-          <button key={h + i} className={`history__item t-label${i === 0 ? " is-active" : ""}`} onClick={() => onPick(h)}>
-            {h}
+      <nav className="nav" aria-label="Topics">
+        <span className="t-label c-tertiary">Topics</span>
+        {STARTERS.map((s) => (
+          <button
+            key={s.label}
+            className={`nav__item t-body${activeTopic === s.label ? " is-active" : ""}`}
+            onClick={() => onPick(s.question)}
+          >
+            {s.label}
           </button>
         ))}
       </nav>
 
-      <div className="level-card">
-        <span className="t-subtitle">🏅 Explorer Level {level}</span>
-        <div className="progress" role="progressbar" aria-valuemin={0} aria-valuemax={STARS_PER_LEVEL} aria-valuenow={into}>
-          <div className="progress__fill" style={{ width: `${(into / STARS_PER_LEVEL) * 100}%` }} />
-        </div>
-        <span className="t-caption c-muted">
-          ⭐ {stars} stars · {toNext} more to Level {level + 1}!
-        </span>
-      </div>
+      {recent.length > 0 && (
+        <nav className="nav" aria-label="Recent questions">
+          <span className="t-label c-tertiary">Recent</span>
+          {recent.map((q, i) => (
+            <button key={q + i} className="nav__item t-body" onClick={() => onPick(q)}>
+              {q}
+            </button>
+          ))}
+        </nav>
+      )}
+
+      <p className="sidebar__foot t-small c-tertiary">
+        Sojourner answers with facts from NASA and links every source. Built for the NASA Space Apps Challenge 2026.
+      </p>
     </aside>
   );
 }

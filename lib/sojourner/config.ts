@@ -1,9 +1,9 @@
-// Central settings for Cosmo's brain. Change models or limits here.
+// Central settings for Sojourner's brain. Change models or limits here.
 
 export const MODELS = {
-  /** Writes Cosmo's answers. Tried in order: if one is busy (rate limited), the next is used. */
+  /** Writes Sojourner's answers. Tried in order: if one is busy (rate limited), the next is used. */
   chat: ["openai/gpt-oss-120b", "openai/gpt-oss-20b"],
-  /** Detects attempts to trick Cosmo into ignoring its rules. */
+  /** Detects attempts to trick Sojourner into ignoring its rules. */
   promptGuard: "meta-llama/llama-prompt-guard-2-86m",
 } as const;
 
@@ -12,7 +12,7 @@ export const LIMITS = {
   maxQuestionChars: 300,
   /** Longest earlier message we pass back to the model. */
   maxHistoryChars: 800,
-  /** How many recent messages Cosmo remembers. */
+  /** How many recent messages Sojourner remembers. */
   historyMessages: 10,
   /** Requests allowed per visitor per minute. */
   perMinute: 10,

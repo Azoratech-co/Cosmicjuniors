@@ -1,10 +1,10 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
+import { ArrowUpIcon, MicIcon } from "./Icons";
 
-// Figma: Composer. Text field + send button, plus a mic button that uses the
-// browser's built-in speech recognition (Chrome, Edge, Safari) so younger kids
-// can talk instead of type. The mic hides itself where it isn't supported.
+// Figma: Composer. Text field, mic (browser speech recognition, hidden where
+// unsupported) and send button.
 
 /* eslint-disable @typescript-eslint/no-explicit-any */
 type Recognition = any;
@@ -60,31 +60,26 @@ export default function Composer({ onSend, disabled }: { onSend: (text: string) 
         submit();
       }}
     >
-      {canListen && (
-        <button
-          type="button"
-          className={`round-btn round-btn--dark${listening ? " is-listening" : ""}`}
-          onClick={toggleMic}
-          aria-label={listening ? "Stop listening" : "Talk to Cosmo"}
-        >
-          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" aria-hidden="true">
-            <rect x="9" y="3" width="6" height="11" rx="3" stroke="currentColor" strokeWidth="2" />
-            <path d="M5 11a7 7 0 0 0 14 0M12 18v3" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
-          </svg>
-        </button>
-      )}
       <input
         className="composer__field t-body"
         value={text}
         onChange={(e) => setText(e.target.value)}
-        placeholder={listening ? "Listening… 👂" : "Ask Cosmo anything…"}
-        aria-label="Ask Cosmo a question"
+        placeholder={listening ? "Listening…" : "Ask Sojourner anything…"}
+        aria-label="Ask Sojourner a question"
         maxLength={300}
       />
-      <button type="submit" className="round-btn round-btn--purple" aria-label="Send" disabled={disabled || !text.trim()}>
-        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" aria-hidden="true">
-          <path d="M12 19V5M5 12l7-7 7 7" stroke="currentColor" strokeWidth="2.6" strokeLinecap="round" strokeLinejoin="round" />
-        </svg>
+      {canListen && (
+        <button
+          type="button"
+          className={`icon-btn${listening ? " is-listening" : ""}`}
+          onClick={toggleMic}
+          aria-label={listening ? "Stop listening" : "Ask with your voice"}
+        >
+          <MicIcon />
+        </button>
+      )}
+      <button type="submit" className="icon-btn icon-btn--solid" aria-label="Send" disabled={disabled || !text.trim()}>
+        <ArrowUpIcon />
       </button>
     </form>
   );

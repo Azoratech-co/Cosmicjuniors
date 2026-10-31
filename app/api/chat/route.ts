@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
-import { askCosmo } from "@/lib/cosmo/brain";
-import { LIMITS } from "@/lib/cosmo/config";
+import { askSojourner } from "@/lib/sojourner/brain";
+import { LIMITS } from "@/lib/sojourner/config";
 import { rateLimit } from "@/lib/rateLimit";
 import type { ChatRequest } from "@/lib/types";
 
@@ -8,7 +8,7 @@ import type { ChatRequest } from "@/lib/types";
 // Body:    { messages: [{ role: "user" | "bot", text: string }, ...] }
 // Returns: ChatReply (see lib/types.ts)
 //
-// This route is the front door to Cosmo's brain (lib/cosmo/brain.ts).
+// This route is the front door to Sojourner's brain (lib/sojourner/brain.ts).
 // It rejects anything suspicious before the AI is ever called.
 
 export const runtime = "nodejs";
@@ -44,8 +44,8 @@ export async function POST(req: Request) {
     return NextResponse.json({ error: "Invalid messages" }, { status: 400 });
   }
 
-  // 4. Ask Cosmo.
-  const reply = await askCosmo(history);
+  // 4. Ask Sojourner.
+  const reply = await askSojourner(history);
   return NextResponse.json(reply, { headers: { "Cache-Control": "no-store" } });
 }
 

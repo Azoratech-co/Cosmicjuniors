@@ -5,9 +5,9 @@ import type { ChatReply } from "../types";
 
 // Kid-safety layers, cheapest first:
 //   1. screenQuestion: instant pattern checks in our own code (no AI, no cost).
-//   2. isTrickAttempt: Prompt Guard model spots attempts to break Cosmo's rules.
+//   2. isTrickAttempt: Prompt Guard model spots attempts to break Sojourner's rules.
 //   3. The chat model labels each question with a "safety" field (see prompt.ts).
-//   4. screenAnswer: a word filter on Cosmo's reply before it is shown.
+//   4. screenAnswer: a word filter on Sojourner's reply before it is shown.
 
 export type SafetyCategory = "ok" | "self_harm" | "personal_info" | "unsafe" | "trick";
 
@@ -38,9 +38,9 @@ export function screenQuestion(text: string): SafetyCategory {
   return "ok";
 }
 
-/** Last check on Cosmo's own answer before a kid sees it. */
+/** Last check on Sojourner's own answer before a kid sees it. */
 export function screenAnswer(reply: ChatReply): boolean {
-  const all = [reply.text, reply.card?.title, reply.card?.body, ...(reply.suggestions ?? [])].join(" ");
+  const all = [reply.text, ...(reply.suggestions ?? [])].join(" ");
   return !UNSAFE_WORDS.test(all) && !/https?:\/\//i.test(all);
 }
 
@@ -54,19 +54,19 @@ export async function isTrickAttempt(content: string): Promise<boolean> {
 /** Gentle, pre-written replies used when a check blocks a message. */
 export const SAFE_REPLIES: Record<Exclude<SafetyCategory, "ok">, ChatReply> = {
   self_harm: {
-    text: "I'm really glad you told me. 💜 That sounds important, and you deserve help from a real person. Please talk to a parent, teacher, or another grown-up you trust right now. You're not alone.",
-    suggestions: ["Tell me something calming 🌙", "Show me the stars ✨"],
+    text: "I'm really glad you told me. What you're feeling matters, and you deserve help from a real person. Please talk to a parent, a teacher, or another grown-up you trust, today. You're not alone.",
+    suggestions: ["Tell me something calm about space", "What does Earth look like from space?"],
   },
   personal_info: {
-    text: "Whoa, hold on, space explorer! 🛡️ Things like your address, school, or phone number are top-secret mission info. Let's keep those private, even from me. Want to explore something cool instead?",
-    suggestions: ["Why is Mars red? 🔴", "How big is the Sun? ☀️"],
+    text: "Let's keep things like your address, school, phone number or email private, even from me. You never need to share them here. What would you like to explore instead?",
+    suggestions: ["What did the first Mars rover do?", "How far away is the Moon?"],
   },
   unsafe: {
-    text: "Hmm, that's not something I can chat about. 🤖 But my circuits are buzzing to talk about space! Want to pick one of these?",
-    suggestions: ["What is a black hole? 🌌", "How do rockets fly? 🚀", "Quiz me! 🧠"],
+    text: "That's not something I can help with. I'm here for space, science and exploration. Want to try one of these?",
+    suggestions: ["What is a black hole?", "Why does Saturn have rings?", "Who flew on Artemis II?"],
   },
   trick: {
-    text: "Nice try, but my mission rules are locked in tight! 🔒😄 Let's get back to exploring the universe. What do you want to discover?",
-    suggestions: ["Tell me a space fact ✨", "Quiz me! 🧠"],
+    text: "I'll stick to my usual rules, but I'm happy to keep exploring with you. What would you like to know about space?",
+    suggestions: ["What did the first Mars rover do?", "What has Webb discovered?"],
   },
 };

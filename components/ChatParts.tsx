@@ -1,128 +1,105 @@
 "use client";
 
-import { useEffect, useMemo, useRef, useState } from "react";
-import Cosmo from "./Cosmo";
-import CardArt from "./CardArt";
-import type { ChatMessage, FactCard } from "@/lib/types";
+import { ArrowRightIcon, ExternalIcon, PlusIcon, RoverIcon } from "./Icons";
+import { STARTERS } from "@/lib/starters";
+import type { ChatMessage, Source } from "@/lib/types";
 
-// Small chat building blocks. Each one maps to a Figma component of the same name.
+// Chat building blocks. Each maps to a component in the Figma page "v2 · Sojourner".
 
-/** Figma: Chat Header */
-export function ChatHeader({ stars }: { stars: number }) {
+/** Figma: Avatar/Sojourner */
+export function Avatar({ size = 32 }: { size?: number }) {
   return (
-    <header className="chat-header">
-      <Cosmo size={44} />
-      <div className="chat-header__name">
-        <span className="t-title">Cosmo</span>
-        <span className="chat-header__status t-caption">
-          <span className="dot" aria-hidden="true" /> Online · your space buddy
-        </span>
+    <span className="avatar" style={{ width: size, height: size }} aria-hidden="true">
+      <RoverIcon size={Math.round(size * 0.62)} />
+    </span>
+  );
+}
+
+/** Figma: Top Bar */
+export function TopBar({ onNew }: { onNew: () => void }) {
+  return (
+    <header className="topbar">
+      <Avatar />
+      <div className="topbar__title">
+        <span className="t-heading">Sojourner</span>
+        <span className="t-small c-secondary">Answers from NASA sources</span>
       </div>
-      <span className="stars-badge t-label" aria-label={`${stars} stars collected`}>
-        ⭐ {stars}
-      </span>
+      <button className="btn-outline t-button" onClick={onNew}>
+        <PlusIcon /> New
+      </button>
     </header>
   );
 }
 
-/** Figma: Card/Space Fact */
-export function FactCardView({ card }: { card: FactCard }) {
+const time = (ms: number) => new Date(ms).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
+
+/** Figma: Card/Source */
+export function SourceCard({ source }: { source: Source }) {
+  const domain = new URL(source.url).hostname.replace(/^www\./, "");
   return (
-    <article className="fact-card">
-      <CardArt image={card.image} />
-      <div className="fact-card__content">
-        <span className="t-caption c-star">🔭 NASA FACT</span>
-        <h3 className="t-title">{card.title}</h3>
-        <p className="t-body-sm c-muted">{card.body}</p>
-        {card.button && (
-          <a className="btn-cyan t-label" href={card.button.href} target="_blank" rel="noreferrer">
-            {card.button.label}
-          </a>
-        )}
-      </div>
-    </article>
+    <a className="source" href={source.url} target="_blank" rel="noopener noreferrer">
+      {source.image && (
+        // eslint-disable-next-line @next/next/no-img-element
+        <img className="source__photo" src={source.image.src} alt={source.image.alt} loading="lazy" />
+      )}
+      <span className="source__text">
+        <span className="t-label c-accent">Source · {source.publisher}</span>
+        <span className="t-body-strong">{source.title}</span>
+        <span className="t-small c-secondary">{source.fact}</span>
+        <span className="source__meta t-label c-tertiary">
+          {domain} <ExternalIcon />
+          {source.image && <span className="source__credit">· Photo {source.image.credit}</span>}
+        </span>
+      </span>
+    </a>
   );
 }
 
-/** Reveals text a few letters at a time, like Cosmo is typing it. */
-function useTypewriter(text: string, enabled: boolean, onDone?: () => void) {
-  const chars = useMemo(() => Array.from(text), [text]); // Array.from keeps emojis whole
-  const [count, setCount] = useState(enabled ? 0 : chars.length);
-  const doneRef = useRef(onDone);
-  doneRef.current = onDone;
-
-  useEffect(() => {
-    if (!enabled) return;
-    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
-      setCount(chars.length);
-      doneRef.current?.();
-      return;
-    }
-    let i = 0;
-    const id = window.setInterval(() => {
-      i = Math.min(i + 3, chars.length);
-      setCount(i);
-      if (i >= chars.length) {
-        window.clearInterval(id);
-        doneRef.current?.();
-      }
-    }, 22);
-    return () => window.clearInterval(id);
-  }, [chars, enabled]);
-
-  return { shown: chars.slice(0, count).join(""), done: count >= chars.length };
-}
-
-/** Figma: Message/Bot and Message/User */
-export function MessageRow({ message, animate, onDone }: { message: ChatMessage; animate?: boolean; onDone?: () => void }) {
-  const { shown, done } = useTypewriter(message.text, Boolean(animate) && message.role === "bot", onDone);
-
+/** Figma: Message/Assistant and Message/User */
+export function MessageRow({ message }: { message: ChatMessage }) {
   if (message.role === "user") {
     return (
       <div className="row row--end">
-        <div className="bubble bubble--user t-body">{message.text}</div>
+        <div className="bubble-user t-body">{message.text}</div>
       </div>
     );
   }
   return (
-    <>
-      <div className="row bot-row">
-        <Cosmo size={32} className="bot-row__avatar" />
-        <div className="bubble bubble--bot t-body">
-          <span className="sr-only">{message.text}</span>
-          <span aria-hidden="true">{shown}</span>
-        </div>
+    <article className="assistant">
+      <div className="assistant__head">
+        <Avatar size={28} />
+        <span className="t-body-strong">Sojourner</span>
+        <time className="t-label c-tertiary">{time(message.at)}</time>
       </div>
-      {done && message.card && (
-        <div className="row indent">
-          <FactCardView card={message.card} />
-        </div>
-      )}
-    </>
+      <div className="assistant__body">
+        <p className="t-body">{message.text}</p>
+        {message.source && <SourceCard source={message.source} />}
+      </div>
+    </article>
   );
 }
 
 /** Figma: Message/Typing */
 export function Typing() {
   return (
-    <div className="row bot-row bot-row--center" aria-live="polite">
-      <Cosmo size={32} />
-      <div className="bubble bubble--bot typing" aria-hidden="true">
+    <div className="typing" role="status">
+      <Avatar size={28} />
+      <span className="t-small c-secondary">Checking NASA sources</span>
+      <span className="typing__dots" aria-hidden="true">
         <span />
         <span />
         <span />
-      </div>
-      <span className="t-caption c-muted">Cosmo is thinking…</span>
+      </span>
     </div>
   );
 }
 
-/** Figma: Chip/Quick Reply */
-export function QuickReplies({ items, onPick }: { items: string[]; onPick: (q: string) => void }) {
+/** Figma: Button/Follow-up */
+export function FollowUps({ items, onPick }: { items: string[]; onPick: (q: string) => void }) {
   return (
-    <div className="chips indent">
+    <div className="followups">
       {items.map((q) => (
-        <button key={q} className="chip t-label" onClick={() => onPick(q)}>
+        <button key={q} className="btn-outline t-button" onClick={() => onPick(q)}>
           {q}
         </button>
       ))}
@@ -130,33 +107,41 @@ export function QuickReplies({ items, onPick }: { items: string[]; onPick: (q: s
   );
 }
 
-const starters: [string, string][] = [
-  ["🪐", "Why does Saturn have rings?"],
-  ["🚀", "How do rockets fly to space?"],
-  ["🌙", "Why does the Moon change shape?"],
-  ["👩‍🚀", "What do astronauts eat?"],
-];
-
-/** Welcome screen with Card/Suggestion grid */
+/** Welcome screen: intro, featured archive photo, and Figma: Row/Prompt */
 export function Welcome({ onPick }: { onPick: (q: string) => void }) {
   return (
     <section className="welcome">
-      <div className="welcome__hero">
-        <div className="welcome__glow" aria-hidden="true" />
-        <Cosmo size={112} />
-      </div>
-      <h1 className="t-display">Hi, Explorer! 👋</h1>
-      <p className="t-body c-muted welcome__intro">
-        I’m Cosmo, your space buddy. Ask me anything about planets, stars, rockets and astronauts!
+      <span className="t-label c-accent">Cosmic Juniors · NASA Space Apps 2026</span>
+      <h1 className="t-display">What would you like to explore today?</h1>
+      <p className="t-body c-secondary">
+        I’m Sojourner, named after the first rover to drive on Mars. I answer with facts from NASA and show you where
+        each one comes from.
       </p>
-      <p className="t-label c-star welcome__try">✨ Try asking…</p>
-      <div className="suggestions">
-        {starters.map(([emoji, q]) => (
-          <button key={q} className="suggestion" onClick={() => onPick(q)}>
-            <span className="t-display" aria-hidden="true">
-              {emoji}
+
+      <button className="featured" onClick={() => onPick("What did Sojourner do on Mars?")}>
+        {/* eslint-disable-next-line @next/next/no-img-element */}
+        <img
+          className="featured__photo"
+          src="https://images-assets.nasa.gov/image/PIA01551/PIA01551~orig.jpg"
+          alt="The Sojourner rover on Mars, just after rolling off the Pathfinder lander"
+        />
+        <span className="featured__text">
+          <span className="t-label c-accent">From the archive</span>
+          <span className="t-body-strong">Sojourner’s first day on Mars</span>
+          <span className="t-small c-secondary">July 4, 1997 · Ares Vallis</span>
+          <span className="t-label c-tertiary">NASA/JPL · PIA01551</span>
+        </span>
+      </button>
+
+      <span className="t-label c-tertiary">Start with a question</span>
+      <div className="prompts">
+        {STARTERS.slice(0, 3).map((s) => (
+          <button key={s.question} className="prompt" onClick={() => onPick(s.question)}>
+            <span className="prompt__text">
+              <span className="t-label c-accent">{s.topic}</span>
+              <span className="t-body-strong">{s.question}</span>
             </span>
-            <span className="t-label">{q}</span>
+            <ArrowRightIcon />
           </button>
         ))}
       </div>

@@ -1,24 +1,29 @@
 import type { Metadata, Viewport } from "next";
-import { Fredoka, Nunito } from "next/font/google";
+import { IBM_Plex_Mono, Newsreader, Public_Sans } from "next/font/google";
 import "./globals.css";
 
-const fredoka = Fredoka({ subsets: ["latin"], weight: ["500", "600", "700"], variable: "--font-heading" });
-const nunito = Nunito({ subsets: ["latin"], weight: ["400", "600", "700"], variable: "--font-body" });
+// Fonts match the Figma file "v2 · Sojourner":
+// Public Sans (US government open typeface) for the interface, Newsreader for headlines,
+// IBM Plex Mono for small labels and sources.
+const sans = Public_Sans({ subsets: ["latin"], weight: ["400", "500", "600"], variable: "--font-sans" });
+const serif = Newsreader({ subsets: ["latin"], weight: ["500"], variable: "--font-serif" });
+const mono = IBM_Plex_Mono({ subsets: ["latin"], weight: ["500"], variable: "--font-mono" });
 
 export const metadata: Metadata = {
-  title: "Cosmic Juniors · Ask Cosmo",
-  description: "Cosmo is a friendly AI space buddy that answers kids' questions about planets, stars, rockets and astronauts.",
+  title: "Sojourner · Cosmic Juniors",
+  description:
+    "Sojourner is a space guide for young explorers that answers with facts from NASA and links every source. Built for the NASA Space Apps Challenge 2026.",
 };
 
 export const viewport: Viewport = {
-  themeColor: "#0B1026",
+  themeColor: "#F5F3EE",
   width: "device-width",
   initialScale: 1,
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="en" className={`${fredoka.variable} ${nunito.variable}`}>
+    <html lang="en" className={`${sans.variable} ${serif.variable} ${mono.variable}`}>
       <body>{children}</body>
     </html>
   );
