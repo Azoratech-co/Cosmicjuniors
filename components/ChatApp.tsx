@@ -17,7 +17,10 @@ export default function ChatApp() {
   const [thinking, setThinking] = useState(false);
   const [stars, setStars] = useState(0);
   const [history, setHistory] = useState<string[]>([]);
+  // The bot message currently being "typed" on screen.
+  const [revealingId, setRevealingId] = useState<string | null>(null);
   const scrollRef = useRef<HTMLDivElement>(null);
+  const threadRef = useRef<HTMLDivElement>(null);
 
   // Stars are saved in this browser only (no accounts yet).
   useEffect(() => {
@@ -26,9 +29,15 @@ export default function ChatApp() {
     } catch {}
   }, []);
 
+  // Keep the newest message in view, including while Cosmo is typing.
   useEffect(() => {
-    scrollRef.current?.scrollTo({ top: scrollRef.current.scrollHeight, behavior: "smooth" });
-  }, [messages, thinking]);
+    const scroller = scrollRef.current;
+    const thread = threadRef.current;
+    if (!scroller || !thread) return;
+    const ro = new ResizeObserver(() => scroller.scrollTo({ top: scroller.scrollHeight }));
+    ro.observe(thread);
+    return () => ro.disconnect();
+  }, []);
 
   const addStar = () =>
     setStars((s) => {
@@ -40,7 +49,7 @@ export default function ChatApp() {
     });
 
   const ask = async (text: string) => {
-    if (thinking) return;
+    if (thinking || revealingId) return;
     const userMsg: ChatMessage = { id: uid(), role: "user", text };
     const next = [...messages, userMsg];
     setMessages(next);
@@ -55,21 +64,28 @@ export default function ChatApp() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ messages: next.map(({ role, text }) => ({ role, text })) }),
       });
+      if (res.status === 429) {
+        throw new Error("slow-down");
+      }
       if (!res.ok) throw new Error(`HTTP ${res.status}`);
       const reply: ChatReply = await res.json();
-      setMessages((m) => [...m, { id: uid(), role: "bot", text: reply.text, card: reply.card }]);
+      const id = uid();
+      setRevealingId(id);
+      setMessages((m) => [...m, { id, role: "bot", text: reply.text, card: reply.card }]);
       setSuggestions(reply.suggestions ?? []);
-    } catch {
-      setMessages((m) => [
-        ...m,
-        { id: uid(), role: "bot", text: "Oops! My radio lost signal 📡 Can you try asking again?" },
-      ]);
+    } catch (err) {
+      const text =
+        err instanceof Error && err.message === "slow-down"
+          ? "Whoa, so many questions! 😅 Let my circuits cool down for a few seconds, then ask me again."
+          : "Oops! My radio lost signal 📡 Can you try asking again?";
+      setMessages((m) => [...m, { id: uid(), role: "bot", text }]);
     } finally {
       setThinking(false);
     }
   };
 
   const reset = () => {
+    setRevealingId(null);
     setMessages([]);
     setSuggestions([]);
   };
@@ -83,7 +99,7 @@ export default function ChatApp() {
       <main className="main">
         <ChatHeader stars={stars} />
         <div className="scroll" ref={scrollRef}>
-          <div className={`thread${empty ? " thread--empty" : ""}`}>
+          <div className={`thread${empty ? " thread--empty" : ""}`} ref={threadRef}>
             {empty ? (
               <Welcome onPick={ask} />
             ) : (
@@ -92,16 +108,23 @@ export default function ChatApp() {
                   <span className="day-pill t-caption c-muted">Today</span>
                 </div>
                 {messages.map((m) => (
-                  <MessageRow key={m.id} message={m} />
+                  <MessageRow
+                    key={m.id}
+                    message={m}
+                    animate={m.id === revealingId}
+                    onDone={() => setRevealingId((cur) => (cur === m.id ? null : cur))}
+                  />
                 ))}
                 {thinking && <Typing />}
-                {!thinking && suggestions.length > 0 && <QuickReplies items={suggestions} onPick={ask} />}
+                {!thinking && !revealingId && suggestions.length > 0 && (
+                  <QuickReplies items={suggestions} onPick={ask} />
+                )}
               </>
             )}
           </div>
         </div>
         <div className="composer-wrap">
-          <Composer onSend={ask} disabled={thinking} />
+          <Composer onSend={ask} disabled={thinking || Boolean(revealingId)} />
           <p className="t-caption c-muted disclaimer">
             Cosmo can make mistakes — ask a grown-up to double-check big facts! 🌍
           </p>

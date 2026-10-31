@@ -40,6 +40,7 @@ a { color: inherit; }
 .t-body-sm  { font-weight: 400; font-size: 13px; line-height: 1.4; }
 .t-label    { font-weight: 700; font-size: 14px; line-height: 1.2; }
 .t-caption  { font-weight: 700; font-size: 11px; line-height: 1.2; }
+.sr-only { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
 .c-muted { color: var(--text-muted); }
 .c-star  { color: var(--accent-star); }
 

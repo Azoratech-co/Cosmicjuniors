@@ -1,5 +1,6 @@
 "use client";
 
+import { useEffect, useMemo, useRef, useState } from "react";
 import Cosmo from "./Cosmo";
 import CardArt from "./CardArt";
 import type { ChatMessage, FactCard } from "@/lib/types";
@@ -43,8 +44,39 @@ export function FactCardView({ card }: { card: FactCard }) {
   );
 }
 
+/** Reveals text a few letters at a time, like Cosmo is typing it. */
+function useTypewriter(text: string, enabled: boolean, onDone?: () => void) {
+  const chars = useMemo(() => Array.from(text), [text]); // Array.from keeps emojis whole
+  const [count, setCount] = useState(enabled ? 0 : chars.length);
+  const doneRef = useRef(onDone);
+  doneRef.current = onDone;
+
+  useEffect(() => {
+    if (!enabled) return;
+    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
+      setCount(chars.length);
+      doneRef.current?.();
+      return;
+    }
+    let i = 0;
+    const id = window.setInterval(() => {
+      i = Math.min(i + 3, chars.length);
+      setCount(i);
+      if (i >= chars.length) {
+        window.clearInterval(id);
+        doneRef.current?.();
+      }
+    }, 22);
+    return () => window.clearInterval(id);
+  }, [chars, enabled]);
+
+  return { shown: chars.slice(0, count).join(""), done: count >= chars.length };
+}
+
 /** Figma: Message/Bot and Message/User */
-export function MessageRow({ message }: { message: ChatMessage }) {
+export function MessageRow({ message, animate, onDone }: { message: ChatMessage; animate?: boolean; onDone?: () => void }) {
+  const { shown, done } = useTypewriter(message.text, Boolean(animate) && message.role === "bot", onDone);
+
   if (message.role === "user") {
     return (
       <div className="row row--end">
@@ -56,9 +88,12 @@ export function MessageRow({ message }: { message: ChatMessage }) {
     <>
       <div className="row bot-row">
         <Cosmo size={32} className="bot-row__avatar" />
-        <div className="bubble bubble--bot t-body">{message.text}</div>
+        <div className="bubble bubble--bot t-body">
+          <span className="sr-only">{message.text}</span>
+          <span aria-hidden="true">{shown}</span>
+        </div>
       </div>
-      {message.card && (
+      {done && message.card && (
         <div className="row indent">
           <FactCardView card={message.card} />
         </div>
