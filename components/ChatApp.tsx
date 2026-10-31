@@ -2,9 +2,7 @@
 
 import { useEffect, useRef, useState } from "react";
 import Composer from "./Composer";
-import Sidebar from "./Sidebar";
-import { FollowUps, MessageRow, TopBar, Typing, Welcome } from "./ChatParts";
-import { STARTERS } from "@/lib/starters";
+import { MessageRow, Pills, SiteHeader, Typing, Welcome } from "./ChatParts";
 import type { ChatMessage, ChatReply } from "@/lib/types";
 
 const uid = () => Math.random().toString(36).slice(2);
@@ -13,7 +11,6 @@ export default function ChatApp() {
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [suggestions, setSuggestions] = useState<string[]>([]);
   const [thinking, setThinking] = useState(false);
-  const [recent, setRecent] = useState<string[]>([]);
   const scrollRef = useRef<HTMLDivElement>(null);
   const threadRef = useRef<HTMLDivElement>(null);
 
@@ -33,7 +30,6 @@ export default function ChatApp() {
     setMessages(next);
     setSuggestions([]);
     setThinking(true);
-    setRecent((r) => [text, ...r.filter((x) => x !== text)].slice(0, 5));
 
     let reply: ChatReply;
     try {
@@ -62,40 +58,35 @@ export default function ChatApp() {
     setSuggestions([]);
   };
 
-  const firstQuestion = messages.find((m) => m.role === "user")?.text;
-  const activeTopic = STARTERS.find((s) => s.question === firstQuestion)?.label ?? null;
   const empty = messages.length === 0;
 
   return (
     <div className="app">
-      <Sidebar recent={recent} activeTopic={activeTopic} onNew={reset} onPick={ask} />
-      <main className="main">
-        <TopBar onNew={reset} />
-        <div className="scroll" ref={scrollRef}>
-          <div className="thread" ref={threadRef}>
-            {empty ? (
-              <Welcome onPick={ask} />
-            ) : (
-              <>
-                <div className="row row--center">
-                  <span className="t-label c-tertiary">Today</span>
-                </div>
-                {messages.map((m) => (
-                  <MessageRow key={m.id} message={m} />
-                ))}
-                {thinking && <Typing />}
-                {!thinking && suggestions.length > 0 && <FollowUps items={suggestions} onPick={ask} />}
-              </>
-            )}
-          </div>
+      <SiteHeader />
+      <div className="scroll" ref={scrollRef}>
+        <div className="column thread" ref={threadRef}>
+          {empty ? (
+            <Welcome onPick={ask} />
+          ) : (
+            <>
+              <div className="thread__top">
+                <span className="eyebrow">03 · Ask Cosmo</span>
+                <button className="link" onClick={reset} disabled={thinking}>
+                  New chat →
+                </button>
+              </div>
+              {messages.map((m) => (
+                <MessageRow key={m.id} message={m} />
+              ))}
+              {thinking && <Typing />}
+              {!thinking && suggestions.length > 0 && <Pills items={suggestions} onPick={ask} indent />}
+            </>
+          )}
         </div>
-        <div className="composer-wrap">
-          <Composer onSend={ask} disabled={thinking} />
-          <p className="t-small c-tertiary disclaimer">
-            Cosmo can make mistakes. Check the NASA links for the full story.
-          </p>
-        </div>
-      </main>
+      </div>
+      <div className="column composer-wrap">
+        <Composer onSend={ask} disabled={thinking} />
+      </div>
     </div>
   );
 }

@@ -5,7 +5,8 @@
 **verified facts from NASA** and shows the NASA page and photo each answer comes from.
 
 - **Live site:** https://cosmic-juniors.vercel.app
-- **Design (Figma):** https://www.figma.com/design/xlAc0KK9rGCb5eSgOFLlaP (page **v2 · Cosmo**)
+- **Chatbot:** https://cosmic-juniors.vercel.app/chat
+- **Design (Figma):** homepage https://www.figma.com/design/bVXS5uIe7RDFs1eTmT12QT · chatbot https://www.figma.com/design/xlAc0KK9rGCb5eSgOFLlaP (page **v3 · Cosmo (homepage theme)**)
 - **Stack:** Next.js (App Router) + TypeScript on Vercel, Groq for the language model
 
 ## Run it locally
@@ -13,7 +14,7 @@
 ```bash
 npm install
 cp .env.example .env.local   # then paste your Groq key (optional)
-npm run dev                  # http://localhost:3000
+npm run dev                  # http://localhost:3000/chat
 npm run build                # production build (what Vercel runs)
 npm run lint                 # type check
 ```
@@ -26,14 +27,14 @@ The **frontend** (what kids see) and **Cosmo's brain** (the AI) are separate.
 
 ```
 app/
-  page.tsx                → the chat page
-  layout.tsx              → fonts: Public Sans, Newsreader, IBM Plex Mono
-  globals.css             → all styles; tokens match the Figma variables
+  page.tsx                → homepage (redirects to /chat until the homepage is built)
+  chat/page.tsx           → the chatbot page
+  layout.tsx              → Inter font, as in the homepage design
+  globals.css             → all styles; tokens match the homepage Figma
   api/chat/route.ts       → POST /api/chat: origin check, rate limit, input validation
 components/               → UI pieces, one per Figma component
 lib/
   types.ts                → the API contract (shared by UI and API)
-  starters.ts             → starter questions and sidebar topics
   cosmo/              → 🧠 COSMO'S BRAIN (server only)
     knowledge.ts          →   verified NASA facts, source links and photos  ← add topics here
     prompt.ts             →   personality and rules (tune the tone here)
@@ -119,13 +120,12 @@ Groq's Dev Tier for a busy demo day.
 
 ## Design → code mapping
 
-| Figma component (v2 · Cosmo) | Code |
+| Figma component (v3 · Cosmo (homepage theme)) | Code |
 | --- | --- |
-| Avatar/Cosmo | `Avatar` in `components/ChatParts.tsx` (`RoverIcon` in `Icons.tsx`) |
-| Top Bar | `TopBar` |
-| Message/Assistant, Message/User | `MessageRow` |
-| Card/Source | `SourceCard` |
-| Button/Follow-up | `FollowUps` |
-| Row/Prompt | `Welcome` |
+| Header (same as homepage) | `SiteHeader` in `components/ChatParts.tsx` |
+| Avatar/Cosmo (✦ from the logo) | `Avatar` |
+| Message/Cosmo, Message/User | `MessageRow` |
+| Card/Source (like homepage mission cards) | `SourceCard` |
+| Button/Follow-up | `Pills` |
 | Message/Typing | `Typing` |
 | Composer | `components/Composer.tsx` |

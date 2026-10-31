@@ -3,8 +3,8 @@
 import { useEffect, useRef, useState } from "react";
 import { ArrowUpIcon, MicIcon } from "./Icons";
 
-// Figma: Composer. Text field, mic (browser speech recognition, hidden where
-// unsupported) and send button.
+// Figma: Composer (v3 · Cosmo (homepage theme)). Text field, mic (browser speech
+// recognition, hidden where unsupported) and send button.
 
 /* eslint-disable @typescript-eslint/no-explicit-any */
 type Recognition = any;
@@ -61,7 +61,7 @@ export default function Composer({ onSend, disabled }: { onSend: (text: string) 
       }}
     >
       <input
-        className="composer__field t-body"
+        className="composer__field"
         value={text}
         onChange={(e) => setText(e.target.value)}
         placeholder={listening ? "Listening…" : "Ask Cosmo anything…"}

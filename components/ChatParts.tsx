@@ -1,41 +1,41 @@
 "use client";
 
-import { ArrowRightIcon, ExternalIcon, PlusIcon, RoverIcon } from "./Icons";
-import { STARTERS } from "@/lib/starters";
+import Link from "next/link";
+import { StarIcon } from "./Icons";
 import type { ChatMessage, Source } from "@/lib/types";
 
-// Chat building blocks. Each maps to a component in the Figma page "v2 · Cosmo".
+// Chat building blocks. Each maps to a component in the Figma page "v3 · Cosmo (homepage theme)".
 
-/** Figma: Avatar/Cosmo */
-export function Avatar({ size = 32 }: { size?: number }) {
+/** Figma: Header (same as the homepage header). */
+export function SiteHeader() {
   return (
-    <span className="avatar" style={{ width: size, height: size }} aria-hidden="true">
-      <RoverIcon size={Math.round(size * 0.62)} />
-    </span>
-  );
-}
-
-/** Figma: Top Bar */
-export function TopBar({ onNew }: { onNew: () => void }) {
-  return (
-    <header className="topbar">
-      <Avatar />
-      <div className="topbar__title">
-        <span className="t-heading">Cosmo</span>
-        <span className="t-small c-secondary">Answers from NASA sources</span>
+    <header className="site-header">
+      <div className="site-header__accent" />
+      <div className="site-header__row">
+        <Link href="/" className="brand">
+          ✦ COSMIC JUNIORS
+        </Link>
+        <nav className="site-nav" aria-label="Main">
+          <Link href="/">HOME</Link>
+          <Link href="/#mission">OUR MISSION</Link>
+          <Link href="/#explore-mars">EXPLORE MARS</Link>
+        </nav>
       </div>
-      <button className="btn-outline t-button" onClick={onNew}>
-        <PlusIcon /> New
-      </button>
     </header>
   );
 }
 
-const time = (ms: number) => new Date(ms).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
+/** Figma: Avatar/Cosmo */
+export function Avatar() {
+  return (
+    <span className="avatar" aria-hidden="true">
+      <StarIcon />
+    </span>
+  );
+}
 
-/** Figma: Card/Source */
+/** Figma: Card/Source (styled like the homepage mission cards). */
 export function SourceCard({ source }: { source: Source }) {
-  const domain = new URL(source.url).hostname.replace(/^www\./, "");
   return (
     <a className="source" href={source.url} target="_blank" rel="noopener noreferrer">
       {source.image && (
@@ -43,36 +43,32 @@ export function SourceCard({ source }: { source: Source }) {
         <img className="source__photo" src={source.image.src} alt={source.image.alt} loading="lazy" />
       )}
       <span className="source__text">
-        <span className="t-label c-accent">Source · {source.publisher}</span>
-        <span className="t-body-strong">{source.title}</span>
-        <span className="t-small c-secondary">{source.fact}</span>
-        <span className="source__meta t-label c-tertiary">
-          {domain} <ExternalIcon />
-          {source.image && <span className="source__credit">· Photo {source.image.credit}</span>}
-        </span>
+        <span className="label c-sky">Source · {source.publisher}</span>
+        <span className="card-title">{source.title}</span>
+        <span className="small c-muted">{source.fact}</span>
+        <span className="link">Read on NASA.gov →</span>
       </span>
     </a>
   );
 }
 
-/** Figma: Message/Assistant and Message/User */
+/** Figma: Message/Cosmo and Message/User */
 export function MessageRow({ message }: { message: ChatMessage }) {
   if (message.role === "user") {
     return (
       <div className="row row--end">
-        <div className="bubble-user t-body">{message.text}</div>
+        <div className="bubble-user">{message.text}</div>
       </div>
     );
   }
   return (
-    <article className="assistant">
-      <div className="assistant__head">
-        <Avatar size={28} />
-        <span className="t-body-strong">Cosmo</span>
-        <time className="t-label c-tertiary">{time(message.at)}</time>
+    <article className="cosmo">
+      <div className="cosmo__head">
+        <Avatar />
+        <span className="label c-sky">Cosmo</span>
       </div>
-      <div className="assistant__body">
-        <p className="t-body">{message.text}</p>
+      <div className="cosmo__body">
+        <p>{message.text}</p>
         {message.source && <SourceCard source={message.source} />}
       </div>
     </article>
@@ -83,8 +79,8 @@ export function MessageRow({ message }: { message: ChatMessage }) {
 export function Typing() {
   return (
     <div className="typing" role="status">
-      <Avatar size={28} />
-      <span className="t-small c-secondary">Checking NASA sources</span>
+      <Avatar />
+      <span className="label c-sky">Checking NASA sources</span>
       <span className="typing__dots" aria-hidden="true">
         <span />
         <span />
@@ -95,11 +91,11 @@ export function Typing() {
 }
 
 /** Figma: Button/Follow-up */
-export function FollowUps({ items, onPick }: { items: string[]; onPick: (q: string) => void }) {
+export function Pills({ items, onPick, indent }: { items: string[]; onPick: (q: string) => void; indent?: boolean }) {
   return (
-    <div className="followups">
+    <div className={`pills${indent ? " pills--indent" : ""}`}>
       {items.map((q) => (
-        <button key={q} className="btn-outline t-button" onClick={() => onPick(q)}>
+        <button key={q} className="pill" onClick={() => onPick(q)}>
           {q}
         </button>
       ))}
@@ -107,43 +103,16 @@ export function FollowUps({ items, onPick }: { items: string[]; onPick: (q: stri
   );
 }
 
-/** Welcome screen: intro, featured archive photo, and Figma: Row/Prompt */
+const STARTERS = ["What did Sojourner do on Mars?", "Is any rover still driving today?", "Why is Mars red?"];
+
+/** Start screen: title and three example questions. */
 export function Welcome({ onPick }: { onPick: (q: string) => void }) {
   return (
     <section className="welcome">
-      <span className="t-label c-accent">Cosmic Juniors · NASA Space Apps 2026</span>
-      <h1 className="t-display">What would you like to explore today?</h1>
-      <p className="t-body c-secondary">
-        I’m Cosmo, your guide to space. I answer with facts from NASA and show you where each one comes from.
-      </p>
-
-      <button className="featured" onClick={() => onPick("What did Sojourner do on Mars?")}>
-        {/* eslint-disable-next-line @next/next/no-img-element */}
-        <img
-          className="featured__photo"
-          src="https://images-assets.nasa.gov/image/PIA01551/PIA01551~orig.jpg"
-          alt="The Sojourner rover on Mars, just after rolling off the Pathfinder lander"
-        />
-        <span className="featured__text">
-          <span className="t-label c-accent">From the archive</span>
-          <span className="t-body-strong">Sojourner’s first day on Mars</span>
-          <span className="t-small c-secondary">July 4, 1997 · Ares Vallis</span>
-          <span className="t-label c-tertiary">NASA/JPL · PIA01551</span>
-        </span>
-      </button>
-
-      <span className="t-label c-tertiary">Start with a question</span>
-      <div className="prompts">
-        {STARTERS.slice(0, 3).map((s) => (
-          <button key={s.question} className="prompt" onClick={() => onPick(s.question)}>
-            <span className="prompt__text">
-              <span className="t-label c-accent">{s.topic}</span>
-              <span className="t-body-strong">{s.question}</span>
-            </span>
-            <ArrowRightIcon />
-          </button>
-        ))}
-      </div>
+      <span className="eyebrow">03 · AI Chatbot</span>
+      <h1 className="title">Ask Cosmo</h1>
+      <p className="c-muted">Ask anything about Mars and space missions. Every answer comes from NASA.</p>
+      <Pills items={STARTERS} onPick={onPick} />
     </section>
   );
 }
