@@ -2,10 +2,9 @@
 
 import { useEffect, useMemo, useRef, useState } from "react";
 import Cosmo from "./Cosmo";
-import CardArt from "./CardArt";
-import type { ChatMessage, FactCard } from "@/lib/types";
+import type { ChatMessage, Source } from "@/lib/types";
 
-// Small chat building blocks. Each one maps to a Figma component of the same name.
+// Chat building blocks. Each maps to a component in the Figma page "v4 · Cosmo (pro)".
 
 /** Figma: Chat Header */
 export function ChatHeader({ stars }: { stars: number }) {
@@ -15,30 +14,37 @@ export function ChatHeader({ stars }: { stars: number }) {
       <div className="chat-header__name">
         <span className="t-title">Cosmo</span>
         <span className="chat-header__status t-caption">
-          <span className="dot" aria-hidden="true" /> Online · your space buddy
+          <span className="dot" aria-hidden="true" /> Online · NASA sources
         </span>
       </div>
       <span className="stars-badge t-label" aria-label={`${stars} stars collected`}>
-        ⭐ {stars}
+        <svg width="12" height="12" viewBox="0 0 24 24" aria-hidden="true">
+          <path d="M12 2l3.1 6.3 6.9 1-5 4.9 1.2 6.8L12 17.8 5.8 21l1.2-6.8-5-4.9 6.9-1z" fill="currentColor" />
+        </svg>
+        {stars}
       </span>
     </header>
   );
 }
 
-/** Figma: Card/Space Fact */
-export function FactCardView({ card }: { card: FactCard }) {
+/** Figma: Card/Space Fact — the NASA page an answer is based on, with a real NASA photo. */
+export function SourceCard({ source }: { source: Source }) {
   return (
     <article className="fact-card">
-      <CardArt image={card.image} />
+      {source.image && (
+        <figure className="fact-card__photo">
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img src={source.image.src} alt={source.image.alt} loading="lazy" />
+          <figcaption className="t-caption">Photo: {source.image.credit}</figcaption>
+        </figure>
+      )}
       <div className="fact-card__content">
-        <span className="t-caption c-star">🔭 NASA FACT</span>
-        <h3 className="t-title">{card.title}</h3>
-        <p className="t-body-sm c-muted">{card.body}</p>
-        {card.button && (
-          <a className="btn-cyan t-label" href={card.button.href} target="_blank" rel="noreferrer">
-            {card.button.label}
-          </a>
-        )}
+        <span className="t-caption c-star">NASA source · {source.publisher}</span>
+        <h3 className="t-title">{source.title}</h3>
+        <p className="t-body-sm c-muted">{source.fact}</p>
+        <a className="btn-cyan t-label" href={source.url} target="_blank" rel="noopener noreferrer">
+          Read on NASA.gov
+        </a>
       </div>
     </article>
   );
@@ -93,9 +99,9 @@ export function MessageRow({ message, animate, onDone }: { message: ChatMessage;
           <span aria-hidden="true">{shown}</span>
         </div>
       </div>
-      {done && message.card && (
+      {done && message.source && (
         <div className="row indent">
-          <FactCardView card={message.card} />
+          <SourceCard source={message.source} />
         </div>
       )}
     </>
@@ -112,7 +118,7 @@ export function Typing() {
         <span />
         <span />
       </div>
-      <span className="t-caption c-muted">Cosmo is thinking…</span>
+      <span className="t-caption c-muted">Checking NASA sources…</span>
     </div>
   );
 }
@@ -130,11 +136,12 @@ export function QuickReplies({ items, onPick }: { items: string[]; onPick: (q: s
   );
 }
 
+// Starter questions about the machines NASA left on Mars and the Moon (the challenge theme).
 const starters: [string, string][] = [
-  ["🪐", "Why does Saturn have rings?"],
-  ["🚀", "How do rockets fly to space?"],
-  ["🌙", "Why does the Moon change shape?"],
-  ["👩‍🚀", "What do astronauts eat?"],
+  ["Mars · 1997", "Where is Sojourner now?"],
+  ["Mars · 2004–2018", "How far did Opportunity drive?"],
+  ["Moon · Apollo", "What did astronauts leave on the Moon?"],
+  ["Mars · 2021–2024", "What happened to Ingenuity?"],
 ];
 
 /** Welcome screen with Card/Suggestion grid */
@@ -145,17 +152,16 @@ export function Welcome({ onPick }: { onPick: (q: string) => void }) {
         <div className="welcome__glow" aria-hidden="true" />
         <Cosmo size={112} />
       </div>
-      <h1 className="t-display">Hi, Explorer! 👋</h1>
+      <h1 className="t-display">Hi, explorer.</h1>
       <p className="t-body c-muted welcome__intro">
-        I’m Cosmo, your space buddy. Ask me anything about planets, stars, rockets and astronauts!
+        I’m Cosmo. Ask me about the rovers, landers and experiments NASA left on Mars and the Moon, and what they
+        discovered.
       </p>
-      <p className="t-label c-star welcome__try">✨ Try asking…</p>
+      <p className="t-label c-star welcome__try">Try asking</p>
       <div className="suggestions">
-        {starters.map(([emoji, q]) => (
+        {starters.map(([topic, q]) => (
           <button key={q} className="suggestion" onClick={() => onPick(q)}>
-            <span className="t-display" aria-hidden="true">
-              {emoji}
-            </span>
+            <span className="t-caption c-cyan">{topic}</span>
             <span className="t-label">{q}</span>
           </button>
         ))}

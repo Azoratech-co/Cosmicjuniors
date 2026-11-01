@@ -1,76 +1,103 @@
-# Cosmic Juniors 🚀
+# Cosmic Juniors · Ask Cosmo 🚀
 
-**Cosmo** is a friendly AI space buddy for kids, built for the NASA Space Apps Challenge.
-Kids ask questions about planets, stars, rockets and astronauts. Cosmo answers in simple
-words, shows NASA fact cards, and rewards curiosity with ⭐ stars.
+**Cosmo** is the AI guide of Cosmic Juniors, built in Beirut for the **2026 NASA Space Apps Challenge**
+**"Abandoned but not Forgotten: Storytelling about NASA's Discarded Equipment on the Moon and Mars."**
+
+Cosmo tells school-age explorers the stories of the machines NASA left behind: Sojourner and the
+Pathfinder lander, the Viking landers, Spirit, Opportunity, InSight, Ingenuity, the Apollo lunar rovers
+and the laser mirrors still used on the Moon. Every answer is based on **verified facts from NASA** and
+shows a **source card** with the NASA page and a real NASA photo.
 
 - **Live site:** https://cosmic-juniors.vercel.app
-- **Design (Figma):** https://www.figma.com/design/xlAc0KK9rGCb5eSgOFLlaP
-- **Stack:** Next.js (App Router) + TypeScript, hosted on Vercel
+- **Design (Figma):** https://www.figma.com/design/xlAc0KK9rGCb5eSgOFLlaP (page **v4 · Cosmo (pro)**)
+- **Stack:** Next.js (App Router) + TypeScript on Vercel, Groq for the language model
 
 ## Run it locally
 
 ```bash
 npm install
-npm run dev        # http://localhost:3000
-npm run build      # production build (what Vercel runs)
-npm run lint       # type check
+cp .env.example .env.local   # then paste your Groq key (optional)
+npm run dev                  # http://localhost:3000
+npm run build                # production build (what Vercel runs)
+npm run lint                 # type check
 ```
 
-## How the project is split
+Without a key the app still works: it answers straight from the NASA notes.
 
-The **frontend** (what kids see) and **Cosmo's brain** (the AI) are separate, so they can be
-worked on in parallel.
+## How the project is split
 
 ```
 app/
   page.tsx                → the chat page
-  layout.tsx              → fonts (Fredoka + Nunito) and page metadata
-  globals.css             → all styles; color tokens match the Figma variables
+  layout.tsx              → fonts: Space Grotesk (headings) + Inter (text)
+  globals.css             → all styles; tokens match the Figma variables
   api/chat/route.ts       → POST /api/chat: origin check, rate limit, input validation
 components/               → UI pieces, one per Figma component
+  ChatApp.tsx             → state: messages, stars, calling the API
+  ChatParts.tsx           → header, messages, NASA source card, chips, welcome screen
+  Composer.tsx            → text box + mic (voice input) + send
+  Sidebar.tsx             → desktop sidebar: new conversation, recent, Explorer level
+  Cosmo.tsx, Starfield.tsx → mascot and background
 lib/
   types.ts                → the API contract (shared by UI and API)
   cosmo/                  → 🧠 COSMO'S BRAIN (server only)
-    brain.ts              →   the flow: safety checks → Groq model → clean reply
-    prompt.ts             →   Cosmo's personality and rules (tune the "human touch" here)
-    safety.ts             →   kid-safety checks and the gentle pre-written replies
-    links.ts              →   the only links Cosmo can show (trusted NASA pages)
-    config.ts             →   which models to use, limits
-    groq.ts               →   tiny Groq client
-  mockBrain.ts            → canned answers, used when there is no API key or Groq is down
+    knowledge.ts          →   verified NASA facts, source links and photos  ← add topics here
+    prompt.ts             →   personality, challenge focus and rules
+    brain.ts              →   the flow: safety → NASA notes → model → source card
+    sources.ts            →   builds the source card under each answer
+    safety.ts             →   kid-safety checks and the careful pre-written replies
+    config.ts / groq.ts   →   models, limits, tiny Groq client
+  mockBrain.ts            → answers from the NASA notes when the AI is unavailable
   rateLimit.ts            → per-visitor request limit
 ```
 
+## Where the facts come from
+
+`lib/cosmo/knowledge.ts` holds facts copied from these NASA pages (checked Oct–Nov 2026). For each
+question, the matching notes are given to the model, which may only use numbers, dates and names from
+them. The page is shown under the answer with a public-domain photo from the
+[NASA Image and Video Library](https://images.nasa.gov).
+
+**Equipment left on Mars and the Moon (the challenge):**
+
+| Topic | NASA source | Photo |
+| --- | --- | --- |
+| Mars Pathfinder & the Sojourner rover | [science.nasa.gov/mission/mars-pathfinder](https://science.nasa.gov/mission/mars-pathfinder/) | PIA04318 |
+| Viking 1 & 2 landers | [science.nasa.gov/mission/viking](https://science.nasa.gov/mission/viking/) | PIA00381 |
+| Spirit rover | [science.nasa.gov/mission/mer-spirit](https://science.nasa.gov/mission/mer-spirit/) | PIA04413 |
+| Opportunity rover | [science.nasa.gov/mission/mer-opportunity](https://science.nasa.gov/mission/mer-opportunity/) | PIA17759 |
+| InSight lander | [science.nasa.gov/mission/insight](https://science.nasa.gov/mission/insight/) | PIA25287 |
+| Ingenuity helicopter | [science.nasa.gov/…/ingenuity-mars-helicopter](https://science.nasa.gov/mission/mars-2020-perseverance/ingenuity-mars-helicopter/) | PIA25970 |
+| Apollo Lunar Roving Vehicles | [nssdc.gsfc.nasa.gov/planetary/lunar/apollo_lrv.html](https://nssdc.gsfc.nasa.gov/planetary/lunar/apollo_lrv.html) | as15-86-11603 |
+| Apollo retroreflectors | [nasa.gov/image-article/retroreflectors-from-apollo-mars](https://www.nasa.gov/image-article/retroreflectors-from-apollo-mars/) | as11-40-5948 |
+
+**General space topics:** Mars, Perseverance, the Moon, Artemis, Saturn, Jupiter, the Sun, the Space
+Station, black holes and the Webb telescope, each from its NASA Science / NASA.gov facts page.
+
+**To add a topic:** copy facts from a NASA page into a new entry in `knowledge.ts`, add the page URL and
+keywords, and pick a photo ID from images.nasa.gov.
+
 ## Running with the real AI
 
-The AI uses [Groq](https://console.groq.com). The key is **only** read on the server from the
-`GROQ_API_KEY` environment variable. It is never in the code and never sent to the browser.
-
-- **On Vercel:** already set in Project → Settings → Environment Variables (type: Sensitive).
-- **Locally:** copy `.env.example` to `.env.local` and paste your key. `.env.local` is git-ignored.
-- **No key?** The app still works, using the canned answers in `lib/mockBrain.ts`.
+The key is **only** read on the server from the `GROQ_API_KEY` environment variable. It is never in the
+code and never sent to the browser. On Vercel it is set in Project → Settings → Environment Variables
+(type: Sensitive).
 
 ## How Cosmo keeps kids safe
 
-Every question goes through these layers (see `lib/cosmo/brain.ts`):
-
-1. **Front door** (`app/api/chat/route.ts`): blocks calls from other websites, limits each visitor
-   to 10 questions a minute, rejects malformed or overly long messages.
-2. **Instant pattern check:** catches phone numbers, emails, addresses and self-harm phrases
-   before any AI is called, and answers with a caring pre-written reply.
+1. **Front door** (`app/api/chat/route.ts`): blocks calls from other websites, limits each visitor to
+   10 questions a minute, rejects malformed or overly long messages.
+2. **Instant pattern check:** catches phone numbers, emails, addresses and self-harm phrases before any
+   AI is called, and answers with a careful pre-written reply.
 3. **Trick check:** Meta's Prompt Guard model spots attempts to make Cosmo break its rules.
-4. **The model labels every question** as ok / self_harm / personal_info / unsafe; anything
-   not "ok" gets a pre-written reply instead of the AI's text.
-5. **Answer filter:** Cosmo's reply is scanned for bad words or links before kids see it.
-   Cosmo can't write links at all; fact-card buttons only point to fixed NASA pages.
-6. **Fail safe:** if anything breaks, Cosmo falls back to canned answers. Kids' messages are
-   never logged.
+4. **The model labels every question** as ok / self_harm / personal_info / unsafe; anything not "ok"
+   gets a pre-written reply instead of the AI's text.
+5. **Answer filter:** replies are scanned for bad words or links. Source cards only point to the NASA
+   pages in `knowledge.ts`.
+6. **Fail safe:** if anything breaks, Cosmo answers from the NASA notes. Kids' messages are never logged.
 
-**Groq free-tier note:** each model allows about 8,000 tokens a minute (roughly 5 questions a
-minute). Cosmo uses `gpt-oss-120b` and switches to `gpt-oss-20b` when the first one is busy.
-For a busy demo day, upgrade to Groq's Dev Tier. For a hard, shared rate limit across all
-servers, add a Vercel Firewall rate-limit rule.
+**Groq free tier:** about 8,000 tokens a minute per model (roughly 5 questions a minute). Cosmo uses
+`gpt-oss-120b` and switches to `gpt-oss-20b` when the first is busy.
 
 ## The chat API contract
 
@@ -78,30 +105,19 @@ servers, add a Vercel Firewall rate-limit rule.
 
 ```jsonc
 // request
-{ "messages": [ { "role": "user", "text": "Why is Mars red?" } ] }
+{ "messages": [ { "role": "user", "text": "Where is Sojourner now?" } ] }
 
 // response
 {
-  "text": "Mars is covered in dust full of iron oxide — that's rust!",
-  "card": {                       // optional NASA fact card
-    "title": "Mars, the Red Planet",
-    "body": "A day on Mars lasts 24 hours and 37 minutes…",
-    "image": "mars",              // mars | saturn | moon | sun | earth | rocket | blackhole
-    "button": { "label": "See real Mars photos 📸", "href": "https://science.nasa.gov/mars/" }
+  "text": "Sojourner is still sitting on Mars, in the Ares Vallis plain…",
+  "source": {                              // optional: the NASA page the answer is based on
+    "id": "pathfinder",
+    "title": "Mars Pathfinder",
+    "publisher": "NASA Science",
+    "url": "https://science.nasa.gov/mission/mars-pathfinder/",
+    "fact": "The mission made more than 15 chemical analyses of Martian rocks and soil.",
+    "image": { "src": "https://images-assets.nasa.gov/…", "alt": "…", "credit": "NASA/JPL", "nasaId": "PIA04318" }
   },
-  "suggestions": ["Can I visit Mars? 🚀", "Quiz me! 🧠"]   // optional follow-up chips
+  "suggestions": ["How big was Sojourner?", "What did Viking find?"]
 }
 ```
-
-## Design → code mapping
-
-| Figma component     | Code                                  |
-| ------------------- | ------------------------------------- |
-| Avatar/Cosmo        | `components/Cosmo.tsx`                |
-| Chat Header         | `ChatHeader` in `ChatParts.tsx`       |
-| Message/Bot, User   | `MessageRow` in `ChatParts.tsx`       |
-| Message/Typing      | `Typing` in `ChatParts.tsx`           |
-| Card/Space Fact     | `FactCardView` in `ChatParts.tsx`     |
-| Chip/Quick Reply    | `QuickReplies` in `ChatParts.tsx`     |
-| Card/Suggestion     | `Welcome` in `ChatParts.tsx`          |
-| Composer            | `components/Composer.tsx`             |

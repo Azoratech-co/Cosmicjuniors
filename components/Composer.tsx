@@ -77,7 +77,7 @@ export default function Composer({ onSend, disabled }: { onSend: (text: string) 
         className="composer__field t-body"
         value={text}
         onChange={(e) => setText(e.target.value)}
-        placeholder={listening ? "Listening… 👂" : "Ask Cosmo anything…"}
+        placeholder={listening ? "Listening…" : "Ask Cosmo anything…"}
         aria-label="Ask Cosmo a question"
         maxLength={300}
       />

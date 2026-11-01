@@ -28,12 +28,12 @@ export default function Sidebar({
         <span className="t-title">Cosmic Juniors</span>
       </div>
       <button className="btn-purple t-label" onClick={onNew}>
-        ＋&nbsp; New adventure
+        +&nbsp; New conversation
       </button>
 
       <nav className="history" aria-label="Recent adventures">
-        <span className="t-caption c-muted">RECENT ADVENTURES</span>
-        {history.length === 0 && <span className="t-body-sm c-muted">Your questions will show up here 🚀</span>}
+        <span className="t-caption c-muted">Recent</span>
+        {history.length === 0 && <span className="t-body-sm c-muted">Your questions will show up here.</span>}
         {history.map((h, i) => (
           <button key={h + i} className={`history__item t-label${i === 0 ? " is-active" : ""}`} onClick={() => onPick(h)}>
             {h}
@@ -42,12 +42,12 @@ export default function Sidebar({
       </nav>
 
       <div className="level-card">
-        <span className="t-subtitle">🏅 Explorer Level {level}</span>
+        <span className="t-subtitle">Explorer level {level}</span>
         <div className="progress" role="progressbar" aria-valuemin={0} aria-valuemax={STARS_PER_LEVEL} aria-valuenow={into}>
           <div className="progress__fill" style={{ width: `${(into / STARS_PER_LEVEL) * 100}%` }} />
         </div>
         <span className="t-caption c-muted">
-          ⭐ {stars} stars · {toNext} more to Level {level + 1}!
+          {stars} stars · {toNext} more to level {level + 1}
         </span>
       </div>
     </aside>

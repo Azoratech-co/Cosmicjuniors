@@ -50,7 +50,7 @@ export default function ChatApp() {
 
   const ask = async (text: string) => {
     if (thinking || revealingId) return;
-    const userMsg: ChatMessage = { id: uid(), role: "user", text };
+    const userMsg: ChatMessage = { id: uid(), role: "user", text, at: Date.now() };
     const next = [...messages, userMsg];
     setMessages(next);
     setSuggestions([]);
@@ -71,14 +71,14 @@ export default function ChatApp() {
       const reply: ChatReply = await res.json();
       const id = uid();
       setRevealingId(id);
-      setMessages((m) => [...m, { id, role: "bot", text: reply.text, card: reply.card }]);
+      setMessages((m) => [...m, { id, role: "bot", text: reply.text, source: reply.source, at: Date.now() }]);
       setSuggestions(reply.suggestions ?? []);
     } catch (err) {
       const text =
         err instanceof Error && err.message === "slow-down"
-          ? "Whoa, so many questions! 😅 Let my circuits cool down for a few seconds, then ask me again."
-          : "Oops! My radio lost signal 📡 Can you try asking again?";
-      setMessages((m) => [...m, { id: uid(), role: "bot", text }]);
+          ? "That’s a lot of questions in a short time. Give me a few seconds, then ask again."
+          : "I lost the signal for a moment. Please try asking again.";
+      setMessages((m) => [...m, { id: uid(), role: "bot", text, at: Date.now() }]);
     } finally {
       setThinking(false);
     }
@@ -125,8 +125,8 @@ export default function ChatApp() {
         </div>
         <div className="composer-wrap">
           <Composer onSend={ask} disabled={thinking || Boolean(revealingId)} />
-          <p className="t-caption c-muted disclaimer">
-            Cosmo can make mistakes — ask a grown-up to double-check big facts! 🌍
+          <p className="t-body-sm c-muted disclaimer">
+            Answers are based on NASA sources. Open a source card to read more.
           </p>
         </div>
       </main>

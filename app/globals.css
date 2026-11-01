@@ -1,5 +1,5 @@
-/* Design tokens mirror the Figma file "Cosmic Juniors – AI Chatbot"
-   (variables collection "Cosmic Colors" + text styles). */
+/* Design tokens mirror the Figma page "v4 · Cosmo (pro)" in "Cosmic Juniors – AI Chatbot"
+   (variables collection "Cosmic Colors" + text styles "Pro/*"). */
 :root {
   --space-950: #0b1026;
   --space-900: #151b3d;
@@ -14,8 +14,8 @@
   --text-muted: #a9b1e0;
   --text-on-light: #0b1026;
 
-  --radius-bubble: 20px;
-  --radius-tail: 6px;
+  --radius-bubble: 16px;
+  --radius-tail: 4px;
   --thread-width: 760px;
 }
 
@@ -33,16 +33,17 @@ h1, h3, p { margin: 0; }
 a { color: inherit; }
 
 /* ---------- Text styles ---------- */
-.t-display  { font-family: var(--font-heading); font-weight: 700; font-size: 30px; line-height: 1.15; }
-.t-title    { font-family: var(--font-heading); font-weight: 600; font-size: 18px; line-height: 1.2; }
+.t-display  { font-family: var(--font-heading); font-weight: 700; font-size: 28px; line-height: 34px; letter-spacing: -0.01em; }
+.t-title    { font-family: var(--font-heading); font-weight: 500; font-size: 18px; line-height: 24px; letter-spacing: -0.005em; }
 .t-subtitle { font-family: var(--font-heading); font-weight: 500; font-size: 16px; line-height: 1.25; }
-.t-body     { font-weight: 600; font-size: 15px; line-height: 1.45; }
+.t-body     { font-weight: 400; font-size: 15px; line-height: 24px; }
 .t-body-sm  { font-weight: 400; font-size: 13px; line-height: 1.4; }
-.t-label    { font-weight: 700; font-size: 14px; line-height: 1.2; }
-.t-caption  { font-weight: 700; font-size: 11px; line-height: 1.2; }
+.t-label    { font-weight: 600; font-size: 14px; line-height: 20px; }
+.t-caption  { font-weight: 600; font-size: 11px; line-height: 16px; text-transform: uppercase; letter-spacing: 0.06em; }
 .sr-only { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
 .c-muted { color: var(--text-muted); }
 .c-star  { color: var(--accent-star); }
+.c-cyan  { color: var(--brand-cyan); }
 
 /* ---------- Layout ---------- */
 .app {
@@ -52,7 +53,7 @@ a { color: inherit; }
   overflow: hidden;
   background: linear-gradient(180deg, #1a1245 0%, var(--space-950) 55%);
 }
-.starfield { position: absolute; inset: 0; pointer-events: none; }
+.starfield { position: absolute; inset: 0; pointer-events: none; opacity: 0.5; }
 .starfield circle { animation: twinkle 4s ease-in-out infinite; }
 @keyframes twinkle { 50% { opacity: 0.2; } }
 
@@ -88,8 +89,9 @@ a { color: inherit; }
 .stars-badge {
   padding: 8px 12px;
   border-radius: 999px;
+  display: inline-flex; align-items: center; gap: 5px;
   color: var(--accent-star);
-  background: rgb(255 209 102 / 0.16);
+  background: rgb(255 209 102 / 0.14);
 }
 
 /* ---------- Bubbles ---------- */
@@ -118,11 +120,17 @@ a { color: inherit; }
 
 /* ---------- Fact card ---------- */
 .fact-card {
-  width: 272px;
-  border-radius: 20px;
+  width: 300px;
+  border-radius: 16px;
   overflow: hidden;
   background: var(--space-900);
   border: 1px solid var(--space-700);
+}
+.fact-card__photo { position: relative; margin: 0; height: 160px; background: var(--space-800); }
+.fact-card__photo img { width: 100%; height: 100%; object-fit: cover; display: block; }
+.fact-card__photo figcaption {
+  position: absolute; left: 8px; bottom: 8px; padding: 2px 6px; border-radius: 4px;
+  background: rgb(11 16 38 / 0.7); color: var(--text-muted); font-size: 10px; letter-spacing: 0.04em;
 }
 .fact-card__content { display: flex; flex-direction: column; gap: 8px; padding: 14px 16px 16px; }
 .btn-cyan {
@@ -130,7 +138,7 @@ a { color: inherit; }
   text-align: center;
   text-decoration: none;
   padding: 10px 16px;
-  border-radius: 999px;
+  border-radius: 10px;
   background: var(--brand-cyan);
   color: var(--text-on-light);
   margin-top: 4px;
@@ -140,11 +148,11 @@ a { color: inherit; }
 /* ---------- Chips ---------- */
 .chips { display: flex; flex-wrap: wrap; gap: 8px; }
 .chip {
-  padding: 9px 14px;
+  padding: 8px 14px;
   border-radius: 999px;
   color: var(--brand-cyan);
-  background: rgb(61 214 245 / 0.12);
-  border: 1.5px solid var(--brand-cyan);
+  background: rgb(61 214 245 / 0.08);
+  border: 1px solid rgb(61 214 245 / 0.7);
   transition: background 0.15s;
 }
 .chip:hover { background: rgb(61 214 245 / 0.22); }
@@ -154,7 +162,7 @@ a { color: inherit; }
 .welcome__hero { position: relative; width: 150px; height: 150px; display: grid; place-items: center; }
 .welcome__glow {
   position: absolute; inset: 10px; border-radius: 50%;
-  background: rgb(123 92 255 / 0.55); filter: blur(40px);
+  background: rgb(123 92 255 / 0.35); filter: blur(40px);
 }
 .welcome__hero svg { position: relative; animation: float 4s ease-in-out infinite; }
 @keyframes float { 50% { transform: translateY(-8px); } }
@@ -163,7 +171,7 @@ a { color: inherit; }
 .suggestions { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; width: 100%; max-width: 342px; }
 .suggestion {
   display: flex; flex-direction: column; gap: 8px; text-align: left;
-  padding: 16px; border-radius: 20px;
+  padding: 16px; border-radius: 14px;
   background: var(--space-900); border: 1px solid var(--space-700);
   transition: transform 0.15s, border-color 0.15s;
 }
@@ -175,7 +183,7 @@ a { color: inherit; }
   display: flex; align-items: center; gap: 10px;
   padding: 12px 16px calc(12px + env(safe-area-inset-bottom));
   background: var(--space-900);
-  border-radius: 28px 28px 0 0;
+  border-radius: 18px 18px 0 0;
 }
 .composer__field {
   flex: 1; min-width: 0; height: 48px; padding: 0 18px;
@@ -199,7 +207,7 @@ a { color: inherit; }
 
 /* ---------- Sidebar (desktop) ---------- */
 .sidebar { display: none; }
-.btn-purple { padding: 12px; border-radius: 999px; background: var(--brand-purple); }
+.btn-purple { padding: 12px; border-radius: 12px; background: var(--brand-purple); }
 .btn-purple:hover { filter: brightness(1.1); }
 .history { display: flex; flex-direction: column; gap: 4px; flex: 1; overflow-y: auto; }
 .history > .t-caption { margin-bottom: 4px; }
@@ -208,7 +216,7 @@ a { color: inherit; }
   white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
 }
 .history__item:hover, .history__item.is-active { background: var(--space-800); color: var(--text-primary); }
-.level-card { display: flex; flex-direction: column; gap: 10px; padding: 16px; border-radius: 20px; background: var(--space-800); }
+.level-card { display: flex; flex-direction: column; gap: 10px; padding: 16px; border-radius: 14px; background: var(--space-800); }
 .progress { height: 10px; border-radius: 999px; background: var(--space-700); overflow: hidden; }
 .progress__fill { height: 100%; border-radius: 999px; background: var(--accent-star); transition: width 0.4s; }
 
@@ -224,7 +232,7 @@ a { color: inherit; }
   .chat-header { padding: 14px 32px; border-bottom-color: var(--space-700); }
   .thread { padding: 24px 16px 16px; }
   .composer-wrap { width: 100%; max-width: var(--thread-width); margin: 0 auto; padding: 8px 0 28px; display: flex; flex-direction: column; gap: 10px; }
-  .composer { border-radius: 28px; border: 1px solid var(--space-700); padding-bottom: 12px; }
+  .composer { border-radius: 18px; border: 1px solid var(--space-700); padding-bottom: 12px; }
   .disclaimer { display: block; }
 }
 
