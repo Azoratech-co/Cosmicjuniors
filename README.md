@@ -9,6 +9,7 @@ and the laser mirrors still used on the Moon. Every answer is based on **verifie
 shows a **source card** with the NASA page and a real NASA photo.
 
 - **Live site:** https://cosmic-juniors.vercel.app
+- **Repository:** https://github.com/Azoratech-co/Cosmicjuniors (every push deploys to Vercel automatically)
 - **Design (Figma):** https://www.figma.com/design/xlAc0KK9rGCb5eSgOFLlaP (page **v4 · Cosmo (pro)**)
 - **Stack:** Next.js (App Router) + TypeScript on Vercel, Groq for the language model
 
