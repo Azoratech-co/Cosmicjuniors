@@ -10,6 +10,7 @@ shows a **source card** with the NASA page and a real NASA photo.
 
 - **Live site:** https://cosmic-juniors.vercel.app
 - **Repository:** https://github.com/Azoratech-co/Cosmicjuniors (every push deploys to Vercel automatically)
+- **Vercel project:** https://vercel.com/azoratech-team/cosmic-juniors
 - **Design (Figma):** https://www.figma.com/design/xlAc0KK9rGCb5eSgOFLlaP (page **v4 · Cosmo (pro)**)
 - **Stack:** Next.js (App Router) + TypeScript on Vercel, Groq for the language model
 
