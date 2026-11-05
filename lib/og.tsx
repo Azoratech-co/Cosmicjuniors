@@ -11,7 +11,12 @@ export const planetSrc = (star: boolean) =>
     `<svg xmlns="http://www.w3.org/2000/svg" width="64" height="64" viewBox="0 0 64 64" fill="none"><defs><radialGradient id="p" cx="0" cy="0" r="1" gradientUnits="userSpaceOnUse" gradientTransform="translate(26 24) rotate(52) scale(30)"><stop stop-color="#FFB27A"/><stop offset="1" stop-color="#C2410C"/></radialGradient></defs><g transform="rotate(-18 32 33)"><path d="M3 33A29 8.5 0 0 1 61 33" stroke="#3DD6F5" stroke-width="3.6" stroke-linecap="round"/></g><circle cx="32" cy="33" r="18" fill="url(#p)"/><g transform="rotate(-18 32 33)"><path d="M3 33A29 8.5 0 0 0 61 33" stroke="#3DD6F5" stroke-width="3.6" stroke-linecap="round"/></g>${star ? '<path d="M54 6l1.7 3.5 3.8.6-2.7 2.7.6 3.8L54 14.8l-3.4 1.8.6-3.8-2.7-2.7 3.8-.6z" fill="#FFD166"/>' : ""}</svg>`,
   );
 
-/** The app icon: planet on a navy rounded tile (same as app/icon.svg). */
+/** Cosmo the robot, used for the iPhone home-screen icon (app/apple-icon.tsx). */
+export const COSMO_SRC = svgUri(
+  `<svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 48 48" fill="none"><circle cx="24" cy="24" r="24" fill="#7B5CFF"/><path d="M24 11V6" stroke="#FFFFFF" stroke-width="2" stroke-linecap="round"/><circle cx="24" cy="5" r="3" fill="#FFD166"/><circle cx="24" cy="26" r="15" fill="#FFFFFF"/><rect x="12.5" y="19" width="23" height="14" rx="7" fill="#0B1026"/><circle cx="19.5" cy="25" r="2.6" fill="#3DD6F5"/><circle cx="28.5" cy="25" r="2.6" fill="#3DD6F5"/><path d="M21 29.3c1.8 1.2 4.2 1.2 6 0" stroke="#3DD6F5" stroke-width="1.6" stroke-linecap="round"/><circle cx="14" cy="38" r="1.6" fill="#FFD166"/><circle cx="37" cy="13" r="1.2" fill="#FFFFFF"/></svg>`,
+);
+
+/** The Cosmo logo tile (planet on navy), used on the link-preview cards. */
 export const ICON_SRC = svgUri(
   `<svg xmlns="http://www.w3.org/2000/svg" width="64" height="64" viewBox="0 0 64 64" fill="none"><defs><radialGradient id="q" cx="0" cy="0" r="1" gradientUnits="userSpaceOnUse" gradientTransform="translate(27 26) rotate(52) scale(27)"><stop stop-color="#FFB27A"/><stop offset="1" stop-color="#C2410C"/></radialGradient></defs><rect width="64" height="64" rx="16" fill="#0B1026"/><g transform="rotate(-18 32 34)"><path d="M5 34A27 8 0 0 1 59 34" stroke="#3DD6F5" stroke-width="4.5" stroke-linecap="round"/></g><circle cx="32" cy="34" r="16" fill="url(#q)"/><g transform="rotate(-18 32 34)"><path d="M5 34A27 8 0 0 0 59 34" stroke="#3DD6F5" stroke-width="4.5" stroke-linecap="round"/></g><circle cx="51" cy="13" r="3" fill="#FFD166"/></svg>`,
 );

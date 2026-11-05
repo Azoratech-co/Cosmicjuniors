@@ -3,7 +3,6 @@
 import Link from "next/link";
 import { useEffect, useState } from "react";
 import Starfield from "../Starfield";
-import CosmoLogo from "../CosmoLogo";
 import { STARS_EVENT, getStars } from "@/lib/stars";
 
 // Shared frame for the games: back link, title, and the kid's star count.
@@ -45,9 +44,6 @@ export default function GameShell({
       <header className="game-top">
         <Link href={backHref} className="game-back t-label">
           ← {backLabel}
-        </Link>
-        <Link href="/" className="game-logo" aria-label="Cosmo home">
-          <CosmoLogo size={20} />
         </Link>
         <StarCount />
       </header>
