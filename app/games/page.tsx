@@ -4,9 +4,9 @@ import GameShell from "@/components/games/GameShell";
 
 export const metadata: Metadata = {
   title: "Mission Games · Cosmic Juniors",
-  description: "Three Mars mission games: rebuild Sojourner, dodge lasers on the way to Mars, and land on Mars.",
-  openGraph: { title: "Mission Games · Cosmic Juniors", description: "Three Mars mission games: rebuild Sojourner, dodge lasers on the way to Mars, and land on Mars.", url: "/games", siteName: "Cosmic Juniors", type: "website" },
-  twitter: { card: "summary_large_image", title: "Mission Games · Cosmic Juniors", description: "Three Mars mission games: rebuild Sojourner, dodge lasers on the way to Mars, and land on Mars." },
+  description: "Three Mars mission games: rebuild Sojourner, fly real NASA cruises to Mars, and land at five real landing sites.",
+  openGraph: { title: "Mission Games · Cosmic Juniors", description: "Three Mars mission games: rebuild Sojourner, fly real NASA cruises to Mars, and land at five real landing sites.", url: "/games", siteName: "Cosmic Juniors", type: "website" },
+  twitter: { card: "summary_large_image", title: "Mission Games · Cosmic Juniors", description: "Three Mars mission games: rebuild Sojourner, fly real NASA cruises to Mars, and land at five real landing sites." },
 };
 
 const GAMES = [
@@ -20,17 +20,17 @@ const GAMES = [
   },
   {
     href: "/games/dodge",
-    label: "Arcade · Earth to Mars",
-    title: "Laser Dodge",
-    text: "Fly from Earth to Mars. Use the arrow keys to dodge the lasers and keep your shields up.",
+    label: "Story · 3 chapters",
+    title: "Journey to Mars",
+    text: "Fly the real cruises of Pathfinder, Spirit and Perseverance. Dodge lasers and catch data capsules to fill your Mission Log.",
     img: "https://images-assets.nasa.gov/image/PIA00407/PIA00407~small.jpg",
     alt: "Mars seen from space",
   },
   {
     href: "/games/landing",
-    label: "Skill · Ares Vallis",
+    label: "Campaign · 5 landing sites",
     title: "Mars Landing",
-    text: "Drop the lander from the rocket, open the parachute in time, and touch down in the landing zone.",
+    text: "Land at five real NASA sites, from Viking 1 to Perseverance, then do the science and find out where each mission rests today.",
     img: "https://images-assets.nasa.gov/image/PIA04318/PIA04318~orig.jpg",
     alt: "Sojourner near rocks on the Martian surface",
   },

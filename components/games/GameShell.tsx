@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import Starfield from "../Starfield";
 import { LogoTile } from "../CosmoLogo";
 import { STARS_EVENT, getStars } from "@/lib/stars";
@@ -70,6 +70,9 @@ export function WinPanel({
   sourceTitle,
   sourceUrl,
   onAgain,
+  againLabel = "Play again",
+  onNext,
+  nextLabel = "Next mission",
   children,
 }: {
   title: string;
@@ -78,10 +81,18 @@ export function WinPanel({
   sourceTitle: string;
   sourceUrl: string;
   onAgain: () => void;
+  againLabel?: string;
+  onNext?: () => void;
+  nextLabel?: string;
   children?: React.ReactNode;
 }) {
+  const ref = useRef<HTMLDivElement>(null);
+  // Bring the results into view, since they open below the game.
+  useEffect(() => {
+    ref.current?.scrollIntoView({ behavior: "smooth", block: "nearest" });
+  }, []);
   return (
-    <div className="win-panel" role="dialog" aria-label={title}>
+    <div className="win-panel" role="dialog" aria-label={title} ref={ref}>
       <span className="t-caption c-star">Mission complete · +{stars} stars</span>
       <h2 className="t-title">{title}</h2>
       {children}
@@ -91,8 +102,13 @@ export function WinPanel({
         ))}
       </ul>
       <div className="win-actions">
-        <button className="btn-purple t-label" onClick={onAgain}>
-          Play again
+        {onNext && (
+          <button className="btn-purple t-label" onClick={onNext}>
+            {nextLabel} →
+          </button>
+        )}
+        <button className={`${onNext ? "btn-ghost" : "btn-purple"} t-label`} onClick={onAgain}>
+          {againLabel}
         </button>
         <a className="btn-ghost t-label" href={sourceUrl} target="_blank" rel="noopener noreferrer">
           {sourceTitle} on NASA.gov

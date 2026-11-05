@@ -461,3 +461,49 @@ body.is-dragging, body.is-dragging * { -webkit-user-select: none !important; use
    (Must beat `.game-page button { touch-action: manipulation }` above.) */
 .game-page .tray-piece, .game-page .puzzle-board, .game-page .puzzle-cell,
 .game-page .arrow-pad button, .game-page .pad-btn, .game-page .arcade-canvas { touch-action: none; }
+
+/* =====================================================================
+   Story campaigns: Journey to Mars + Mars Landing
+   ===================================================================== */
+.stage-overlay { overflow-y: auto; }
+.fact-toast {
+  position: absolute; left: 12px; right: 12px; top: 40px; display: flex; flex-direction: column; gap: 4px;
+  padding: 10px 14px; border-radius: 12px; background: rgb(11 16 38 / 0.7); border: 1px solid var(--brand-cyan);
+  box-shadow: 0 0 24px rgb(61 214 245 / 0.25); pointer-events: none; animation: pop 0.25s ease-out;
+}
+.chapter-list { display: flex; flex-direction: column; gap: 8px; width: 100%; max-width: 360px; }
+.chapter, .mission-chip {
+  display: flex; flex-direction: column; gap: 2px; text-align: left; padding: 10px 12px; border-radius: 12px;
+  background: var(--space-900); border: 1px solid var(--space-700); color: var(--text-primary); cursor: pointer;
+}
+.chapter:hover:not(:disabled), .mission-chip:hover:not(:disabled) { border-color: var(--brand-cyan); }
+.chapter.is-on, .mission-chip.is-on { border-color: var(--brand-purple); box-shadow: 0 0 0 1px var(--brand-purple); }
+.chapter:disabled, .mission-chip:disabled { opacity: 0.45; cursor: not-allowed; }
+.mission-chip.is-on:disabled { opacity: 1; }
+.mission-picker {
+  width: 100%; max-width: 960px; display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 8px;
+}
+.mission-picker .mission-chip { padding: 8px 10px; }
+.fuel--battery span { background: var(--brand-cyan); }
+.win-photo { margin: 0; display: flex; flex-direction: column; gap: 6px; }
+.win-photo img { width: 100%; max-height: 260px; object-fit: cover; border-radius: 12px; background: var(--space-800); }
+.mission-log {
+  width: 100%; max-width: 960px; margin-top: 8px; display: flex; flex-direction: column; gap: 14px; padding: 18px;
+  border-radius: 16px; background: rgb(21 27 61 / 0.75); border: 1px solid var(--space-700);
+  -webkit-user-select: text; user-select: text;
+}
+.mission-log__head { display: flex; align-items: baseline; justify-content: space-between; gap: 12px; }
+.log-mission { display: flex; flex-direction: column; gap: 6px; }
+.log-mission ul { margin: 0; padding-left: 18px; display: flex; flex-direction: column; gap: 4px; color: var(--text-primary); }
+.log-mission li.is-locked { color: var(--text-muted); font-style: italic; opacity: 0.7; }
+.log-mission a { color: var(--text-muted); }
+@media (max-width: 720px) {
+  .mission-picker { grid-template-columns: none; grid-auto-flow: column; grid-auto-columns: 150px; overflow-x: auto; padding-bottom: 4px; }
+  .stage-overlay { padding: 12px; gap: 8px; }
+  .landing .stage-overlay .t-title { font-size: 18px; }
+}
+@media (max-width: 720px) {
+  .game-page .hide-sm { display: none; }
+  .chapter { padding: 7px 10px; }
+  .chapter-list { gap: 6px; }
+}
