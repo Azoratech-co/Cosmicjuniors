@@ -95,6 +95,7 @@ export default function ChatApp() {
   return (
     <div className="app">
       <Starfield />
+      <div className="mars-glow" aria-hidden="true" />
       <Sidebar stars={stars} history={history} onNew={reset} onPick={ask} />
       <main className="main">
         <ChatHeader stars={stars} />

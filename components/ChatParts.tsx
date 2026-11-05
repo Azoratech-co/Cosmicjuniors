@@ -3,6 +3,7 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import Link from "next/link";
 import Cosmo from "./Cosmo";
+import CosmoLogo, { LogoTile } from "./CosmoLogo";
 import type { ChatMessage, Source } from "@/lib/types";
 
 // Chat building blocks. Each maps to a component in the Figma page "v4 · Cosmo (pro)".
@@ -11,11 +12,11 @@ import type { ChatMessage, Source } from "@/lib/types";
 export function ChatHeader({ stars }: { stars: number }) {
   return (
     <header className="chat-header">
-      <Cosmo size={44} />
+      <LogoTile size={42} />
       <div className="chat-header__name">
-        <span className="t-title">Cosmo</span>
+        <CosmoLogo size={19} />
         <span className="chat-header__status t-caption">
-          <span className="dot" aria-hidden="true" /> Online · NASA sources
+          <span className="dot" aria-hidden="true" /> Online<span className="t-hide-sm">&nbsp;· NASA sources</span>
         </span>
       </div>
       <Link href="/games" className="games-link games-link--header t-label">
@@ -151,22 +152,23 @@ const starters: [string, string][] = [
 /** Welcome screen with Card/Suggestion grid */
 export function Welcome({ onPick }: { onPick: (q: string) => void }) {
   return (
-    <section className="welcome">
-      <div className="welcome__hero">
-        <div className="welcome__glow" aria-hidden="true" />
-        <Cosmo size={112} />
+    <section className="hero">
+      <div className="hero__brand">
+        <LogoTile size={64} />
+        <span className="hero__eyebrow">Cosmic Juniors</span>
       </div>
-      <h1 className="t-display">Hi, explorer.</h1>
-      <p className="t-body c-muted welcome__intro">
-        I’m Cosmo. Ask me about the rovers, landers and experiments NASA left on Mars and the Moon, and what they
-        discovered.
+      <h1 className="hero__title">
+        <span>Ask</span> <CosmoLogo size={56} />
+      </h1>
+      <p className="hero__text">
+        Your AI space guide. Real NASA facts and sources about the rovers, landers and experiments NASA left on Mars
+        and the Moon.
       </p>
-      <p className="t-label c-star welcome__try">Try asking</p>
-      <div className="suggestions">
+      <div className="hero__chips">
         {starters.map(([topic, q]) => (
-          <button key={q} className="suggestion" onClick={() => onPick(q)}>
-            <span className="t-caption c-cyan">{topic}</span>
-            <span className="t-label">{q}</span>
+          <button key={q} className="hero-chip" onClick={() => onPick(q)}>
+            <span className="hero-chip__topic">{topic}</span>
+            {q}
           </button>
         ))}
       </div>

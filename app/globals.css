@@ -389,3 +389,70 @@ kbd { font-family: var(--font-body); font-size: 12px; padding: 1px 6px; border-r
 .arrow-pad button, .pad-btn, .tray-piece, .arcade-canvas, .puzzle-board { touch-action: none; }
 .game-card img, .puzzle img { -webkit-user-drag: none; pointer-events: none; }
 body.is-dragging, body.is-dragging * { -webkit-user-select: none !important; user-select: none !important; cursor: grabbing !important; }
+
+/* =====================================================================
+   Preview-card look (matches app/opengraph-image): deep purple → navy,
+   soft stars, a big glowing Mars bottom-right, Inter type, cyan accents.
+   ===================================================================== */
+.app, .game-page { background: linear-gradient(180deg, #1a1245 0%, #0b1026 70%); }
+.starfield { opacity: 0.7; }
+.mars-glow {
+  position: fixed; right: -12vmax; bottom: -16vmax; width: 44vmax; height: 44vmax; border-radius: 50%;
+  background: radial-gradient(circle at 35% 30%, #ffa36c 0%, #c2532a 48%, #a8341a 72%);
+  box-shadow: 0 0 120px 20px rgb(255 140 90 / 0.18); opacity: 0.85; pointer-events: none; z-index: 0;
+}
+.app > .main, .app > .sidebar, .game-page > *:not(.starfield):not(.mars-glow) { position: relative; z-index: 1; }
+.main { background: transparent; }
+.chat-header { background: transparent; }
+.composer-wrap { background: transparent; }
+
+/* Headings: Inter, large and clean like the card */
+.t-display { font-weight: 700; letter-spacing: -0.02em; }
+.t-title { font-weight: 600; letter-spacing: -0.01em; }
+
+/* Logo */
+.cosmo-logo {
+  display: inline-flex; align-items: center; font-family: var(--font-heading); font-weight: 700;
+  letter-spacing: -0.03em; line-height: 1; color: var(--text-primary); white-space: nowrap;
+}
+.cosmo-logo svg { flex-shrink: 0; margin: 0 -0.16em; }
+.logo-tile { flex-shrink: 0; border-radius: 22%; box-shadow: 0 6px 20px rgb(0 0 0 / 0.35); }
+
+/* Welcome hero, laid out like the preview card */
+.thread--empty { justify-content: center; }
+.hero { display: flex; flex-direction: column; align-items: flex-start; gap: 20px; width: 100%; max-width: 680px; margin: 0 auto; padding: 8px 4px; }
+.hero__brand { display: flex; align-items: center; gap: 16px; }
+.hero__eyebrow { font-weight: 600; font-size: 18px; letter-spacing: 0.12em; text-transform: uppercase; color: var(--brand-cyan); }
+.hero__eyebrow--sm { font-size: 13px; letter-spacing: 0.1em; }
+.hero__title { display: flex; align-items: center; gap: 0.28em; flex-wrap: wrap; margin: 0; font-size: 56px; font-weight: 700; letter-spacing: -0.03em; line-height: 1.05; }
+.hero__text { margin: 0; max-width: 560px; font-size: 19px; line-height: 1.5; color: #c9cff0; }
+.hero__chips { display: flex; flex-wrap: wrap; gap: 12px; margin-top: 4px; }
+.hero-chip {
+  display: inline-flex; flex-direction: column; align-items: flex-start; gap: 3px; text-align: left;
+  padding: 10px 16px; border-radius: 14px; border: 2px solid var(--brand-cyan); color: var(--brand-cyan);
+  background: rgb(11 16 38 / 0.35); font-weight: 600; font-size: 15px; line-height: 1.25;
+  transition: background 0.15s, transform 0.15s;
+}
+.hero-chip:hover { background: rgb(61 214 245 / 0.12); transform: translateY(-2px); }
+.hero-chip__topic { font-size: 11px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--text-muted); font-weight: 600; }
+
+/* Chips across the app use the same cyan outline */
+.chip { border: 2px solid var(--brand-cyan); background: rgb(11 16 38 / 0.35); border-radius: 14px; }
+.games-link { border-width: 2px; border-color: rgb(61 214 245 / 0.6); color: var(--brand-cyan); }
+
+/* Sidebar + games brand row */
+.sidebar { background: rgb(11 16 38 / 0.55); backdrop-filter: blur(6px); }
+.sidebar__logo { display: flex; flex-direction: row; align-items: center; gap: 12px; }
+.game-brand { display: inline-flex; align-items: center; gap: 10px; text-decoration: none; }
+.game-card { background: rgb(21 27 61 / 0.75); backdrop-filter: blur(4px); }
+
+@media (max-width: 600px) {
+  .hero__title { font-size: 40px; }
+  .hero__text { font-size: 16px; }
+  .hero-chip { font-size: 14px; }
+  .mars-glow { width: 70vmax; height: 70vmax; right: -30vmax; bottom: -34vmax; opacity: 0.7; }
+  .game-brand .hero__eyebrow { display: none; }
+}
+/* Keep Mars fixed in the corner on game pages (an older rule made game-page children relative). */
+.game-page > .mars-glow { position: fixed; z-index: 0; }
+@media (max-width: 480px) { .chat-header__status { white-space: nowrap; } .t-hide-sm { display: none; } }

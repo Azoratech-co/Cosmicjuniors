@@ -1,9 +1,10 @@
 import type { Metadata, Viewport } from "next";
-import { Inter, Space_Grotesk } from "next/font/google";
+import { Inter } from "next/font/google";
 import "./globals.css";
 
 // Fonts match the Figma page "v4 · Cosmo (pro)": Space Grotesk for headings, Inter for text.
-const heading = Space_Grotesk({ subsets: ["latin"], weight: ["500", "700"], variable: "--font-heading" });
+// Headings use Inter too, matching the link-preview card.
+const heading = Inter({ subsets: ["latin"], weight: ["500", "600", "700"], variable: "--font-heading" });
 const body = Inter({ subsets: ["latin"], weight: ["400", "600"], variable: "--font-body" });
 
 const DESCRIPTION =
