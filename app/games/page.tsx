@@ -46,7 +46,7 @@ export default function GamesPage() {
         {GAMES.map((g) => (
           <Link key={g.href} href={g.href} className="game-card">
             {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img src={g.img} alt={g.alt} />
+            <img src={g.img} alt={g.alt} draggable={false} />
             <span className="game-card__body">
               <span className="t-caption c-cyan">{g.label}</span>
               <span className="t-title">{g.title}</span>

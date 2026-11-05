@@ -133,6 +133,9 @@ export default function SojournerPuzzle() {
   dragRef.current = drag;
   useEffect(() => {
     if (!drag) return;
+    // While dragging, stop the browser from selecting text or images anywhere on the page.
+    document.body.classList.add("is-dragging");
+    window.getSelection()?.removeAllRanges();
     const move = (e: PointerEvent) => {
       const d = dragRef.current;
       if (!d) return;
@@ -158,6 +161,7 @@ export default function SojournerPuzzle() {
       window.removeEventListener("pointermove", move);
       window.removeEventListener("pointerup", up);
       window.removeEventListener("pointercancel", up);
+      document.body.classList.remove("is-dragging");
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [drag?.id]);

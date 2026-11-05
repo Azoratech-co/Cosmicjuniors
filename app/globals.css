@@ -377,3 +377,15 @@ kbd { font-family: var(--font-body); font-size: 12px; padding: 1px 6px; border-r
 @media (hover: hover) and (pointer: fine) {
   .arrow-pad { display: none; }
 }
+
+/* No text/image selection, long-press menus or tap flashes while playing.
+   (Fact panels stay selectable so kids can copy facts.) */
+.puzzle, .arcade, .game-card, .segmented, .toggle {
+  -webkit-user-select: none; user-select: none; -webkit-touch-callout: none;
+}
+.win-panel { -webkit-user-select: text; user-select: text; }
+.game-page button, .game-page canvas, .game-card { -webkit-tap-highlight-color: transparent; }
+.game-page button { touch-action: manipulation; }
+.arrow-pad button, .pad-btn, .tray-piece, .arcade-canvas, .puzzle-board { touch-action: none; }
+.game-card img, .puzzle img { -webkit-user-drag: none; pointer-events: none; }
+body.is-dragging, body.is-dragging * { -webkit-user-select: none !important; user-select: none !important; cursor: grabbing !important; }
