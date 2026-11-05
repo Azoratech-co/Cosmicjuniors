@@ -5,6 +5,8 @@ import GameShell from "@/components/games/GameShell";
 export const metadata: Metadata = {
   title: "Mission Games · Cosmic Juniors",
   description: "Three Mars mission games: rebuild Sojourner, dodge lasers on the way to Mars, and land on Mars.",
+  openGraph: { title: "Mission Games · Cosmic Juniors", description: "Three Mars mission games: rebuild Sojourner, dodge lasers on the way to Mars, and land on Mars.", url: "/games", siteName: "Cosmic Juniors", type: "website" },
+  twitter: { card: "summary_large_image", title: "Mission Games · Cosmic Juniors", description: "Three Mars mission games: rebuild Sojourner, dodge lasers on the way to Mars, and land on Mars." },
 };
 
 const GAMES = [

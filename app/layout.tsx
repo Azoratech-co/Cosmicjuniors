@@ -6,9 +6,22 @@ import "./globals.css";
 const heading = Space_Grotesk({ subsets: ["latin"], weight: ["500", "700"], variable: "--font-heading" });
 const body = Inter({ subsets: ["latin"], weight: ["400", "600"], variable: "--font-body" });
 
+const DESCRIPTION =
+  "Cosmo tells the stories of the rovers, landers and experiments NASA left on Mars and the Moon, with facts and sources from NASA. Built for NASA Space Apps 2026.";
+
 export const metadata: Metadata = {
+  metadataBase: new URL("https://cosmic-juniors.vercel.app"),
   title: "Cosmic Juniors · Ask Cosmo",
-  description: "Cosmo tells the stories of the rovers, landers and experiments NASA left on Mars and the Moon, with facts and sources from NASA. Built for NASA Space Apps 2026.",
+  description: DESCRIPTION,
+  applicationName: "Cosmic Juniors",
+  openGraph: {
+    type: "website",
+    siteName: "Cosmic Juniors",
+    title: "Ask Cosmo · Cosmic Juniors",
+    description: DESCRIPTION,
+    url: "/",
+  },
+  twitter: { card: "summary_large_image", title: "Ask Cosmo · Cosmic Juniors", description: DESCRIPTION },
 };
 
 export const viewport: Viewport = {
