@@ -3,6 +3,7 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import Link from "next/link";
 import Cosmo from "./Cosmo";
+import CosmoLogo from "./CosmoLogo";
 import type { ChatMessage, Source } from "@/lib/types";
 
 // Chat building blocks. Each maps to a component in the Figma page "v4 · Cosmo (pro)".
@@ -13,9 +14,9 @@ export function ChatHeader({ stars }: { stars: number }) {
     <header className="chat-header">
       <Cosmo size={44} />
       <div className="chat-header__name">
-        <span className="t-title">Cosmo</span>
+        <CosmoLogo size={19} />
         <span className="chat-header__status t-caption">
-          <span className="dot" aria-hidden="true" /> Online · NASA sources
+          <span className="dot" aria-hidden="true" /> Online<span className="t-hide-sm">&nbsp;· NASA sources</span>
         </span>
       </div>
       <Link href="/games" className="games-link games-link--header t-label">

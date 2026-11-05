@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import Cosmo from "./Cosmo";
+import CosmoLogo from "./CosmoLogo";
 
 // Desktop-only sidebar: new chat, recent topics, and the Explorer Level card.
 
@@ -25,8 +25,8 @@ export default function Sidebar({
   return (
     <aside className="sidebar">
       <div className="sidebar__logo">
-        <Cosmo size={36} />
-        <span className="t-title">Cosmic Juniors</span>
+        <CosmoLogo size={30} />
+        <span className="t-caption c-muted">by Cosmic Juniors</span>
       </div>
       <button className="btn-purple t-label" onClick={onNew}>
         +&nbsp; New conversation

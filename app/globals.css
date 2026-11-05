@@ -389,3 +389,13 @@ kbd { font-family: var(--font-body); font-size: 12px; padding: 1px 6px; border-r
 .arrow-pad button, .pad-btn, .tray-piece, .arcade-canvas, .puzzle-board { touch-action: none; }
 .game-card img, .puzzle img { -webkit-user-drag: none; pointer-events: none; }
 body.is-dragging, body.is-dragging * { -webkit-user-select: none !important; user-select: none !important; cursor: grabbing !important; }
+
+/* Cosmo logo (Figma: Cosmo · Logo → Final · Planet O) */
+.cosmo-logo {
+  display: inline-flex; align-items: center; font-family: var(--font-heading); font-weight: 700;
+  letter-spacing: -0.02em; line-height: 1; color: var(--text-primary); white-space: nowrap;
+}
+.cosmo-logo svg { flex-shrink: 0; margin: 0 -0.16em; }
+@media (max-width: 480px) { .chat-header__status { white-space: nowrap; } .chat-header__status .t-hide-sm { display: none; } }
+.sidebar__logo { display: flex; flex-direction: column; align-items: flex-start; gap: 6px; }
+.game-logo { display: inline-flex; text-decoration: none; }
