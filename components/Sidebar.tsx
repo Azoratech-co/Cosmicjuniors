@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import Cosmo from "./Cosmo";
 
 // Desktop-only sidebar: new chat, recent topics, and the Explorer Level card.
@@ -30,6 +31,9 @@ export default function Sidebar({
       <button className="btn-purple t-label" onClick={onNew}>
         +&nbsp; New conversation
       </button>
+      <Link href="/games" className="games-link t-label">
+        Mission games
+      </Link>
 
       <nav className="history" aria-label="Recent adventures">
         <span className="t-caption c-muted">Recent</span>

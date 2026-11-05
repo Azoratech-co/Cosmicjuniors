@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useMemo, useRef, useState } from "react";
+import Link from "next/link";
 import Cosmo from "./Cosmo";
 import type { ChatMessage, Source } from "@/lib/types";
 
@@ -17,6 +18,9 @@ export function ChatHeader({ stars }: { stars: number }) {
           <span className="dot" aria-hidden="true" /> Online · NASA sources
         </span>
       </div>
+      <Link href="/games" className="games-link games-link--header t-label">
+        Games
+      </Link>
       <span className="stars-badge t-label" aria-label={`${stars} stars collected`}>
         <svg width="12" height="12" viewBox="0 0 24 24" aria-hidden="true">
           <path d="M12 2l3.1 6.3 6.9 1-5 4.9 1.2 6.8L12 17.8 5.8 21l1.2-6.8-5-4.9 6.9-1z" fill="currentColor" />

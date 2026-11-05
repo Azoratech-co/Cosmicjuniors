@@ -239,3 +239,141 @@ a { color: inherit; }
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after { animation: none !important; transition: none !important; }
 }
+
+/* =====================================================================
+   Mission games (/games). Same tokens as the chat (Figma: v4 · Cosmo (pro)).
+   ===================================================================== */
+.game-page {
+  position: relative; min-height: 100dvh; overflow-x: hidden;
+  background: linear-gradient(180deg, #1a1245 0%, var(--space-950) 45%);
+  padding: 0 16px 48px;
+}
+.game-page > *:not(.starfield) { position: relative; }
+.game-top { max-width: 1040px; margin: 0 auto; display: flex; align-items: center; justify-content: space-between; padding: 18px 0; }
+.game-back { color: var(--text-muted); text-decoration: none; }
+.game-back:hover { color: var(--text-primary); }
+.game-head { max-width: 1040px; margin: 8px auto 20px; display: flex; flex-direction: column; gap: 6px; }
+.game-head p { max-width: 640px; }
+.game-main { max-width: 1040px; margin: 0 auto; }
+.btn-ghost {
+  display: inline-flex; align-items: center; justify-content: center; padding: 10px 14px; border-radius: 12px;
+  border: 1px solid var(--space-700); color: var(--text-primary); text-decoration: none; background: rgb(21 27 61 / 0.6);
+}
+.btn-ghost:hover { border-color: var(--brand-cyan); }
+.btn-purple { padding: 10px 16px; }
+.c-danger { color: #ff6b81; }
+kbd { font-family: var(--font-body); font-size: 12px; padding: 1px 6px; border-radius: 6px; border: 1px solid var(--space-700); background: var(--space-800); color: var(--text-primary); }
+
+/* Hub */
+.games-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 16px; }
+.game-card {
+  display: flex; flex-direction: column; overflow: hidden; text-decoration: none; color: var(--text-primary);
+  border-radius: 16px; background: var(--space-900); border: 1px solid var(--space-700);
+  transition: transform 0.15s, border-color 0.15s;
+}
+.game-card:hover { transform: translateY(-3px); border-color: var(--brand-purple); }
+.game-card img { width: 100%; height: 170px; object-fit: cover; display: block; background: var(--space-800); }
+.game-card__body { display: flex; flex-direction: column; gap: 8px; padding: 16px; }
+
+/* Toolbar */
+.game-toolbar { display: flex; flex-wrap: wrap; align-items: center; gap: 12px 16px; margin-bottom: 16px; }
+.segmented { display: inline-flex; padding: 3px; border-radius: 12px; background: var(--space-900); border: 1px solid var(--space-700); }
+.segmented button { padding: 7px 12px; border-radius: 9px; color: var(--text-muted); font-weight: 600; font-size: 13px; }
+.segmented button.is-on { background: var(--brand-purple); color: #fff; }
+.stat { font-variant-numeric: tabular-nums; }
+.toggle { display: inline-flex; align-items: center; gap: 6px; color: var(--text-muted); cursor: pointer; }
+.toggle input { accent-color: var(--brand-purple); }
+
+/* Puzzle */
+.puzzle-layout { display: grid; grid-template-columns: minmax(0, 1fr) 300px; gap: 20px; align-items: start; }
+.puzzle-board-col { min-width: 0; }
+.puzzle-board {
+  position: relative; border-radius: 12px; overflow: hidden; background: var(--space-900);
+  outline: 1px solid var(--space-700); touch-action: none;
+}
+.puzzle-board.has-hint::before {
+  content: ""; position: absolute; inset: 0; background: var(--photo) center / 100% 100%; opacity: 0.16; filter: grayscale(1);
+}
+.puzzle-cell { position: absolute; border: 1px dashed rgb(169 177 224 / 0.25); padding: 0; }
+.puzzle-cell.is-placed { border-color: transparent; }
+.puzzle-cell.is-target:hover { background: rgb(123 92 255 / 0.2); }
+.puzzle-cell.is-wrong { background: rgb(255 107 129 / 0.25); animation: shake 0.35s; }
+@keyframes shake { 25% { transform: translateX(-4px); } 75% { transform: translateX(4px); } }
+.puzzle-piece { display: block; background-repeat: no-repeat; }
+.puzzle-cell .puzzle-piece { animation: snap 0.25s ease-out; }
+@keyframes snap { from { transform: scale(1.06); filter: brightness(1.3); } }
+.puzzle-tray {
+  display: flex; flex-wrap: wrap; gap: 10px; align-content: flex-start; padding: 12px; min-height: 120px;
+  max-height: 70vh; overflow-y: auto; border-radius: 12px; background: rgb(21 27 61 / 0.7); border: 1px solid var(--space-700);
+}
+.tray-piece {
+  border-radius: 6px; box-shadow: 0 2px 8px rgb(0 0 0 / 0.4); cursor: grab; touch-action: none; padding: 0;
+  outline: 2px solid transparent; transition: transform 0.1s, outline-color 0.1s;
+}
+.tray-piece:hover { transform: translateY(-2px); }
+.tray-piece.is-selected { outline-color: var(--brand-cyan); }
+.tray-piece.is-lifted { opacity: 0.25; }
+.drag-ghost { position: fixed; z-index: 50; pointer-events: none; border-radius: 6px; box-shadow: 0 12px 32px rgb(0 0 0 / 0.55); outline: 2px solid var(--brand-cyan); }
+.credit { margin-top: 8px; }
+
+/* Win panel */
+.win-panel {
+  margin-top: 20px; display: flex; flex-direction: column; gap: 10px; padding: 20px; border-radius: 16px;
+  background: var(--space-900); border: 1px solid var(--brand-purple); box-shadow: 0 0 40px rgb(123 92 255 / 0.25);
+  animation: pop 0.25s ease-out;
+}
+.win-facts { margin: 0; padding-left: 18px; display: flex; flex-direction: column; gap: 6px; color: var(--text-muted); }
+.win-actions { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 4px; }
+
+/* Arcade games */
+.arcade { display: flex; flex-direction: column; gap: 12px; align-items: center; }
+.arcade-hud {
+  width: 100%; max-width: 960px; display: flex; flex-wrap: wrap; align-items: center; gap: 10px 20px;
+  padding: 10px 14px; border-radius: 12px; background: rgb(21 27 61 / 0.75); border: 1px solid var(--space-700);
+}
+.arcade-hud b { font-variant-numeric: tabular-nums; }
+.pip { display: inline-block; width: 10px; height: 10px; margin-left: 4px; border-radius: 3px; background: var(--space-700); vertical-align: -1px; }
+.pip.is-on { background: var(--brand-cyan); box-shadow: 0 0 8px rgb(61 214 245 / 0.6); }
+.trip { flex: 1; min-width: 180px; display: flex; align-items: center; gap: 8px; }
+.trip__bar { flex: 1; height: 8px; border-radius: 999px; background: var(--space-700); overflow: hidden; }
+.trip__bar span { display: block; height: 100%; background: linear-gradient(90deg, #3d8bff, #ff8a5c); transition: width 0.1s linear; }
+/* Fit the game to the screen height so the whole play area is always visible. */
+.arcade-stage { position: relative; width: min(100%, 480px, calc((100dvh - 230px) * 0.75)); min-width: 260px; }
+.landing .arcade-stage { width: min(100%, 960px, calc((100dvh - 250px) * 1.778)); }
+.arcade-canvas { display: block; width: 100%; height: auto; border-radius: 16px; border: 1px solid var(--space-700); touch-action: none; background: var(--space-950); }
+.stage-overlay {
+  position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 12px;
+  padding: 24px; text-align: center; border-radius: 16px; background: rgb(11 16 38 / 0.78); backdrop-filter: blur(2px);
+}
+.stage-overlay p { max-width: 380px; }
+.steps { text-align: left; max-width: 520px; margin: 0; padding-left: 20px; display: flex; flex-direction: column; gap: 6px; }
+.arrow-pad { display: grid; grid-template-columns: repeat(3, 56px); grid-template-rows: repeat(2, 48px); gap: 6px; }
+.arrow-pad button, .pad-btn {
+  border-radius: 12px; background: var(--space-800); border: 1px solid var(--space-700); color: var(--text-primary);
+  font-size: 18px; touch-action: none; user-select: none;
+}
+.arrow-pad button:active, .pad-btn:active { background: var(--brand-purple); }
+.pad-up { grid-column: 2; grid-row: 1; }
+.pad-left { grid-column: 1; grid-row: 2; }
+.pad-down { grid-column: 2; grid-row: 2; }
+.pad-right { grid-column: 3; grid-row: 2; }
+.landing-controls { display: flex; gap: 10px; align-items: stretch; }
+.pad-btn { width: 64px; height: 52px; }
+.pad-btn:disabled { opacity: 0.35; }
+.action-btn { min-width: 200px; font-size: 15px; }
+.action-btn:disabled { opacity: 0.6; }
+.fuel { display: inline-block; width: 80px; height: 8px; margin-left: 6px; border-radius: 999px; background: var(--space-700); overflow: hidden; vertical-align: 0; }
+.fuel span { display: block; height: 100%; background: var(--accent-star); }
+
+/* Link to games from the chat */
+.games-link { display: inline-flex; align-items: center; justify-content: center; gap: 6px; padding: 10px 12px; border-radius: 12px; text-decoration: none; color: var(--text-primary); border: 1px solid var(--space-700); }
+.games-link:hover { border-color: var(--brand-cyan); }
+.games-link--header { padding: 7px 10px; }
+
+@media (max-width: 800px) {
+  .puzzle-layout { grid-template-columns: minmax(0, 1fr); }
+  .puzzle-tray { max-height: none; }
+}
+@media (hover: hover) and (pointer: fine) {
+  .arrow-pad { display: none; }
+}
