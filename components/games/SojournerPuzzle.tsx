@@ -147,6 +147,8 @@ export default function SojournerPuzzle() {
       dragRef.current = null;
       setDrag(null);
       if (!d) return;
+      // A cancelled touch (the browser took over) is neither a tap nor a drop.
+      if (e.type === "pointercancel") return;
       if (!d.moved) {
         setSelected((s) => (s === d.id ? null : d.id));
         return;

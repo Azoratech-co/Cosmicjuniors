@@ -456,3 +456,8 @@ body.is-dragging, body.is-dragging * { -webkit-user-select: none !important; use
 /* Keep Mars fixed in the corner on game pages (an older rule made game-page children relative). */
 .game-page > .mars-glow { position: fixed; z-index: 0; }
 @media (max-width: 480px) { .chat-header__status { white-space: nowrap; } .t-hide-sm { display: none; } }
+
+/* Touch: let fingers drag pieces and hold controls instead of scrolling the page.
+   (Must beat `.game-page button { touch-action: manipulation }` above.) */
+.game-page .tray-piece, .game-page .puzzle-board, .game-page .puzzle-cell,
+.game-page .arrow-pad button, .game-page .pad-btn, .game-page .arcade-canvas { touch-action: none; }
