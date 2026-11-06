@@ -44,7 +44,8 @@ export async function askCosmo(history: History, mode: ChatMode = "guide"): Prom
     // Fact-check numbers and "the first / the largest" claims; give Cosmo one chance to fix them.
     const problems = (text: string) => [
       ...unsupportedNumbers(text, topics, kidText).map((n) => `the number ${n}`),
-      ...unsupportedClaims(text, topics).map((c) => `the claim "${c}"`),
+      // With no notes (general questions like "why is the sky blue?") there is nothing to check claims against.
+      ...(topics.length ? unsupportedClaims(text, topics) : []).map((c) => `the claim "${c}"`),
     ];
     let bad = problems(draft.reply.text);
     if (bad.length) {
