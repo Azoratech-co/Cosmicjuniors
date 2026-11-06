@@ -224,7 +224,7 @@ export const TOPICS: Topic[] = [
     voice: "an Apollo flag",
     facts: [
       "Photos from NASA's Lunar Reconnaissance Orbiter show shadows from the flags at the Apollo 12, 16 and 17 sites, which means those flags are still standing on their poles.",
-      "There is no flag shadow at the Apollo 11 site. Buzz Aldrin wrote: \"I looked up long enough to see the flag fall over.\"",
+      "There is no flag shadow at the Apollo 11 site. The flag fell over when the lunar module blasted off to leave: Buzz Aldrin wrote, \"I looked up long enough to see the flag fall over.\"",
       "The photos of the Apollo 14 and 15 sites show no clear flag shadow.",
       "Lunar scientist Paul Spudis wrote that the flags have been bleached white by the strong ultraviolet sunlight on the Moon.",
     ],
