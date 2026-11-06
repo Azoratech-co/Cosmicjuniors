@@ -321,7 +321,7 @@ export const TOPICS: Topic[] = [
       "They ask future spacecraft not to fly their landing path within 2.0 km of historic lander sites like Apollo and Surveyor.",
       "Around the Apollo 11 site, the recommended no-go zone extends 75 meters from the lunar module.",
       "Around the Apollo 17 site, the recommended no-go zone extends 225 meters from the lunar module.",
-      "The zones protect artifacts such as the descent stage, the lunar rover, the flag and the science experiments.",
+      "At each site, the protected area covers the hardware left there, such as the descent stage, the flag and the science experiments. Only the Apollo 15, 16 and 17 sites also have a lunar rover.",
     ],
     image: img("as11-40-5874", "as11-40-5874~small.jpg", "The Apollo 11 site, July 20, 1969", "NASA"),
   },

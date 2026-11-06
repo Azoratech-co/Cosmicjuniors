@@ -3,7 +3,7 @@ import { GroqError, groqChat, hasGroqKey } from "./groq";
 import { LIMITS, MODELS } from "./config";
 import { buildSystemPrompt } from "./prompt";
 import { findTopics, getTopic, type Topic } from "./knowledge";
-import { toReference, toSource, unsupportedNumbers } from "./sources";
+import { toReference, toSource, unsupportedNumbers, usedTopics } from "./sources";
 import { SAFE_REPLIES, isTrickAttempt, screenAnswer, screenQuestion, type SafetyCategory } from "./safety";
 import { mockReply } from "../mockBrain";
 import type { ChatMode, ChatReply, ChatRequest } from "../types";
@@ -114,7 +114,7 @@ function parseAnswer(data: unknown, topics: Topic[]): { safety: SafetyCategory; 
   const ids = (Array.isArray(d.sources) ? d.sources : typeof d.source === "string" ? [d.source] : []).filter(
     (id, i, all): id is string => typeof id === "string" && topics.some((t) => t.id === id) && all.indexOf(id) === i,
   );
-  const used = ids.map((id) => getTopic(id)!).slice(0, 4);
+  const used = usedTopics(text, topics, ids.map((id) => getTopic(id)!)).slice(0, 4);
   if (used.length) {
     reply.source = toSource(used[0], typeof d.fact === "number" ? d.fact : null, text);
     reply.references = used.map(toReference);

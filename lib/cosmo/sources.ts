@@ -37,3 +37,21 @@ export function unsupportedNumbers(answer: string, topics: Topic[], kidText = ""
   const allowed = new Set(numbers([kidText, ...topics.flatMap((t) => [t.title, ...t.facts, t.whereNow?.status ?? "", t.whereNow?.place ?? ""])].join(" ")));
   return [...new Set(numbers(answer))].filter((n) => !allowed.has(n));
 }
+
+/**
+ * Which notes the answer actually drew on: the ones the model listed, plus any note whose fact
+ * the answer clearly repeats (most of its words) or whose number only that note contains.
+ */
+export function usedTopics(answer: string, topics: Topic[], listed: Topic[]): Topic[] {
+  const said = words(answer);
+  const nums = new Set(numbers(answer));
+  const uniqueNum = (t: Topic) =>
+    numbers(t.facts.join(" ")).some((n) => n.length > 1 && nums.has(n) && !topics.some((o) => o !== t && numbers(o.facts.join(" ")).includes(n)));
+  const repeats = (t: Topic) =>
+    t.facts.some((f) => {
+      const w = [...words(f)].filter((x) => x.length > 3);
+      return w.length >= 3 && w.filter((x) => said.has(x)).length / w.length >= 0.6;
+    });
+  const extra = topics.filter((t) => !listed.includes(t) && (uniqueNum(t) || repeats(t)));
+  return [...listed, ...extra];
+}
