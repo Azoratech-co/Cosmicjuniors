@@ -59,17 +59,24 @@ export default function ChatApp() {
     setHistory((h) => [text, ...h.filter((x) => x !== text)].slice(0, 6));
     addStar();
 
-    try {
+    const send = async (): Promise<ChatReply> => {
       const res = await fetch("/api/chat", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ messages: next.map(({ role, text }) => ({ role, text })), mode: askMode }),
       });
-      if (res.status === 429) {
-        throw new Error("slow-down");
-      }
+      if (res.status === 429) throw new Error("slow-down");
       if (!res.ok) throw new Error(`HTTP ${res.status}`);
-      const reply: ChatReply = await res.json();
+      return res.json();
+    };
+
+    try {
+      let reply = await send();
+      // If Cosmo's AI was busy, wait a moment and quietly ask again (up to twice) before showing anything.
+      for (let i = 0; reply.busy && i < 2; i++) {
+        await new Promise((r) => setTimeout(r, 5000 + i * 3000));
+        reply = await send();
+      }
       const id = uid();
       setRevealingId(id);
       setMessages((m) => [

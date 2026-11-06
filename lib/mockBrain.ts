@@ -60,6 +60,7 @@ export function mockReply(question: string, busy = false): ChatReply {
     return {
       text: "Lots of explorers are asking me questions right now, so I need a moment. Please ask that again in a few seconds.",
       suggestions: [question.slice(0, 48)],
+      busy: true,
     };
   }
   if (!topic) {
@@ -73,5 +74,5 @@ export function mockReply(question: string, busy = false): ChatReply {
   const picked = busy ? ranked.filter((x) => x.s > 0).slice(0, 2) : ranked.slice(0, 2);
   const text = lead + picked.sort((a, b) => a.i - b.i).map((x) => x.f).join(" ");
   // Built word for word from the notes, so every number is checked by definition.
-  return { text, source: toSource(topic, 2, text), references: [toReference(topic)], checked: true, suggestions: NEXT[topic.id] };
+  return { text, source: toSource(topic, 2, text), references: [toReference(topic)], checked: true, suggestions: NEXT[topic.id], ...(busy ? { busy: true } : {}) };
 }
