@@ -30,7 +30,8 @@ export async function askCosmo(history: History, mode: ChatMode = "guide"): Prom
 
   if (!hasGroqKey()) return mockReply(question);
 
-  const context = history.slice(-5, -1).map((m) => m.text).join(" ");
+  // For follow-ups, the last exchange (kid's previous question + Cosmo's reply) says what "it" means.
+  const context = history.slice(-3, -1).map((m) => m.text).join(" ");
   const topics = findTopics(question, context);
   const kidText = history.filter((m) => m.role === "user").map((m) => m.text).join(" ");
 

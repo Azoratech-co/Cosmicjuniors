@@ -605,20 +605,40 @@ export function getTopic(id: string): Topic | undefined {
   return byId.get(id);
 }
 
-/** Pick the topics most related to the conversation (latest question counts most). */
+/** Words that show a question is a follow-up about the earlier topic ("How far did it drive?"). */
+const FOLLOW_UP = /\b(it|its|it's|they|them|their|that|this|those|these|there|he|she|his|her|him|then|more|else|also)\b/i;
+
+const escape = (k: string) => k.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+
+function score(text: string, t: Topic) {
+  let n = 0;
+  for (const k of t.keywords) if (new RegExp(`\\b${escape(k)}\\b`).test(text)) n += 3 + k.split(" ").length;
+  return n;
+}
+
+/**
+ * Pick the notes for the latest question. Earlier messages only count when the question is a
+ * follow-up (it says "it", "they", "that"... and names no topic of its own). A brand-new question
+ * never inherits notes from an earlier one.
+ */
 export function findTopics(question: string, context = "", limit = 4): Topic[] {
   const q = ` ${question.toLowerCase()} `;
+  const direct = TOPICS.map((t) => ({ t, s: score(q, t) })).filter((x) => x.s > 0);
+  if (direct.length) {
+    // Context only breaks ties between topics the question itself named.
+    const c = ` ${context.toLowerCase()} `;
+    return direct
+      .map((x) => ({ ...x, s: x.s + (context ? Math.min(2, score(c, x.t) / 4) : 0) }))
+      .sort((a, b) => b.s - a.s)
+      .slice(0, limit)
+      .map((x) => x.t);
+  }
+  if (!context || !FOLLOW_UP.test(question)) return [];
+  // Follow-up: use what the most recent earlier message was about.
   const c = ` ${context.toLowerCase()} `;
-  const scored = TOPICS.map((t) => {
-    let score = 0;
-    for (const k of t.keywords) {
-      const re = new RegExp(`\\b${k.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")}\\b`);
-      if (re.test(q)) score += 3 + k.split(" ").length;
-      else if (re.test(c)) score += 1;
-    }
-    return { t, score };
-  })
-    .filter((s) => s.score > 0)
-    .sort((a, b) => b.score - a.score);
-  return scored.slice(0, limit).map((s) => s.t);
+  return TOPICS.map((t) => ({ t, s: score(c, t) }))
+    .filter((x) => x.s > 0)
+    .sort((a, b) => b.s - a.s)
+    .slice(0, 2)
+    .map((x) => x.t);
 }

@@ -57,7 +57,13 @@ export function usedTopics(answer: string, topics: Topic[], listed: Topic[]): To
   const uniqueWord = (t: Topic) =>
     [...vocab(t)].some((w) => said.has(w) && !topics.some((o) => o !== t && vocab(o).has(w)));
   const extra = topics.filter((t) => !listed.includes(t) && (uniqueNum(t) || repeats(t) || uniqueWord(t)));
-  return [...listed, ...extra];
+  // Drop any listed note the answer doesn't actually draw on (no shared facts, names or numbers).
+  const relevant = (t: Topic) => {
+    if (uniqueNum(t) || repeats(t) || uniqueWord(t)) return true;
+    const vocab = new Set([...words([t.title, ...t.facts, ...t.keywords].join(" "))].filter((x) => x.length > 4));
+    return [...said].filter((w) => w.length > 4 && vocab.has(w)).length >= 3;
+  };
+  return [...listed.filter(relevant), ...extra];
 }
 
 // ---------------------------------------------------------------------------------------------
