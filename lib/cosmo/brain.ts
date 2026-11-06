@@ -91,7 +91,9 @@ async function writeAnswer(history: History, topics: Topic[], mode: ChatMode, ba
   // (Groq answers 400 "json_validate_failed"), ask again without strict JSON mode and read the
   // JSON object out of the reply ourselves.
   let lastError: unknown;
-  for (const model of await chatModels()) {
+  const tried: string[] = [];
+  const models = await chatModels();
+  for (const model of models) {
     for (const strict of [true, false]) {
       try {
         const raw = await groqChat(
@@ -109,6 +111,7 @@ async function writeAnswer(history: History, topics: Topic[], mode: ChatMode, ba
         return parseAnswer(readJson(raw), topics);
       } catch (err) {
         lastError = err;
+        tried.push(`${model}${strict ? "" : " (loose)"}: ${err instanceof GroqError ? `${err.status} ${err.code}` : err instanceof Error ? err.name : "error"}`);
         const badJson = (err instanceof GroqError && err.status === 400) || err instanceof SyntaxError;
         if (strict && badJson) continue; // retry this model without strict JSON
         // Busy (429), retired or unknown model (400/404), server trouble (5xx), bad JSON: next model.
@@ -118,7 +121,8 @@ async function writeAnswer(history: History, topics: Topic[], mode: ChatMode, ba
       }
     }
   }
-  throw lastError;
+  // One log line that shows what every model said (never the kid's message).
+  throw new Error(`All models failed. ${tried.join(" | ") || String(lastError)}`);
 }
 
 /** Preferred models that exist right now, then any other good chat model on the account. */
