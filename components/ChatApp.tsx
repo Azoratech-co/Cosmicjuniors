@@ -5,7 +5,7 @@ import Composer from "./Composer";
 import Sidebar from "./Sidebar";
 import Starfield from "./Starfield";
 import { ChatHeader, MessageRow, QuickReplies, Typing, Welcome } from "./ChatParts";
-import type { ChatMessage, ChatReply } from "@/lib/types";
+import type { ChatMessage, ChatMode, ChatReply } from "@/lib/types";
 
 const STARS_KEY = "cj-stars";
 
@@ -19,6 +19,7 @@ export default function ChatApp() {
   const [history, setHistory] = useState<string[]>([]);
   // The bot message currently being "typed" on screen.
   const [revealingId, setRevealingId] = useState<string | null>(null);
+  const [mode, setMode] = useState<ChatMode>("guide");
   const scrollRef = useRef<HTMLDivElement>(null);
   const threadRef = useRef<HTMLDivElement>(null);
 
@@ -48,7 +49,7 @@ export default function ChatApp() {
       return n;
     });
 
-  const ask = async (text: string) => {
+  const ask = async (text: string, askMode: ChatMode = mode) => {
     if (thinking || revealingId) return;
     const userMsg: ChatMessage = { id: uid(), role: "user", text, at: Date.now() };
     const next = [...messages, userMsg];
@@ -62,7 +63,7 @@ export default function ChatApp() {
       const res = await fetch("/api/chat", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ messages: next.map(({ role, text }) => ({ role, text })) }),
+        body: JSON.stringify({ messages: next.map(({ role, text }) => ({ role, text })), mode: askMode }),
       });
       if (res.status === 429) {
         throw new Error("slow-down");
@@ -71,7 +72,19 @@ export default function ChatApp() {
       const reply: ChatReply = await res.json();
       const id = uid();
       setRevealingId(id);
-      setMessages((m) => [...m, { id, role: "bot", text: reply.text, source: reply.source, at: Date.now() }]);
+      setMessages((m) => [
+        ...m,
+        {
+          id,
+          role: "bot",
+          text: reply.text,
+          source: reply.source,
+          references: reply.references,
+          checked: reply.checked,
+          story: reply.story,
+          at: Date.now(),
+        },
+      ]);
       setSuggestions(reply.suggestions ?? []);
     } catch (err) {
       const text =
@@ -102,7 +115,13 @@ export default function ChatApp() {
         <div className="scroll" ref={scrollRef}>
           <div className={`thread${empty ? " thread--empty" : ""}`} ref={threadRef}>
             {empty ? (
-              <Welcome onPick={ask} />
+              <Welcome
+                onPick={(q) => ask(q)}
+                onStory={(q) => {
+                  setMode("story");
+                  ask(q, "story");
+                }}
+              />
             ) : (
               <>
                 <div className="row row--center">
@@ -118,16 +137,27 @@ export default function ChatApp() {
                 ))}
                 {thinking && <Typing />}
                 {!thinking && !revealingId && suggestions.length > 0 && (
-                  <QuickReplies items={suggestions} onPick={ask} />
+                  <QuickReplies items={suggestions} onPick={(q) => ask(q)} />
                 )}
               </>
             )}
           </div>
         </div>
         <div className="composer-wrap">
-          <Composer onSend={ask} disabled={thinking || Boolean(revealingId)} />
+          <div className="mode-switch" role="radiogroup" aria-label="How Cosmo answers">
+            <button role="radio" aria-checked={mode === "guide"} className={mode === "guide" ? "is-on" : ""} onClick={() => setMode("guide")}>
+              Explain
+            </button>
+            <button role="radio" aria-checked={mode === "story"} className={mode === "story" ? "is-on" : ""} onClick={() => setMode("story")}>
+              Story mode
+            </button>
+            <span className="mode-switch__hint t-caption c-muted">
+              {mode === "story" ? "The machines tell their own stories, with real facts." : "Answers with sources and fact-checked numbers."}
+            </span>
+          </div>
+          <Composer onSend={(q) => ask(q)} disabled={thinking || Boolean(revealingId)} />
           <p className="t-body-sm c-muted disclaimer">
-            Answers are based on NASA sources. Open a source card to read more.
+            Answers come from NASA and trusted partners, with references. Numbers are fact-checked against them.
           </p>
         </div>
       </main>

@@ -1,5 +1,5 @@
 import type { Topic } from "./knowledge";
-import type { Source } from "../types";
+import type { Reference, Source } from "../types";
 
 const words = (s: string) => new Set(s.toLowerCase().match(/[a-z0-9]+/g) ?? []);
 
@@ -7,6 +7,10 @@ const words = (s: string) => new Set(s.toLowerCase().match(/[a-z0-9]+/g) ?? []);
 function overlap(fact: string, answer: Set<string>) {
   const w = [...words(fact)].filter((x) => x.length > 3);
   return w.length ? w.filter((x) => answer.has(x)).length / w.length : 1;
+}
+
+export function toReference(topic: Topic): Reference {
+  return { id: topic.id, title: topic.title, publisher: topic.publisher, url: topic.url, kind: topic.kind ?? "nasa" };
 }
 
 /** Turn a knowledge-base topic into the source card shown under an answer. */
@@ -18,12 +22,18 @@ export function toSource(topic: Topic, factIndex: number | null, answer: string)
     const scores = topic.facts.map((f) => overlap(f, said));
     i = scores.indexOf(Math.min(...scores));
   }
-  return {
-    id: topic.id,
-    title: topic.title,
-    publisher: topic.publisher,
-    url: topic.url,
-    fact: topic.facts[i],
-    image: topic.image,
-  };
+  return { ...toReference(topic), fact: topic.facts[i], image: topic.image, whereNow: topic.whereNow };
+}
+
+// ---------------------------------------------------------------------------------------------
+// Fact-check: every number Cosmo writes must appear in the notes it was given (or in the kid's
+// own messages). This catches the most common AI mistake, a wrong or made-up number or date.
+// ---------------------------------------------------------------------------------------------
+
+const numbers = (s: string) => (s.match(/\d+(?:[.,]\d+)*/g) ?? []).map((n) => n.replace(/,/g, "").replace(/\.$/, ""));
+
+/** Numbers in `answer` that no note (or the kid) mentioned. Empty means the answer passed. */
+export function unsupportedNumbers(answer: string, topics: Topic[], kidText = ""): string[] {
+  const allowed = new Set(numbers([kidText, ...topics.flatMap((t) => [t.title, ...t.facts, t.whereNow?.status ?? "", t.whereNow?.place ?? ""])].join(" ")));
+  return [...new Set(numbers(answer))].filter((n) => !allowed.has(n));
 }

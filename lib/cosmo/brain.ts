@@ -3,10 +3,10 @@ import { GroqError, groqChat, hasGroqKey } from "./groq";
 import { LIMITS, MODELS } from "./config";
 import { buildSystemPrompt } from "./prompt";
 import { findTopics, getTopic, type Topic } from "./knowledge";
-import { toSource } from "./sources";
+import { toReference, toSource, unsupportedNumbers } from "./sources";
 import { SAFE_REPLIES, isTrickAttempt, screenAnswer, screenQuestion, type SafetyCategory } from "./safety";
 import { mockReply } from "../mockBrain";
-import type { ChatReply, ChatRequest } from "../types";
+import type { ChatMode, ChatReply, ChatRequest } from "../types";
 
 // Cosmo's brain: safety checks + verified NASA notes + the Groq model.
 //
@@ -15,12 +15,14 @@ import type { ChatReply, ChatRequest } from "../types";
 //   2. Find the NASA reference notes that match the question (lib/cosmo/knowledge.ts).
 //   3. Trick check (Prompt Guard) runs at the same time as the answer is written.
 //   4. The model labels the question's safety itself; anything not "ok" gets a pre-written reply.
-//   5. The answer goes through a word filter, then gets its NASA source card attached.
-//   6. If anything goes wrong (no key, Groq busy or down, bad output), answer from the notes directly.
+//   5. Fact-check: every number in the answer must appear in the notes. If not, Cosmo rewrites it
+//      once; if it still fails, the answer is replaced by one built straight from the notes.
+//   6. The answer goes through a word filter, then gets its source card and numbered references.
+//   7. If anything goes wrong (no key, Groq busy or down, bad output), answer from the notes directly.
 
 type History = ChatRequest["messages"];
 
-export async function askCosmo(history: History): Promise<ChatReply> {
+export async function askCosmo(history: History, mode: ChatMode = "guide"): Promise<ChatReply> {
   const question = history[history.length - 1].text;
 
   const quick = screenQuestion(question);
@@ -30,12 +32,28 @@ export async function askCosmo(history: History): Promise<ChatReply> {
 
   const context = history.slice(-5, -1).map((m) => m.text).join(" ");
   const topics = findTopics(question, context);
+  const kidText = history.filter((m) => m.role === "user").map((m) => m.text).join(" ");
 
   try {
-    const [trick, draft] = await Promise.all([isTrickAttempt(question), writeAnswer(history, topics)]);
+    const [trick, first] = await Promise.all([isTrickAttempt(question), writeAnswer(history, topics, mode)]);
     if (trick) return SAFE_REPLIES.trick;
+    let draft = first;
     if (draft.safety !== "ok") return SAFE_REPLIES[draft.safety];
+
+    // Fact-check the numbers; give Cosmo one chance to fix them.
+    let bad = unsupportedNumbers(draft.reply.text, topics, kidText);
+    if (bad.length) {
+      draft = await writeAnswer(history, topics, mode, bad);
+      bad = unsupportedNumbers(draft.reply.text, topics, kidText);
+      if (draft.safety !== "ok") return SAFE_REPLIES[draft.safety];
+    }
+    if (bad.length) {
+      console.warn("Cosmo fact-check failed twice; answering from the notes.");
+      return mockReply(question);
+    }
     if (!screenAnswer(draft.reply)) return SAFE_REPLIES.unsafe;
+    draft.reply.checked = Boolean(draft.reply.references?.length);
+    if (mode === "story") draft.reply.story = true;
     return draft.reply;
   } catch (err) {
     // Log only the error, never the kid's message.
@@ -44,11 +62,17 @@ export async function askCosmo(history: History): Promise<ChatReply> {
   }
 }
 
-async function writeAnswer(history: History, topics: Topic[]) {
+async function writeAnswer(history: History, topics: Topic[], mode: ChatMode, badNumbers: string[] = []) {
   const messages = [
-    { role: "system", content: buildSystemPrompt(topics) },
+    { role: "system", content: buildSystemPrompt(topics, mode) },
     ...history.map((m) => ({ role: m.role === "bot" ? "assistant" : "user", content: m.text })),
   ];
+  if (badNumbers.length) {
+    messages.push({
+      role: "system",
+      content: `FACT-CHECK FAILED. Your answer used these numbers that are not in the REFERENCE NOTES: ${badNumbers.join(", ")}. Write the answer again using only numbers that appear in the notes, or no numbers at all.`,
+    });
+  }
 
   // Try each model in order; move to the next one only if Groq says it's busy (429).
   let lastError: unknown;
@@ -86,9 +110,15 @@ function parseAnswer(data: unknown, topics: Topic[]): { safety: SafetyCategory; 
   if (!text) throw new Error("Model returned no text");
   const reply: ChatReply = { text };
 
-  // Only accept a source that was actually given to the model for this question.
-  const topic = typeof d.source === "string" && topics.some((t) => t.id === d.source) ? getTopic(d.source) : undefined;
-  if (topic) reply.source = toSource(topic, typeof d.fact === "number" ? d.fact : null, text);
+  // Only accept sources that were actually given to the model for this question.
+  const ids = (Array.isArray(d.sources) ? d.sources : typeof d.source === "string" ? [d.source] : []).filter(
+    (id, i, all): id is string => typeof id === "string" && topics.some((t) => t.id === id) && all.indexOf(id) === i,
+  );
+  const used = ids.map((id) => getTopic(id)!).slice(0, 4);
+  if (used.length) {
+    reply.source = toSource(used[0], typeof d.fact === "number" ? d.fact : null, text);
+    reply.references = used.map(toReference);
+  }
 
   if (Array.isArray(d.suggestions)) {
     reply.suggestions = d.suggestions

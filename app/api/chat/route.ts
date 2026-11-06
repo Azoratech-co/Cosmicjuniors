@@ -45,7 +45,8 @@ export async function POST(req: Request) {
   }
 
   // 4. Ask Cosmo.
-  const reply = await askCosmo(history);
+  const mode = body.mode === "story" ? "story" : "guide";
+  const reply = await askCosmo(history, mode);
   return NextResponse.json(reply, { headers: { "Cache-Control": "no-store" } });
 }
 

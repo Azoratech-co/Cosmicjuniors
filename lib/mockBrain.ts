@@ -1,5 +1,5 @@
 import { findTopics } from "./cosmo/knowledge";
-import { toSource } from "./cosmo/sources";
+import { toReference, toSource } from "./cosmo/sources";
 import type { ChatReply } from "./types";
 
 // Offline answers built straight from the verified NASA notes. Used when there is no
@@ -12,6 +12,22 @@ const NEXT: Record<string, string[]> = {
   opportunity: ["How far did Opportunity drive?", "What ended its mission?"],
   insight: ["What is a marsquake?", "When did InSight stop?"],
   ingenuity: ["How many times did it fly?", "How high did it fly?"],
+  apollo11: ["What does the plaque say?", "Is the Apollo 11 flag still up?"],
+  "apollo11-tps": ["Is the Moon moving away?", "Can we see the footprints?"],
+  surveyor3: ["Why did they take its camera?", "What did Surveyor 3 do?"],
+  flags: ["Why did the Apollo 11 flag fall?", "What color are the flags now?"],
+  "fallen-astronaut": ["Who placed the memorial?", "What else did Apollo 15 leave?"],
+  grail: ["Why crash on purpose?", "Who was Sally Ride?"],
+  lcross: ["Is there water on the Moon?", "Where is Cabeus crater?"],
+  "lunar-artifacts": ["Why protect Moon artifacts?", "What is left on Mars?"],
+  "space-trash-tps": ["Is it junk or history?", "Who protects the Apollo sites?"],
+  "heritage-rules": ["Is there a law about it?", "What did Apollo 11 leave?"],
+  "one-small-step": ["Why protect Apollo sites?", "What did Apollo 17 leave?"],
+  phoenix: ["What did Phoenix find?", "What is on Mars today?"],
+  "mars-missions-tps": ["Why do Mars missions fail?", "What did Viking see first?"],
+  "pathfinder-tps": ["How did the airbags work?", "Who was Carl Sagan?"],
+  curiosity: ["How big is Curiosity?", "Is Curiosity still working?"],
+  "perseverance-debris": ["Why photograph the parachute?", "What did Ingenuity do?"],
   lrv: ["How far did they drive?", "How heavy was the rover?"],
   retroreflector: ["How do the mirrors work?", "Are they still used?"],
   mars: ["How tall is Olympus Mons?", "How long is a day on Mars?"],
@@ -30,10 +46,11 @@ export function mockReply(question: string): ChatReply {
   const [topic] = findTopics(question);
   if (!topic) {
     return {
-      text: "I don't have a NASA source for that one yet. I can tell you the stories of the machines NASA left on Mars and the Moon, like Sojourner, Viking, Spirit, Opportunity, InSight, Ingenuity and the Apollo moon rovers.",
+      text: "I don't have a NASA source for that one yet. I can tell you the stories of the machines NASA left on Mars and the Moon, like Sojourner, Viking, Spirit, Opportunity, Phoenix, Curiosity, Ingenuity, the Apollo landing sites and the spacecraft that crashed into the Moon on purpose.",
       suggestions: ["Where is Sojourner now?", "How far did Opportunity drive?", "What did Apollo leave on the Moon?"],
     };
   }
   const text = topic.facts.slice(0, 2).join(" ");
-  return { text, source: toSource(topic, 2, text), suggestions: NEXT[topic.id] };
+  // Built word for word from the notes, so every number is checked by definition.
+  return { text, source: toSource(topic, 2, text), references: [toReference(topic)], checked: true, suggestions: NEXT[topic.id] };
 }
