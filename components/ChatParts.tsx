@@ -85,8 +85,9 @@ export function References({ items, checked }: { items: Reference[]; checked?: b
         )}
       </div>
       <ol className="refs__list">
-        {items.map((r) => (
+        {items.map((r, i) => (
           <li key={r.id}>
+            <span className="refs__n t-caption">[{i + 1}]</span>
             <a href={r.url} target="_blank" rel="noopener noreferrer" className="t-body-sm">
               {r.title}
             </a>

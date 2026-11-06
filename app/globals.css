@@ -551,3 +551,5 @@ body.is-dragging, body.is-dragging * { -webkit-user-select: none !important; use
 }
 .hero-story:hover { transform: translateY(-2px); background: rgb(255 209 102 / 0.14); }
 @media (max-width: 720px) { .mode-switch__hint { display: none; } .mode-switch { padding: 0 12px; } }
+.refs__list { list-style: none; padding-left: 0; }
+.refs__n { color: var(--brand-cyan); font-variant-numeric: tabular-nums; }
