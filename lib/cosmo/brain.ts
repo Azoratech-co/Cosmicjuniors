@@ -80,28 +80,48 @@ async function writeAnswer(history: History, topics: Topic[], mode: ChatMode, ba
     });
   }
 
-  // Try each model in order; move to the next one only if Groq says it's busy (429).
+  // Try each model in order. Move on if Groq is busy (429). If the model's reply wasn't valid JSON
+  // (Groq answers 400 "json_validate_failed"), ask again without strict JSON mode and read the
+  // JSON object out of the reply ourselves.
   let lastError: unknown;
   for (const model of MODELS.chat) {
-    try {
-      const raw = await groqChat(
-        {
-          model,
-          messages,
-          response_format: { type: "json_object" },
-          temperature: 0.4,
-          reasoning_effort: "low",
-          max_completion_tokens: 1000,
-        },
-        LIMITS.timeoutMs,
-      );
-      return parseAnswer(JSON.parse(raw), topics);
-    } catch (err) {
-      lastError = err;
-      if (!(err instanceof GroqError && err.status === 429)) throw err;
+    for (const strict of [true, false]) {
+      try {
+        const raw = await groqChat(
+          {
+            model,
+            messages,
+            ...(strict ? { response_format: { type: "json_object" } } : {}),
+            temperature: 0.4,
+            reasoning_effort: "low",
+            max_completion_tokens: 1200,
+          },
+          LIMITS.timeoutMs,
+        );
+        return parseAnswer(readJson(raw), topics);
+      } catch (err) {
+        lastError = err;
+        const badJson = (err instanceof GroqError && err.status === 400) || err instanceof SyntaxError;
+        if (strict && badJson) continue; // retry this model without strict JSON
+        if (err instanceof GroqError && err.status === 429) break; // busy: next model
+        if (badJson) break; // still no valid JSON: next model
+        throw err;
+      }
     }
   }
   throw lastError;
+}
+
+/** Parse the model's reply, tolerating extra text around the JSON object. */
+function readJson(raw: string): unknown {
+  try {
+    return JSON.parse(raw);
+  } catch {
+    const start = raw.indexOf("{");
+    const end = raw.lastIndexOf("}");
+    if (start < 0 || end <= start) throw new SyntaxError("No JSON object in reply");
+    return JSON.parse(raw.slice(start, end + 1));
+  }
 }
 
 /** Never trust model output blindly: keep only the expected fields, with size limits. */

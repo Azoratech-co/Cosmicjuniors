@@ -7,8 +7,12 @@ import "server-only";
 const GROQ_URL = "https://api.groq.com/openai/v1/chat/completions";
 
 export class GroqError extends Error {
-  constructor(public status: number) {
-    super(`Groq request failed with status ${status}`);
+  constructor(
+    public status: number,
+    /** Groq's short error code, e.g. "json_validate_failed". Never includes the kid's message. */
+    public code = "",
+  ) {
+    super(`Groq request failed with status ${status}${code ? ` (${code})` : ""}`);
   }
 }
 
@@ -27,7 +31,14 @@ export async function groqChat(body: Record<string, unknown>, timeoutMs: number)
     signal: AbortSignal.timeout(timeoutMs),
     cache: "no-store",
   });
-  if (!res.ok) throw new GroqError(res.status);
+  if (!res.ok) {
+    let code = "";
+    try {
+      const err = await res.json();
+      code = String(err?.error?.code ?? err?.error?.type ?? "").slice(0, 60);
+    } catch {}
+    throw new GroqError(res.status, code);
+  }
 
   const data = await res.json();
   return data?.choices?.[0]?.message?.content ?? "";
