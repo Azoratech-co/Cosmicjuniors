@@ -27,7 +27,7 @@ export const LIMITS = {
   /** Longest earlier message we pass back to the model. */
   maxHistoryChars: 800,
   /** How many recent messages Cosmo remembers. */
-  historyMessages: 6,
+  historyMessages: 5,
   /** Requests allowed per visitor per minute. */
   perMinute: 10,
   /** Prompt Guard score above which a message counts as a trick attempt. */

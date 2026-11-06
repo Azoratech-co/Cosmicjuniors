@@ -22,8 +22,29 @@ import type { ChatMode, ChatReply, ChatRequest } from "../types";
 
 type History = ChatRequest["messages"];
 
+// Opening questions (like the starter buttons) are asked by almost every visitor. Remember good
+// answers for 10 minutes so they don't use up the AI's per-minute limit. Only answers with no
+// earlier conversation are cached, and nothing personal: just the question text and Cosmo's reply.
+const CACHE_MS = 10 * 60_000;
+const firstAnswers = new Map<string, { at: number; reply: ChatReply }>();
+/** Replies written by the AI that passed every check (offline fallbacks are never cached). */
+const fullAnswers = new WeakSet<ChatReply>();
+
 export async function askCosmo(history: History, mode: ChatMode = "guide"): Promise<ChatReply> {
   const question = history[history.length - 1].text;
+  const cacheKey = history.length === 1 ? `${mode}:${question.toLowerCase().replace(/[^a-z0-9 ]/g, "").trim()}` : "";
+  const hit = cacheKey ? firstAnswers.get(cacheKey) : undefined;
+  if (hit && Date.now() - hit.at < CACHE_MS) return hit.reply;
+  const reply = await answer(history, question, mode);
+  // Cache only full AI answers that passed every check.
+  if (cacheKey && fullAnswers.has(reply)) {
+    if (firstAnswers.size > 200) firstAnswers.clear();
+    firstAnswers.set(cacheKey, { at: Date.now(), reply });
+  }
+  return reply;
+}
+
+async function answer(history: History, question: string, mode: ChatMode): Promise<ChatReply> {
 
   const quick = screenQuestion(question);
   if (quick !== "ok") return SAFE_REPLIES[quick];
@@ -66,6 +87,7 @@ export async function askCosmo(history: History, mode: ChatMode = "guide"): Prom
     }
     if (!screenAnswer(draft.reply)) return SAFE_REPLIES.unsafe;
     draft.reply.checked = Boolean(draft.reply.references?.length);
+    fullAnswers.add(draft.reply);
     if (mode === "story") draft.reply.story = true;
     return draft.reply;
   } catch (err) {
@@ -96,7 +118,7 @@ async function writeAnswer(history: History, topics: Topic[], mode: ChatMode, ba
   for (const model of models) {
     for (const strict of [true, false]) {
       try {
-        const raw = await groqChat(
+        const raw = await withShortWait(() => groqChat(
           {
             model,
             messages,
@@ -104,10 +126,11 @@ async function writeAnswer(history: History, topics: Topic[], mode: ChatMode, ba
             temperature: 0.4,
             // Only reasoning models accept this setting.
             ...(model.includes("gpt-oss") ? { reasoning_effort: "low" } : {}),
-            max_completion_tokens: 900,
+            // Groq counts this whole budget against the per-minute limit, so keep it tight.
+            max_completion_tokens: 600,
           },
           LIMITS.timeoutMs,
-        );
+        ));
         return parseAnswer(readJson(raw), topics);
       } catch (err) {
         lastError = err;
@@ -123,6 +146,19 @@ async function writeAnswer(history: History, topics: Topic[], mode: ChatMode, ba
   }
   // One log line that shows what every model said (never the kid's message).
   throw new Error(`All models failed. ${tried.join(" | ") || String(lastError)}`);
+}
+
+/** If Groq says "busy, try again in a moment" (up to 4 s), wait once and retry. */
+async function withShortWait<T>(call: () => Promise<T>): Promise<T> {
+  try {
+    return await call();
+  } catch (err) {
+    if (err instanceof GroqError && err.status === 429 && err.retryAfter > 0 && err.retryAfter <= 4) {
+      await new Promise((r) => setTimeout(r, err.retryAfter * 1000));
+      return call();
+    }
+    throw err;
+  }
 }
 
 /** Preferred models that exist right now, then any other good chat model on the account. */

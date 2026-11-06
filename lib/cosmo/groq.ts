@@ -11,6 +11,8 @@ export class GroqError extends Error {
     public status: number,
     /** Groq's short error code, e.g. "json_validate_failed". Never includes the kid's message. */
     public code = "",
+    /** Seconds Groq asks us to wait before retrying (from the retry-after header), if any. */
+    public retryAfter = 0,
   ) {
     super(`Groq request failed with status ${status}${code ? ` (${code})` : ""}`);
   }
@@ -37,7 +39,7 @@ export async function groqChat(body: Record<string, unknown>, timeoutMs: number)
       const err = await res.json();
       code = String(err?.error?.code ?? err?.error?.type ?? "").slice(0, 60);
     } catch {}
-    throw new GroqError(res.status, code);
+    throw new GroqError(res.status, code, Number.parseFloat(res.headers.get("retry-after") ?? "") || 0);
   }
 
   const data = await res.json();
