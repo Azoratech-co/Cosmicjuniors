@@ -360,7 +360,6 @@ export default function LaserDodge() {
             {status === "ready" && (
               <>
                 <h2 className="t-title">Choose your cruise</h2>
-                <p className="t-body-sm c-muted hide-sm">Fly real NASA missions from Earth to Mars. Catch the glowing data capsules to unlock facts for your Mission Log.</p>
                 <div className="chapter-list">
                   {CRUISES.map((c, i) => {
                     const locked = i > save.unlocked;
@@ -442,14 +441,16 @@ export default function LaserDodge() {
           const got = save.found[c.mission.id] ?? [];
           return (
             <div key={c.mission.id} className="log-mission">
-              <span className="t-caption c-cyan">{c.mission.name} · {c.mission.year}</span>
-              <ul className="t-body-sm">
-                {c.mission.facts.map((f, i) => (
-                  <li key={i} className={got.includes(i) ? "" : "is-locked"}>
-                    {got.includes(i) ? f : "Catch a data capsule on this cruise to unlock this fact."}
-                  </li>
-                ))}
-              </ul>
+              <span className="t-caption c-cyan">
+                {c.mission.name} · {got.length}/{c.mission.facts.length}
+              </span>
+              {got.length > 0 && (
+                <ul className="t-body-sm">
+                  {got.map((i) => (
+                    <li key={i}>{c.mission.facts[i]}</li>
+                  ))}
+                </ul>
+              )}
               {got.length > 0 && (
                 <a className="t-caption c-muted" href={c.mission.source.url} target="_blank" rel="noopener noreferrer">
                   Source: {c.mission.source.title} on NASA.gov

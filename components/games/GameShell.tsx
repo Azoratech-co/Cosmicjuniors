@@ -34,7 +34,7 @@ export default function GameShell({
   children,
 }: {
   title: string;
-  tagline: string;
+  tagline?: string;
   backHref?: string;
   backLabel?: string;
   children: React.ReactNode;
@@ -55,7 +55,7 @@ export default function GameShell({
       </header>
       <div className="game-head">
         <h1 className="t-display">{title}</h1>
-        <p className="t-body c-muted">{tagline}</p>
+        {tagline && <p className="t-body c-muted">{tagline}</p>}
       </div>
       <main className="game-main">{children}</main>
     </div>

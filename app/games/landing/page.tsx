@@ -13,7 +13,6 @@ export default function LandingPage() {
   return (
     <GameShell
       title="Mars Landing"
-      tagline="Five real NASA landing sites, from Viking 1 in 1976 to Perseverance in 2021. Land safely, do the science, and see where each mission rests today."
     >
       <MarsLanding />
     </GameShell>

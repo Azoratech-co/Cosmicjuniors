@@ -13,7 +13,7 @@ export default function PuzzlePage() {
   return (
     <GameShell
       title="Sojourner Puzzle"
-      tagline="A real NASA photo of Sojourner is in pieces. Drag each piece to its spot, or tap a piece and then tap where it goes."
+      tagline="Drag each piece to its spot, or tap a piece and then its spot."
     >
       <SojournerPuzzle />
     </GameShell>

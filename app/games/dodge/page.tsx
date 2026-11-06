@@ -11,7 +11,7 @@ export const metadata: Metadata = {
 
 export default function DodgePage() {
   return (
-    <GameShell title="Journey to Mars" tagline="Three real NASA cruises from Earth to Mars. Dodge the lasers, catch data capsules, and fill your Mission Log.">
+    <GameShell title="Journey to Mars">
       <LaserDodge />
     </GameShell>
   );

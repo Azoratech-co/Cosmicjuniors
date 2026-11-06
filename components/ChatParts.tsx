@@ -16,7 +16,7 @@ export function ChatHeader({ stars }: { stars: number }) {
       <div className="chat-header__name">
         <CosmoLogo size={19} />
         <span className="chat-header__status t-caption">
-          <span className="dot" aria-hidden="true" /> Online<span className="t-hide-sm">&nbsp;· NASA sources</span>
+          <span className="dot" aria-hidden="true" /> Online
         </span>
       </div>
       <Link href="/games" className="games-link games-link--header t-label">
@@ -48,9 +48,7 @@ export function SourceCard({ source }: { source: Source }) {
         </figure>
       )}
       <div className="fact-card__content">
-        <span className="t-caption c-star">
-          {source.kind === "nasa" ? "NASA source" : KIND_LABEL[source.kind ?? "nasa"]} · {source.publisher}
-        </span>
+        <span className="t-caption c-star">{source.publisher}</span>
         <h3 className="t-title">{source.title}</h3>
         {source.whereNow && (
           <p className="where-now t-body-sm">
@@ -92,7 +90,6 @@ export function References({ items, checked }: { items: Reference[]; checked?: b
               {r.title}
             </a>
             <span className={`refs__kind refs__kind--${r.kind} t-caption`}>{KIND_LABEL[r.kind]}</span>
-            <span className="t-caption c-muted">{r.publisher}</span>
           </li>
         ))}
       </ol>
@@ -145,7 +142,6 @@ export function MessageRow({ message, animate, onDone }: { message: ChatMessage;
       <div className="row bot-row">
         <Cosmo size={32} className="bot-row__avatar" />
         <div className={`bubble bubble--bot t-body${message.story ? " bubble--story" : ""}`}>
-          {message.story && <span className="story-tag t-caption">Story mode</span>}
           <span className="sr-only">{message.text}</span>
           <span aria-hidden="true">{shown}</span>
         </div>
@@ -174,7 +170,6 @@ export function Typing() {
         <span />
         <span />
       </div>
-      <span className="t-caption c-muted">Checking sources and fact-checking…</span>
     </div>
   );
 }
@@ -193,41 +188,32 @@ export function QuickReplies({ items, onPick }: { items: string[]; onPick: (q: s
 }
 
 // Starter questions about the machines NASA left on Mars and the Moon (the challenge theme).
-const starters: [string, string][] = [
-  ["Mars · 1997", "Where is Sojourner now?"],
-  ["Moon · Apollo", "What did astronauts leave on the Moon?"],
-  ["Heritage", "Why protect the Apollo landing sites?"],
-  ["Mars · 2022", "What did Perseverance leave behind?"],
-  ["Moon · 1969", "Why did Apollo 12 visit Surveyor 3?"],
-  ["Moon · flags", "Are the Apollo flags still standing?"],
+const starters = [
+  "Where is Sojourner now?",
+  "What did astronauts leave on the Moon?",
+  "Why protect the Apollo landing sites?",
+  "What did Perseverance leave behind?",
 ];
 
 /** Welcome screen with Card/Suggestion grid */
 export function Welcome({ onPick, onStory }: { onPick: (q: string) => void; onStory?: (q: string) => void }) {
   return (
     <section className="hero">
-      <div className="hero__brand">
-        <LogoTile size={64} />
-        <span className="hero__eyebrow">Cosmic Juniors</span>
-      </div>
       <h1 className="hero__title">
         <span>Ask</span> <CosmoLogo size={56} />
       </h1>
       <p className="hero__text">
-        Your AI space guide to the rovers, landers and experiments NASA left on Mars and the Moon. Every answer
-        lists its NASA sources, and every number is fact-checked.
+        The machines NASA left on Mars and the Moon, with real sources.
       </p>
       <div className="hero__chips">
-        {starters.map(([topic, q]) => (
+        {starters.map((q) => (
           <button key={q} className="hero-chip" onClick={() => onPick(q)}>
-            <span className="hero-chip__topic">{topic}</span>
             {q}
           </button>
         ))}
       </div>
       {onStory && (
         <button className="hero-story" onClick={() => onStory("Tell me your story, Sojourner")}>
-          <span className="hero-chip__topic">New · Story mode</span>
           Hear Sojourner tell its own story →
         </button>
       )}

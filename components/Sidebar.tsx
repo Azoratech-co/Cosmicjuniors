@@ -36,8 +36,7 @@ export default function Sidebar({
       </Link>
 
       <nav className="history" aria-label="Recent adventures">
-        <span className="t-caption c-muted">Recent</span>
-        {history.length === 0 && <span className="t-body-sm c-muted">Your questions will show up here.</span>}
+        {history.length > 0 && <span className="t-caption c-muted">Recent</span>}
         {history.map((h, i) => (
           <button key={h + i} className={`history__item t-label${i === 0 ? " is-active" : ""}`} onClick={() => onPick(h)}>
             {h}

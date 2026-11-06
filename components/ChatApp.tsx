@@ -131,9 +131,6 @@ export default function ChatApp() {
               />
             ) : (
               <>
-                <div className="row row--center">
-                  <span className="day-pill t-caption c-muted">Today</span>
-                </div>
                 {messages.map((m) => (
                   <MessageRow
                     key={m.id}
@@ -158,14 +155,8 @@ export default function ChatApp() {
             <button role="radio" aria-checked={mode === "story"} className={mode === "story" ? "is-on" : ""} onClick={() => setMode("story")}>
               Story mode
             </button>
-            <span className="mode-switch__hint t-caption c-muted">
-              {mode === "story" ? "The machines tell their own stories, with real facts." : "Answers with sources and fact-checked numbers."}
-            </span>
           </div>
           <Composer onSend={(q) => ask(q)} disabled={thinking || Boolean(revealingId)} />
-          <p className="t-body-sm c-muted disclaimer">
-            Answers come from NASA and trusted partners, with references. Numbers are fact-checked against them.
-          </p>
         </div>
       </main>
     </div>
