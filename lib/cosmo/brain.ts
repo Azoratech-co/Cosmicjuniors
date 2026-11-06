@@ -3,7 +3,7 @@ import { GroqError, groqChat, hasGroqKey } from "./groq";
 import { LIMITS, MODELS } from "./config";
 import { buildSystemPrompt } from "./prompt";
 import { findTopics, getTopic, type Topic } from "./knowledge";
-import { toReference, toSource, unsupportedNumbers, usedTopics } from "./sources";
+import { toReference, toSource, unsupportedClaims, unsupportedNumbers, usedTopics } from "./sources";
 import { SAFE_REPLIES, isTrickAttempt, screenAnswer, screenQuestion, type SafetyCategory } from "./safety";
 import { mockReply } from "../mockBrain";
 import type { ChatMode, ChatReply, ChatRequest } from "../types";
@@ -40,11 +40,15 @@ export async function askCosmo(history: History, mode: ChatMode = "guide"): Prom
     let draft = first;
     if (draft.safety !== "ok") return SAFE_REPLIES[draft.safety];
 
-    // Fact-check the numbers; give Cosmo one chance to fix them.
-    let bad = unsupportedNumbers(draft.reply.text, topics, kidText);
+    // Fact-check numbers and "the first / the largest" claims; give Cosmo one chance to fix them.
+    const problems = (text: string) => [
+      ...unsupportedNumbers(text, topics, kidText).map((n) => `the number ${n}`),
+      ...unsupportedClaims(text, topics).map((c) => `the claim "${c}"`),
+    ];
+    let bad = problems(draft.reply.text);
     if (bad.length) {
       draft = await writeAnswer(history, topics, mode, bad);
-      bad = unsupportedNumbers(draft.reply.text, topics, kidText);
+      bad = problems(draft.reply.text);
       if (draft.safety !== "ok") return SAFE_REPLIES[draft.safety];
     }
     if (bad.length) {
@@ -70,7 +74,7 @@ async function writeAnswer(history: History, topics: Topic[], mode: ChatMode, ba
   if (badNumbers.length) {
     messages.push({
       role: "system",
-      content: `FACT-CHECK FAILED. Your answer used these numbers that are not in the REFERENCE NOTES: ${badNumbers.join(", ")}. Write the answer again using only numbers that appear in the notes, or no numbers at all.`,
+      content: `FACT-CHECK FAILED. Your answer used ${badNumbers.join(", ")}, which the REFERENCE NOTES do not support exactly. Write the answer again. Use only numbers that appear in the notes, and copy any "first", "largest" or "only" claim exactly as the notes word it, including words like "America's", "U.S." or "successful". Or leave the claim out.`,
     });
   }
 
