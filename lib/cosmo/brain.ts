@@ -1,5 +1,5 @@
 import "server-only";
-import { GroqError, groqChat, hasGroqKey } from "./groq";
+import { GroqError, availableModels, groqChat, hasGroqKey } from "./groq";
 import { LIMITS, MODELS } from "./config";
 import { buildSystemPrompt } from "./prompt";
 import { findTopics, getTopic, type Topic } from "./knowledge";
@@ -37,7 +37,13 @@ export async function askCosmo(history: History, mode: ChatMode = "guide"): Prom
   const kidText = history.filter((m) => m.role === "user").map((m) => m.text).join(" ");
 
   try {
-    const [trick, first] = await Promise.all([isTrickAttempt(question), writeAnswer(history, topics, mode)]);
+    // If the trick check itself is busy, carry on: the regex screen, the model's own safety label
+    // and the answer filter still protect the kid.
+    const guard = isTrickAttempt(question).catch((e) => {
+      console.warn("Prompt Guard unavailable:", e instanceof Error ? e.message : e);
+      return false;
+    });
+    const [trick, first] = await Promise.all([guard, writeAnswer(history, topics, mode)]);
     if (trick) return SAFE_REPLIES.trick;
     let draft = first;
     if (draft.safety !== "ok") return SAFE_REPLIES[draft.safety];
@@ -85,7 +91,7 @@ async function writeAnswer(history: History, topics: Topic[], mode: ChatMode, ba
   // (Groq answers 400 "json_validate_failed"), ask again without strict JSON mode and read the
   // JSON object out of the reply ourselves.
   let lastError: unknown;
-  for (const model of MODELS.chat) {
+  for (const model of await chatModels()) {
     for (const strict of [true, false]) {
       try {
         const raw = await groqChat(
@@ -95,7 +101,7 @@ async function writeAnswer(history: History, topics: Topic[], mode: ChatMode, ba
             ...(strict ? { response_format: { type: "json_object" } } : {}),
             temperature: 0.4,
             // Only reasoning models accept this setting.
-            ...(model.startsWith("openai/gpt-oss") ? { reasoning_effort: "low" } : {}),
+            ...(model.includes("gpt-oss") ? { reasoning_effort: "low" } : {}),
             max_completion_tokens: 900,
           },
           LIMITS.timeoutMs,
@@ -113,6 +119,15 @@ async function writeAnswer(history: History, topics: Topic[], mode: ChatMode, ba
     }
   }
   throw lastError;
+}
+
+/** Preferred models that exist right now, then any other good chat model on the account. */
+async function chatModels(): Promise<string[]> {
+  const live = await availableModels();
+  if (!live.length) return [...MODELS.chat]; // couldn't ask Groq: try the list as written
+  const preferred: string[] = MODELS.chat.filter((m) => live.includes(m));
+  const extra = live.filter((m) => !preferred.includes(m) && MODELS.chatFamilies.test(m) && !MODELS.notChat.test(m));
+  return [...preferred, ...extra].slice(0, 6);
 }
 
 /** Parse the model's reply, tolerating extra text around the JSON object. */

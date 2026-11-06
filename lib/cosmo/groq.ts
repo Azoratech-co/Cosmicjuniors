@@ -43,3 +43,30 @@ export async function groqChat(body: Record<string, unknown>, timeoutMs: number)
   const data = await res.json();
   return data?.choices?.[0]?.message?.content ?? "";
 }
+
+/**
+ * The chat models this Groq account can use right now, asked from Groq and remembered for an hour.
+ * Groq retires models over time, so Cosmo never depends on a hard-coded list being current.
+ */
+let cache: { at: number; ids: string[] } | null = null;
+export async function availableModels(): Promise<string[]> {
+  if (cache && Date.now() - cache.at < 3_600_000) return cache.ids;
+  const key = process.env.GROQ_API_KEY;
+  if (!key) return [];
+  try {
+    const res = await fetch("https://api.groq.com/openai/v1/models", {
+      headers: { Authorization: `Bearer ${key}` },
+      signal: AbortSignal.timeout(5000),
+      cache: "no-store",
+    });
+    if (!res.ok) return cache?.ids ?? [];
+    const data = await res.json();
+    const ids: string[] = (data?.data ?? [])
+      .filter((m: { id?: string; active?: boolean }) => typeof m.id === "string" && m.active !== false)
+      .map((m: { id: string }) => m.id);
+    cache = { at: Date.now(), ids };
+    return ids;
+  } catch {
+    return cache?.ids ?? [];
+  }
+}
