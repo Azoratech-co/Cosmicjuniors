@@ -209,6 +209,7 @@ export const TOPICS: Topic[] = [
       "Surveyor 3, a robot lander with no crew, launched on April 17, 1967, and landed on the Moon on April 20, 1967.",
       "It came to rest on a slope inside a small crater in the Ocean of Storms (Oceanus Procellarum).",
       "Surveyor 3 dug trenches up to 18 cm deep, and its TV camera sent back 6,326 pictures.",
+      "Surveyor 3 only worked until just after sunset on May 3, 1967. After that it sat silent on the Moon until Apollo 12 arrived about two and a half years later.",
       "On Nov. 19, 1969, the Apollo 12 lunar module landed about 180 meters from Surveyor 3.",
       "On Nov. 20, 1969, astronauts Pete Conrad and Alan Bean walked over to Surveyor 3 and removed about 10 kg of parts, including its TV camera, to study back on Earth.",
     ],
