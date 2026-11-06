@@ -42,15 +42,36 @@ const NEXT: Record<string, string[]> = {
   webb: ["Where is Webb?", "Why does Webb use infrared?"],
 };
 
-export function mockReply(question: string): ChatReply {
+const words = (s: string) => new Set((s.toLowerCase().match(/[a-z0-9]+/g) ?? []).filter((w) => w.length > 3));
+
+/** Offline answer. `busy` = the AI service was unavailable, so we say so honestly. */
+export function mockReply(question: string, busy = false): ChatReply {
   const [topic] = findTopics(question);
+  // Pick the facts that share the most words with the question, not just the first ones.
+  // Ignore the topic's own name ("mars", "sojourner"): every fact in the note shares it.
+  const common = topic ? words([topic.title, ...topic.keywords].join(" ")) : new Set<string>();
+  const q = new Set([...words(question)].filter((w) => !common.has(w)));
+  const ranked = topic
+    ? topic.facts
+        .map((f, i) => ({ f, i, s: [...words(f)].filter((w) => q.has(w)).length }))
+        .sort((a, b) => b.s - a.s || a.i - b.i)
+    : [];
+  if (busy && (!topic || ranked[0].s === 0)) {
+    return {
+      text: "Lots of explorers are asking me questions right now, so I need a moment. Please ask that again in a few seconds.",
+      suggestions: [question.slice(0, 48)],
+    };
+  }
   if (!topic) {
     return {
       text: "I don't have a NASA source for that one yet. I can tell you the stories of the machines NASA left on Mars and the Moon, like Sojourner, Viking, Spirit, Opportunity, Phoenix, Curiosity, Ingenuity, the Apollo landing sites and the spacecraft that crashed into the Moon on purpose.",
       suggestions: ["Where is Sojourner now?", "How far did Opportunity drive?", "What did Apollo leave on the Moon?"],
     };
   }
-  const text = topic.facts.slice(0, 2).join(" ");
+  const lead = busy ? "I'm a bit busy right now, but here's what my NASA notes say: " : "";
+  // When busy, show only facts that match the question; otherwise the note's opening facts.
+  const picked = busy ? ranked.filter((x) => x.s > 0).slice(0, 2) : ranked.slice(0, 2);
+  const text = lead + picked.sort((a, b) => a.i - b.i).map((x) => x.f).join(" ");
   // Built word for word from the notes, so every number is checked by definition.
   return { text, source: toSource(topic, 2, text), references: [toReference(topic)], checked: true, suggestions: NEXT[topic.id] };
 }

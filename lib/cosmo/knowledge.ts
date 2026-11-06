@@ -606,7 +606,7 @@ export function getTopic(id: string): Topic | undefined {
 }
 
 /** Words that show a question is a follow-up about the earlier topic ("How far did it drive?"). */
-const FOLLOW_UP = /\b(it|its|it's|they|them|their|that|this|those|these|there|he|she|his|her|him|then|more|else|also)\b/i;
+const FOLLOW_UP = /\b(it|its|it's|they|them|their|he|she|his|her|him)\b/i;
 
 const escape = (k: string) => k.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
 
@@ -633,7 +633,9 @@ export function findTopics(question: string, context = "", limit = 4): Topic[] {
       .slice(0, limit)
       .map((x) => x.t);
   }
-  if (!context || !FOLLOW_UP.test(question)) return [];
+  // Only short questions like "How big was it?" or "When did they land?" count as follow-ups.
+  const short = question.trim().split(/\s+/).length <= 8;
+  if (!context || !short || !FOLLOW_UP.test(question)) return [];
   // Follow-up: use what the most recent earlier message was about.
   const c = ` ${context.toLowerCase()} `;
   return TOPICS.map((t) => ({ t, s: score(c, t) }))

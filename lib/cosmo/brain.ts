@@ -30,8 +30,9 @@ export async function askCosmo(history: History, mode: ChatMode = "guide"): Prom
 
   if (!hasGroqKey()) return mockReply(question);
 
-  // For follow-ups, the last exchange (kid's previous question + Cosmo's reply) says what "it" means.
-  const context = history.slice(-3, -1).map((m) => m.text).join(" ");
+  // For follow-ups, the kid's previous question says what "it" means. (Not Cosmo's reply: a long
+  // answer mentions many things and could pull the next question back to the same topic.)
+  const context = history.slice(0, -1).filter((m) => m.role === "user").slice(-1).map((m) => m.text).join(" ");
   const topics = findTopics(question, context);
   const kidText = history.filter((m) => m.role === "user").map((m) => m.text).join(" ");
 
@@ -64,7 +65,7 @@ export async function askCosmo(history: History, mode: ChatMode = "guide"): Prom
   } catch (err) {
     // Log only the error, never the kid's message.
     console.error("Cosmo brain error:", err instanceof Error ? err.message : err);
-    return mockReply(question);
+    return mockReply(question, true);
   }
 }
 
@@ -93,8 +94,9 @@ async function writeAnswer(history: History, topics: Topic[], mode: ChatMode, ba
             messages,
             ...(strict ? { response_format: { type: "json_object" } } : {}),
             temperature: 0.4,
-            reasoning_effort: "low",
-            max_completion_tokens: 1200,
+            // Only reasoning models accept this setting.
+            ...(model.startsWith("openai/gpt-oss") ? { reasoning_effort: "low" } : {}),
+            max_completion_tokens: 900,
           },
           LIMITS.timeoutMs,
         );
@@ -103,9 +105,10 @@ async function writeAnswer(history: History, topics: Topic[], mode: ChatMode, ba
         lastError = err;
         const badJson = (err instanceof GroqError && err.status === 400) || err instanceof SyntaxError;
         if (strict && badJson) continue; // retry this model without strict JSON
-        if (err instanceof GroqError && err.status === 429) break; // busy: next model
-        if (badJson) break; // still no valid JSON: next model
-        throw err;
+        // Busy (429), retired or unknown model (400/404), server trouble (5xx), bad JSON: next model.
+        // Only a bad API key (401/403) stops here.
+        if (err instanceof GroqError && (err.status === 401 || err.status === 403)) throw err;
+        break;
       }
     }
   }

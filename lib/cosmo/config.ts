@@ -2,7 +2,8 @@
 
 export const MODELS = {
   /** Writes Cosmo's answers. Tried in order: if one is busy (rate limited), the next is used. */
-  chat: ["openai/gpt-oss-120b", "openai/gpt-oss-20b"],
+  // Each Groq model has its own free-tier rate limit, so more backups = more capacity.
+  chat: ["openai/gpt-oss-120b", "openai/gpt-oss-20b", "meta-llama/llama-4-scout-17b-16e-instruct", "llama-3.3-70b-versatile"],
   /** Detects attempts to trick Cosmo into ignoring its rules. */
   promptGuard: "meta-llama/llama-prompt-guard-2-86m",
 } as const;
@@ -13,7 +14,7 @@ export const LIMITS = {
   /** Longest earlier message we pass back to the model. */
   maxHistoryChars: 800,
   /** How many recent messages Cosmo remembers. */
-  historyMessages: 10,
+  historyMessages: 6,
   /** Requests allowed per visitor per minute. */
   perMinute: 10,
   /** Prompt Guard score above which a message counts as a trick attempt. */
