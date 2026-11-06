@@ -65,7 +65,7 @@ export function usedTopics(answer: string, topics: Topic[], listed: Topic[]): To
 // any qualifier the notes use ("America's first woman in space" is not "the first woman in space").
 // ---------------------------------------------------------------------------------------------
 
-const SUPERLATIVE = /\b(?:the|was|became|is)\s+(first|largest|biggest|only|longest|fastest|highest|oldest)\s+([a-z.'-]+(?:\s+[a-z.'-]+)?)/gi;
+const SUPERLATIVE = /\b(?:the|was|became|is)\s+(first|last|largest|biggest|smallest|only|longest|farthest|furthest|fastest|highest|tallest|deepest|hottest|coldest|oldest|most)\s+([a-z.'-]+(?:\s+[a-z.'-]+)?)/gi;
 const QUALIFIERS = ["america's", "american", "us", "successful", "nasa's", "powered"];
 
 const tokens = (s: string) =>

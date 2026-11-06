@@ -89,7 +89,7 @@ export const TOPICS: Topic[] = [
   },
   {
     id: "opportunity",
-    keywords: ["opportunity", "oppy", "meridiani", "marathon", "eagle crater", "dust storm", "twin rovers"],
+    keywords: ["opportunity", "oppy", "meridiani", "marathon", "eagle crater", "dust storm", "twin rovers", "farthest", "furthest", "drove the most", "longest drive", "driving record", "distance record"],
     title: "Opportunity Rover",
     publisher: "NASA Science",
     url: "https://science.nasa.gov/mission/mer-opportunity/",
@@ -281,7 +281,7 @@ export const TOPICS: Topic[] = [
   },
   {
     id: "lunar-artifacts",
-    keywords: ["left on the moon", "leave on the moon", "left behind on the moon", "abandoned on the moon", "astronauts left", "astronauts leave", "artifact", "artifacts", "catalogue", "catalog", "how many things", "objects on the moon", "lunar module", "ascent stage", "snoopy"],
+    keywords: ["left on the moon", "leave on the moon", "left behind on the moon", "abandoned on the moon", "astronauts left", "astronauts leave", "artifact", "artifacts", "catalogue", "catalog", "how many things", "objects on the moon", "lunar module", "ascent stage", "snoopy", "lander", "landers", "apollo 10", "apollo 12", "apollo 14", "apollo 15", "apollo 16", "apollo 17"],
     title: "Human Artifacts on the Moon",
     publisher: "NASA History Office",
     url: "https://www.nasa.gov/wp-content/uploads/static/history/humanartifacts.html",
@@ -445,7 +445,7 @@ export const TOPICS: Topic[] = [
   },
   {
     id: "perseverance",
-    keywords: ["perseverance", "jezero", "rover today", "still driving", "rovers", "moxie", "sample", "life on mars"],
+    keywords: ["perseverance", "jezero", "rover today", "still driving", "rovers", "moxie", "sample", "life on mars", "farthest", "furthest", "drove the most", "longest drive", "driving record", "distance record"],
     title: "Mars 2020: Perseverance Rover",
     publisher: "NASA Science",
     url: "https://science.nasa.gov/mission/mars-2020-perseverance/",
@@ -605,7 +605,7 @@ export function getTopic(id: string): Topic | undefined {
 }
 
 /** Pick the topics most related to the conversation (latest question counts most). */
-export function findTopics(question: string, context = "", limit = 3): Topic[] {
+export function findTopics(question: string, context = "", limit = 4): Topic[] {
   const q = ` ${question.toLowerCase()} `;
   const c = ` ${context.toLowerCase()} `;
   const scored = TOPICS.map((t) => {
