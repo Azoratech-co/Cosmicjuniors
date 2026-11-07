@@ -553,3 +553,117 @@ body.is-dragging, body.is-dragging * { -webkit-user-select: none !important; use
 @media (max-width: 720px) { .mode-switch__hint { display: none; } .mode-switch { padding: 0 12px; } }
 .refs__list { list-style: none; padding-left: 0; }
 .refs__n { color: var(--brand-cyan); font-variant-numeric: tabular-nums; }
+
+/* =====================================================================
+   Mission-control look (less "AI app"): flat near-black, one rust accent,
+   no glows or gradients, tighter corners, Plex Sans + Plex Mono for data.
+   Everything above stays as is; this block overrides it, so deleting it
+   restores the previous design.
+   ===================================================================== */
+:root {
+  --space-950: #0e1116;
+  --space-900: #151920;
+  --space-800: #1c212a;
+  --space-700: #2a313c;
+  --brand-purple: #d9542e;  /* the one accent: Mars rust */
+  --brand-cyan: #e6e8eb;    /* former neon cyan becomes plain light text */
+  --accent-star: #e8b84a;
+  --accent-green: #6fbf8a;
+  --text-primary: #e6e8eb;
+  --text-muted: #8a93a3;
+  --radius-bubble: 10px;
+  --radius-tail: 3px;
+}
+body { background: var(--space-950); }
+.app, .game-page { background: var(--space-950); }
+.mars-glow { display: none; }
+.starfield { opacity: 0.18; }
+.starfield circle { animation: none; }
+*, *::before, *::after { box-shadow: none !important; }
+
+/* Type: sentence-case mono for small labels instead of spaced-out capitals */
+.t-caption, .hero__eyebrow, .hero-chip__topic, .where-now__label, .refs__head > .t-caption:first-child, .story-tag {
+  font-family: var(--font-mono), ui-monospace, monospace; text-transform: none; letter-spacing: 0; font-weight: 500; font-size: 12px;
+}
+.t-display, .hero__title { letter-spacing: -0.02em; }
+.c-star { color: var(--accent-star); }
+
+/* Header */
+.chat-header { border-bottom: 1px solid var(--space-700); background: var(--space-950); }
+.stars-badge { border-radius: 6px; background: var(--space-900); border: 1px solid var(--space-700); color: var(--accent-star); }
+.logo-tile { border-radius: 10px; }
+.games-link, .games-link--header { border: 1px solid var(--space-700); border-radius: 6px; color: var(--text-primary); }
+.games-link:hover { border-color: var(--text-muted); }
+
+/* Buttons */
+.btn-purple { border-radius: 6px; background: var(--brand-purple); color: #fff; }
+.btn-purple:hover { filter: none; background: #c34823; }
+.btn-ghost { border-radius: 6px; }
+.btn-cyan { border-radius: 6px; background: transparent; color: var(--text-primary); border: 1px solid var(--space-700); }
+.btn-cyan:hover { filter: none; border-color: var(--text-muted); }
+.round-btn { border-radius: 8px; }
+.round-btn--purple { background: var(--brand-purple); }
+
+/* Welcome: a plain list of questions, not neon pills */
+.hero__chips { display: flex; flex-direction: column; gap: 0; align-items: stretch; border-top: 1px solid var(--space-700); }
+.hero-chip {
+  border: 0; border-bottom: 1px solid var(--space-700); border-radius: 0; background: transparent;
+  color: var(--text-primary); font-weight: 500; text-align: left; padding: 14px 4px; transform: none !important;
+}
+.hero-chip::after { content: "→"; float: right; color: var(--text-muted); }
+.hero-chip:hover { background: var(--space-900); }
+.hero-story {
+  border: 0; border-left: 2px solid var(--brand-purple); border-radius: 0; background: transparent;
+  padding: 10px 14px; transform: none !important; color: var(--text-primary);
+}
+.hero-story:hover { background: var(--space-900); }
+
+/* Chat */
+.bubble--bot { background: var(--space-900); border: 1px solid var(--space-700); }
+.bubble--user { background: var(--brand-purple); color: #fff; }
+.bubble--story { border-left: 2px solid var(--accent-star); }
+.chip { border: 1px solid var(--space-700); border-radius: 6px; background: transparent; color: var(--text-primary); }
+.chip:hover { background: var(--space-900); border-color: var(--text-muted); }
+.fact-card { border-radius: 10px; border: 1px solid var(--space-700); background: var(--space-900); }
+.fact-card__photo figcaption { border-radius: 4px; font-family: var(--font-mono), monospace; }
+.where-now { border: 0; border-left: 2px solid var(--brand-purple); border-radius: 0; background: var(--space-800); }
+.where-now__label { color: var(--text-muted); }
+.refs { border-radius: 10px; background: transparent; }
+.refs__list a { text-decoration-color: var(--space-700); }
+.refs__list a:hover { color: #fff; text-decoration-color: var(--text-muted); }
+.refs__n { color: var(--text-muted); font-family: var(--font-mono), monospace; }
+.refs__kind { font-family: var(--font-mono), monospace; font-weight: 500; border-radius: 3px; background: var(--space-800) !important; color: var(--text-muted) !important; }
+.refs__check { border-radius: 4px; background: transparent; border-color: rgb(111 191 138 / 0.5); color: var(--accent-green); }
+.mode-switch button { border-radius: 6px; }
+.mode-switch button:nth-child(2).is-on { background: var(--brand-purple); border-color: var(--brand-purple); }
+.composer, .composer__field { border-radius: 10px; }
+.typing span { background: var(--text-muted); }
+
+/* Sidebar */
+.level-card { border-radius: 8px; background: var(--space-900); border: 1px solid var(--space-700); }
+.progress, .progress__fill, .trip__bar, .fuel, .fuel span { border-radius: 2px; }
+.history__item { border-radius: 6px; }
+
+/* Games */
+.game-card { border-radius: 10px; }
+.game-card:hover { transform: none; border-color: var(--text-muted); }
+.win-panel { border-radius: 10px; border: 1px solid var(--space-700); border-top: 2px solid var(--brand-purple); }
+.arcade-hud, .mission-log, .puzzle-tray { border-radius: 8px; }
+.arcade-canvas, .stage-overlay { border-radius: 10px; }
+.segmented { border-radius: 8px; }
+.segmented button { border-radius: 6px; }
+.chapter, .mission-chip { border-radius: 8px; }
+.chapter.is-on, .mission-chip.is-on { border-color: var(--brand-purple); }
+.trip__bar span { background: var(--brand-purple); }
+.pip.is-on { background: var(--text-primary); }
+.fact-toast { border-radius: 8px; border: 1px solid var(--space-700); border-left: 2px solid var(--brand-purple); background: rgb(14 17 22 / 0.85); }
+.arrow-pad button, .pad-btn { border-radius: 8px; }
+.sidebar { background: var(--space-950); backdrop-filter: none; border-right: 1px solid var(--space-700); }
+.hero__text { color: var(--text-muted); font-size: 17px; }
+.hero-chip { flex-direction: row; justify-content: space-between; align-items: center; gap: 12px; padding: 12px 4px; font-size: 15px; }
+.hero-chip::after { float: none; }
+.mode-switch button.is-on, .mode-switch button:nth-child(2).is-on { background: var(--space-800); border-color: var(--text-muted); color: var(--text-primary); }
+@media (max-width: 720px) { .hero__text { font-size: 15px; } .hero-chip { font-size: 15px; padding: 11px 4px; } }
+.arcade-hud, .mission-log, .puzzle-tray { background: var(--space-900); }
+.stage-overlay { background: rgb(14 17 22 / 0.82); }
+.bot-row .logo-tile { align-self: flex-end; }

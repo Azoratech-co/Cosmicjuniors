@@ -2,7 +2,6 @@
 
 import { useEffect, useMemo, useRef, useState } from "react";
 import Link from "next/link";
-import Cosmo from "./Cosmo";
 import CosmoLogo, { LogoTile } from "./CosmoLogo";
 import type { ChatMessage, Reference, Source, SourceKind } from "@/lib/types";
 
@@ -140,7 +139,7 @@ export function MessageRow({ message, animate, onDone }: { message: ChatMessage;
   return (
     <>
       <div className="row bot-row">
-        <Cosmo size={32} className="bot-row__avatar" />
+        <LogoTile size={32} />
         <div className={`bubble bubble--bot t-body${message.story ? " bubble--story" : ""}`}>
           <span className="sr-only">{message.text}</span>
           <span aria-hidden="true">{shown}</span>
@@ -164,7 +163,7 @@ export function MessageRow({ message, animate, onDone }: { message: ChatMessage;
 export function Typing() {
   return (
     <div className="row bot-row bot-row--center" aria-live="polite">
-      <Cosmo size={32} />
+      <LogoTile size={32} />
       <div className="bubble bubble--bot typing" aria-hidden="true">
         <span />
         <span />

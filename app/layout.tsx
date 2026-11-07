@@ -1,11 +1,12 @@
 import type { Metadata, Viewport } from "next";
-import { Inter } from "next/font/google";
+import { IBM_Plex_Mono, IBM_Plex_Sans } from "next/font/google";
 import "./globals.css";
 
-// Fonts match the Figma page "v4 · Cosmo (pro)": Space Grotesk for headings, Inter for text.
-// Headings use Inter too, matching the link-preview card.
-const heading = Inter({ subsets: ["latin"], weight: ["500", "600", "700"], variable: "--font-heading" });
-const body = Inter({ subsets: ["latin"], weight: ["400", "600"], variable: "--font-body" });
+// IBM Plex Sans for text, IBM Plex Mono for data (dates, sources, coordinates): a calm,
+// technical "mission log" feel instead of a generic app look.
+const heading = IBM_Plex_Sans({ subsets: ["latin"], weight: ["500", "600", "700"], variable: "--font-heading" });
+const body = IBM_Plex_Sans({ subsets: ["latin"], weight: ["400", "500", "600"], variable: "--font-body" });
+const mono = IBM_Plex_Mono({ subsets: ["latin"], weight: ["400", "500"], variable: "--font-mono" });
 
 const DESCRIPTION =
   "Cosmo tells the stories of the rovers, landers and experiments NASA left on Mars and the Moon, with facts and sources from NASA. Built for NASA Space Apps 2026.";
@@ -26,14 +27,14 @@ export const metadata: Metadata = {
 };
 
 export const viewport: Viewport = {
-  themeColor: "#0B1026",
+  themeColor: "#0E1116",
   width: "device-width",
   initialScale: 1,
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="en" className={`${heading.variable} ${body.variable}`}>
+    <html lang="en" className={`${heading.variable} ${body.variable} ${mono.variable}`}>
       <body>{children}</body>
     </html>
   );
