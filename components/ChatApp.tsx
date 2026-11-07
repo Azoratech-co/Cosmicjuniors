@@ -131,10 +131,16 @@ export default function ChatApp() {
               />
             ) : (
               <>
-                {messages.map((m) => (
+                {messages.map((m, i) => (
                   <MessageRow
                     key={m.id}
                     message={m}
+                    repeat={(() => {
+                      const prev = messages.slice(0, i).reverse().find((x) => x.role === "bot" && x.source);
+                      return Boolean(
+                        m.source && prev?.source && prev.source.id === m.source.id && prev.source.image?.src === m.source.image?.src,
+                      );
+                    })()}
                     animate={m.id === revealingId}
                     onDone={() => setRevealingId((cur) => (cur === m.id ? null : cur))}
                   />

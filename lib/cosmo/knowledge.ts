@@ -21,6 +21,8 @@ export interface Topic {
   whereNow?: { place: string; status: string };
   /** For Story mode: the machine that tells this story in first person. */
   voice?: string;
+  /** Different photo + heading for the source card, picked by what the answer is about. */
+  views?: { keywords: string[]; title: string; image: NasaImage }[];
   /** Lowercase words or phrases that point to this topic. */
   keywords: string[];
   title: string;
@@ -229,7 +231,7 @@ export const TOPICS: Topic[] = [
       "The photos of the Apollo 14 and 15 sites show no clear flag shadow.",
       "Lunar scientist Paul Spudis wrote that the flags have been bleached white by the strong ultraviolet sunlight on the Moon.",
     ],
-    image: img("as17-134-20382", "as17-134-20382~small.jpg", "Harrison Schmitt next to the flag at the Apollo 17 site, Dec. 13, 1972", "NASA"),
+    image: img("as17-134-20466", "as17-134-20466~small.jpg", "Close-up of the U.S. flag at the Apollo 17 site", "NASA"),
   },
   {
     id: "fallen-astronaut",
@@ -309,7 +311,7 @@ export const TOPICS: Topic[] = [
       "One researcher worries the Apollo landing sites could one day be looted.",
       "In 2022, the article noted that the first human-made objects to reach the surface of Mars had been there for 50 years.",
     ],
-    image: img("as11-40-5903", "as11-40-5903~small.jpg", "Buzz Aldrin near the lunar module Eagle, July 1969", "NASA"),
+    image: img("as11-40-5877", "as11-40-5877~small.jpg", "An astronaut's bootprint in the lunar soil, Apollo 11", "NASA"),
   },
   {
     id: "heritage-rules",
@@ -324,7 +326,7 @@ export const TOPICS: Topic[] = [
       "Around the Apollo 17 site, the recommended no-go zone extends 225 meters from the lunar module.",
       "At each site, the protected area covers the hardware left there, such as the descent stage, the flag and the science experiments. Only the Apollo 15, 16 and 17 sites also have a lunar rover.",
     ],
-    image: img("as11-40-5874", "as11-40-5874~small.jpg", "The Apollo 11 site, July 20, 1969", "NASA"),
+    image: img("PIA12920", "PIA12920~small.jpg", "The Apollo 17 lunar module descent stage, seen from orbit by NASA's Lunar Reconnaissance Orbiter", "NASA/GSFC/Arizona State University"),
   },
   {
     id: "one-small-step",
@@ -339,7 +341,7 @@ export const TOPICS: Topic[] = [
       "It also covers any newer guidelines NASA writes on the same subject.",
       "NASA must share these recommendations with other U.S. agencies and encourage them to follow the same practices.",
     ],
-    image: img("as11-40-5874", "as11-40-5874~small.jpg", "The Apollo 11 site, July 20, 1969", "NASA"),
+    image: img("as11-40-5899", "as11-40-5899~small.jpg", "The plaque the Apollo 11 astronauts left on the Moon", "NASA"),
   },
   // ---------------------------------------------------------------------------------------
   // Left on Mars
@@ -390,7 +392,7 @@ export const TOPICS: Topic[] = [
       "The lander and rover each studied Mars for almost three months.",
       "The lander was named the Sagan Memorial Station in honor of Carl Sagan, a co-founder of The Planetary Society.",
     ],
-    image: img("PIA04318", "PIA04318~orig.jpg", "Sojourner rover next to rocks on Mars", "NASA/JPL"),
+    image: img("PIA00611", "PIA00611~small.jpg", "Sojourner, the lander's deflated airbags and the Martian terrain", "NASA/JPL"),
   },
   {
     id: "curiosity",
@@ -598,6 +600,47 @@ const ARTIFACTS: Record<string, Pick<Topic, "whereNow" | "voice">> = {
   retroreflector: { whereNow: { place: "Apollo 11 landing site, Moon", status: "Still used by scientists today" }, voice: "the Apollo 11 laser mirrors" },
 };
 for (const t of TOPICS) Object.assign(t, ARTIFACTS[t.id] ?? {});
+
+/** Extra source-card views: a photo and heading that match what the answer is about. */
+const VIEWS: Record<string, Topic["views"]> = {
+  pathfinder: [
+    { keywords: ["sojourner", "rover", "10.6", "30 centimeters", "weighed", "sojourner truth", "550"], title: "Sojourner rover", image: img("PIA04318", "PIA04318~orig.jpg", "Sojourner rover next to rocks on Mars", "NASA/JPL") },
+    { keywords: ["lander", "carl sagan", "memorial station", "16,500", "launched"], title: "Pathfinder lander", image: img("PIA00612", "PIA00612~orig.jpg", "The Martian surface and Pathfinder's airbags on its first day on Mars", "NASA/JPL") },
+    { keywords: ["ares vallis", "flood plain", "chemical analyses", "rocks and soil"], title: "Ares Vallis landing site", image: img("PIA00609", "PIA00609~orig.jpg", "Large boulders at the Pathfinder landing site in Ares Vallis", "NASA/JPL") },
+  ],
+  viking: [
+    { keywords: ["viking 2", "utopia planitia", "color picture", "first color"], title: "Viking 2 at Utopia Planitia", image: img("PIA00568", "PIA00568~orig.jpg", "First color image of the Viking Lander 2 site", "NASA/JPL") },
+  ],
+  spirit: [
+    { keywords: ["silica", "hot springs", "steam vents", "wetter", "soft soil", "stuck"], title: "Spirit's discovery in the soil", image: img("PIA09491", "PIA09491~small.jpg", "Silica-rich soil found by the Spirit rover", "NASA/JPL-Caltech/Cornell") },
+  ],
+  opportunity: [
+    { keywords: ["dust storm", "sunlight", "solar panels", "last heard", "ended"], title: "Opportunity's last dust storm", image: img("PIA22329", "PIA22329~small.jpg", "Dust storm covering Opportunity's location on Mars, 2018", "NASA/JPL-Caltech/MSSS") },
+    { keywords: ["marathon", "45.16", "drove", "km", "miles"], title: "Opportunity's long drive", image: img("PIA20328", "PIA20328~small.jpg", "Opportunity's shadow and wheel tracks on a Martian slope", "NASA/JPL-Caltech") },
+  ],
+  perseverance: [
+    { keywords: ["cheyava falls", "signs of past life", "sample", "samples"], title: "The \"Cheyava Falls\" rock", image: img("PIA26344", "PIA26344~small.jpg", "Perseverance's selfie with the \"Cheyava Falls\" rock", "NASA/JPL-Caltech/MSSS") },
+    { keywords: ["moxie", "oxygen", "carbon dioxide"], title: "MOXIE: making oxygen on Mars", image: img("PIA24203", "PIA24203~small.jpg", "The MOXIE instrument being installed in Perseverance", "NASA/JPL-Caltech") },
+    { keywords: ["landed", "jezero", "launched", "feb. 18"], title: "Perseverance lands in Jezero Crater", image: img("PIA24319", "PIA24319~small.jpg", "Illustration of Perseverance touching down on Mars", "NASA/JPL-Caltech") },
+  ],
+  ingenuity: [
+    { keywords: ["last flight", "ended", "jan. 25", "jan. 18", "final"], title: "Ingenuity's final airfield", image: img("PIA26236", "PIA26236~small.jpg", "Perseverance spots Ingenuity at its final airfield", "NASA/JPL-Caltech/ASU/MSSS") },
+  ],
+  insight: [
+    { keywords: ["marsquake", "marsquakes", "seismometer", "inside of mars", "pulse"], title: "InSight's seismometer", image: img("PIA22977", "PIA22977~small.jpg", "InSight placing its seismometer on the ground", "NASA/JPL-Caltech") },
+  ],
+  mars: [
+    { keywords: ["olympus mons", "volcano"], title: "Olympus Mons", image: img("PIA18104", "PIA18104~small.jpg", "Lava flows from Olympus Mons, seen by Mars Odyssey", "NASA/JPL-Caltech/ASU") },
+    { keywords: ["phobos", "deimos", "moons"], title: "Phobos, a moon of Mars", image: img("PIA10369", "PIA10369~small.jpg", "Phobos in color", "NASA/JPL-Caltech/University of Arizona") },
+  ],
+  lrv: [
+    { keywords: ["apollo 17", "35.9", "20.1"], title: "The Apollo 17 lunar rover", image: img("as17-137-20979", "as17-137-20979~small.jpg", "Close-up of the lunar roving vehicle at the Apollo 17 site", "NASA") },
+  ],
+  apollo11: [
+    { keywords: ["plaque", "came in peace", "mankind"], title: "The Apollo 11 plaque", image: img("as11-40-5899", "as11-40-5899~small.jpg", "The plaque the Apollo 11 astronauts left on the Moon", "NASA") },
+  ],
+};
+for (const t of TOPICS) if (VIEWS[t.id]) t.views = VIEWS[t.id];
 
 const byId = new Map(TOPICS.map((t) => [t.id, t]));
 

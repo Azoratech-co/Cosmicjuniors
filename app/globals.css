@@ -705,3 +705,5 @@ a { color: inherit; }
 .toggle { color: var(--text-muted); }
 .drag-ghost { outline-color: var(--brand-purple); }
 .tray-piece.is-selected { outline-color: var(--brand-purple); }
+.fact-card--compact { max-width: 520px; }
+.fact-card--compact .fact-card__content { padding: 12px 14px; gap: 6px; }

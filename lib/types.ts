@@ -16,6 +16,8 @@ export interface Reference {
 
 /** The main page an answer is based on, shown as a source card. */
 export interface Source extends Reference {
+  /** What the card is about (e.g. "Sojourner rover"); the source page title stays in `title`. */
+  heading?: string;
   /** One extra fact from that page. */
   fact: string;
   image?: { src: string; alt: string; credit: string; nasaId: string };

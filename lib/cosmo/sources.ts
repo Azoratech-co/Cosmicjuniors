@@ -22,7 +22,22 @@ export function toSource(topic: Topic, factIndex: number | null, answer: string)
     const scores = topic.facts.map((f) => overlap(f, said));
     i = scores.indexOf(Math.min(...scores));
   }
-  return { ...toReference(topic), fact: topic.facts[i], image: topic.image, whereNow: topic.whereNow };
+  // Pick the photo + heading that best match what the answer (and the extra fact) talk about.
+  // The answer counts double; the extra fact on the card breaks ties.
+  const said2 = answer.toLowerCase();
+  const extra = topic.facts[i].toLowerCase();
+  const scored = (topic.views ?? [])
+    .map((v) => ({ v, s: v.keywords.reduce((n, k) => n + (said2.includes(k) ? 2 : 0) + (extra.includes(k) ? 1 : 0), 0) }))
+    .filter((x) => x.s > 0)
+    .sort((a, b) => b.s - a.s);
+  const view = scored[0]?.v;
+  return {
+    ...toReference(topic),
+    heading: view?.title,
+    fact: topic.facts[i],
+    image: view?.image ?? topic.image,
+    whereNow: topic.whereNow,
+  };
 }
 
 // ---------------------------------------------------------------------------------------------

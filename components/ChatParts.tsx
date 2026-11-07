@@ -36,10 +36,10 @@ const readLabel = (r: Reference) =>
   r.kind === "partner" ? `Read on ${new URL(r.url).hostname.replace(/^www\./, "")}` : r.kind === "law" ? "Read the law" : "Read on NASA.gov";
 
 /** Figma: Card/Space Fact — the page an answer is based on, with a real NASA photo. */
-export function SourceCard({ source }: { source: Source }) {
+export function SourceCard({ source, compact }: { source: Source; compact?: boolean }) {
   return (
-    <article className="fact-card">
-      {source.image && (
+    <article className={`fact-card${compact ? " fact-card--compact" : ""}`}>
+      {source.image && !compact && (
         <figure className="fact-card__photo">
           {/* eslint-disable-next-line @next/next/no-img-element */}
           <img src={source.image.src} alt={source.image.alt} loading="lazy" />
@@ -47,8 +47,11 @@ export function SourceCard({ source }: { source: Source }) {
         </figure>
       )}
       <div className="fact-card__content">
-        <span className="t-caption c-star">{source.publisher}</span>
-        <h3 className="t-title">{source.title}</h3>
+        <span className="t-caption c-star">
+          {source.publisher}
+          {source.heading ? ` · ${source.title}` : ""}
+        </span>
+        <h3 className="t-title">{source.heading ?? source.title}</h3>
         {source.whereNow && (
           <p className="where-now t-body-sm">
             <span className="where-now__label t-caption">Where it is now</span>
@@ -126,7 +129,18 @@ function useTypewriter(text: string, enabled: boolean, onDone?: () => void) {
 }
 
 /** Figma: Message/Bot and Message/User */
-export function MessageRow({ message, animate, onDone }: { message: ChatMessage; animate?: boolean; onDone?: () => void }) {
+export function MessageRow({
+  message,
+  animate,
+  onDone,
+  repeat,
+}: {
+  message: ChatMessage;
+  animate?: boolean;
+  onDone?: () => void;
+  /** Same card as Cosmo's previous answer: show it small, without the photo. */
+  repeat?: boolean;
+}) {
   const { shown, done } = useTypewriter(message.text, Boolean(animate) && message.role === "bot", onDone);
 
   if (message.role === "user") {
@@ -147,7 +161,7 @@ export function MessageRow({ message, animate, onDone }: { message: ChatMessage;
       </div>
       {done && message.source && (
         <div className="row indent">
-          <SourceCard source={message.source} />
+          <SourceCard source={message.source} compact={repeat} />
         </div>
       )}
       {done && message.references && message.references.length > 0 && (
