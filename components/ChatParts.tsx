@@ -1,8 +1,9 @@
 "use client";
 
 import { useEffect, useMemo, useRef, useState } from "react";
-import Link from "next/link";
 import CosmoLogo, { LogoTile } from "./CosmoLogo";
+import NavTabs from "./NavTabs";
+import RichText from "./RichText";
 import type { ChatMessage, Reference, Source, SourceKind } from "@/lib/types";
 
 // Chat building blocks. Each maps to a component in the Figma page "v4 · Cosmo (pro)".
@@ -18,9 +19,7 @@ export function ChatHeader({ stars }: { stars: number }) {
           <span className="dot" aria-hidden="true" /> Online
         </span>
       </div>
-      <Link href="/games" className="games-link games-link--header t-label">
-        Games
-      </Link>
+      <NavTabs />
       <span className="stars-badge t-label" aria-label={`${stars} stars collected`}>
         <svg width="12" height="12" viewBox="0 0 24 24" aria-hidden="true">
           <path d="M12 2l3.1 6.3 6.9 1-5 4.9 1.2 6.8L12 17.8 5.8 21l1.2-6.8-5-4.9 6.9-1z" fill="currentColor" />
@@ -156,7 +155,9 @@ export function MessageRow({
         <LogoTile size={32} />
         <div className={`bubble bubble--bot t-body${message.story ? " bubble--story" : ""}`}>
           <span className="sr-only">{message.text}</span>
-          <span aria-hidden="true">{shown}</span>
+          <div aria-hidden="true" className="rt">
+            <RichText text={shown} />
+          </div>
         </div>
       </div>
       {done && message.source && (
@@ -176,12 +177,13 @@ export function MessageRow({
 /** Figma: Message/Typing */
 export function Typing() {
   return (
-    <div className="row bot-row bot-row--center" aria-live="polite">
+    <div className="row bot-row bot-row--center thinking" aria-live="polite">
       <LogoTile size={32} />
-      <div className="bubble bubble--bot typing" aria-hidden="true">
-        <span />
-        <span />
-        <span />
+      <div className="bubble bubble--bot thinking__bubble">
+        <span className="orbit" aria-hidden="true">
+          <span />
+        </span>
+        <span className="thinking__text">Cosmo is checking NASA sources</span>
       </div>
     </div>
   );
@@ -201,12 +203,20 @@ export function QuickReplies({ items, onPick }: { items: string[]; onPick: (q: s
 }
 
 // Starter questions about the machines NASA left on Mars and the Moon (the challenge theme).
-const starters = [
-  "Where is Sojourner now?",
-  "What did astronauts leave on the Moon?",
-  "Why protect the Apollo landing sites?",
-  "What did Perseverance leave behind?",
+const starters: { q: string; icon: "mars" | "moon" | "shield" | "chute" }[] = [
+  { q: "Where is Sojourner now?", icon: "mars" },
+  { q: "What did astronauts leave on the Moon?", icon: "moon" },
+  { q: "Why protect the Apollo landing sites?", icon: "shield" },
+  { q: "What did Perseverance leave behind?", icon: "chute" },
 ];
+
+function StarterIcon({ kind }: { kind: "mars" | "moon" | "shield" | "chute" }) {
+  const p = { width: 20, height: 20, viewBox: "0 0 24 24", fill: "none", stroke: "currentColor", strokeWidth: 1.8, strokeLinecap: "round" as const, strokeLinejoin: "round" as const, "aria-hidden": true };
+  if (kind === "mars") return <svg {...p}><circle cx="12" cy="12" r="8" /><path d="M6 10c3 1 6 .5 9-1.5M7.5 15.5c2.5-1 5-1 8 .5" /></svg>;
+  if (kind === "moon") return <svg {...p}><path d="M19 14.5A8 8 0 1 1 9.5 5a6.5 6.5 0 0 0 9.5 9.5z" /></svg>;
+  if (kind === "shield") return <svg {...p}><path d="M12 3l7 3v5c0 4.5-3 8.2-7 10-4-1.8-7-5.5-7-10V6z" /><path d="M9 12l2 2 4-4" /></svg>;
+  return <svg {...p}><path d="M4 11a8 8 0 0 1 16 0z" /><path d="M5 11l7 8 7-8M12 19v2" /></svg>;
+}
 
 /** Welcome screen with Card/Suggestion grid */
 export function Welcome({ onPick, onStory }: { onPick: (q: string) => void; onStory?: (q: string) => void }) {
@@ -219,15 +229,22 @@ export function Welcome({ onPick, onStory }: { onPick: (q: string) => void; onSt
         The machines NASA left on Mars and the Moon, with real sources.
       </p>
       <div className="hero__chips">
-        {starters.map((q) => (
+        {starters.map(({ q, icon }) => (
           <button key={q} className="hero-chip" onClick={() => onPick(q)}>
-            {q}
+            <span className="hero-chip__icon">
+              <StarterIcon kind={icon} />
+            </span>
+            <span className="hero-chip__q">{q}</span>
           </button>
         ))}
       </div>
       {onStory && (
         <button className="hero-story" onClick={() => onStory("Tell me your story, Sojourner")}>
-          Hear Sojourner tell its own story →
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+            <path d="M4 5.5C6.5 4 9.5 4 12 5.5 14.5 4 17.5 4 20 5.5V19c-2.5-1.5-5.5-1.5-8 0-2.5-1.5-5.5-1.5-8 0z" />
+            <path d="M12 5.5V19" />
+          </svg>
+          <span>Hear Sojourner tell its own story</span>
         </button>
       )}
     </section>

@@ -6,8 +6,8 @@ import Sidebar from "./Sidebar";
 import Starfield from "./Starfield";
 import { ChatHeader, MessageRow, QuickReplies, Typing, Welcome } from "./ChatParts";
 import type { ChatMessage, ChatMode, ChatReply } from "@/lib/types";
+import { STARS_EVENT, addStars, getStars } from "@/lib/stars";
 
-const STARS_KEY = "cj-stars";
 
 const uid = () => Math.random().toString(36).slice(2);
 
@@ -23,11 +23,12 @@ export default function ChatApp() {
   const scrollRef = useRef<HTMLDivElement>(null);
   const threadRef = useRef<HTMLDivElement>(null);
 
-  // Stars are saved in this browser only (no accounts yet).
+  // Stars are saved in this browser only (no accounts yet). Stay in sync with every screen.
   useEffect(() => {
-    try {
-      setStars(Number(localStorage.getItem(STARS_KEY)) || 0);
-    } catch {}
+    const sync = () => setStars(getStars());
+    sync();
+    window.addEventListener(STARS_EVENT, sync);
+    return () => window.removeEventListener(STARS_EVENT, sync);
   }, []);
 
   // Keep the newest message in view, including while Cosmo is typing.
@@ -40,14 +41,7 @@ export default function ChatApp() {
     return () => ro.disconnect();
   }, []);
 
-  const addStar = () =>
-    setStars((s) => {
-      const n = s + 1;
-      try {
-        localStorage.setItem(STARS_KEY, String(n));
-      } catch {}
-      return n;
-    });
+  const addStar = () => addStars(1);
 
   const ask = async (text: string, askMode: ChatMode = mode) => {
     if (thinking || revealingId) return;
@@ -155,11 +149,19 @@ export default function ChatApp() {
         </div>
         <div className="composer-wrap">
           <div className="mode-switch" role="radiogroup" aria-label="How Cosmo answers">
+            <span className="mode-switch__thumb" data-mode={mode} aria-hidden="true" />
             <button role="radio" aria-checked={mode === "guide"} className={mode === "guide" ? "is-on" : ""} onClick={() => setMode("guide")}>
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                <path d="M9 18h6M10 21h4M12 3a6 6 0 0 0-3.5 10.9c.6.5 1 1.2 1 2.1h5c0-.9.4-1.6 1-2.1A6 6 0 0 0 12 3z" />
+              </svg>
               Explain
             </button>
             <button role="radio" aria-checked={mode === "story"} className={mode === "story" ? "is-on" : ""} onClick={() => setMode("story")}>
-              Story mode
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                <path d="M4 5.5C6.5 4 9.5 4 12 5.5 14.5 4 17.5 4 20 5.5V19c-2.5-1.5-5.5-1.5-8 0-2.5-1.5-5.5-1.5-8 0z" />
+                <path d="M12 5.5V19" />
+              </svg>
+              Story
             </button>
           </div>
           <Composer onSend={(q) => ask(q)} disabled={thinking || Boolean(revealingId)} />

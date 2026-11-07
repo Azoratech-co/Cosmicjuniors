@@ -3,7 +3,8 @@
 import Link from "next/link";
 import { useEffect, useRef, useState } from "react";
 import Starfield from "../Starfield";
-import { LogoTile } from "../CosmoLogo";
+import CosmoLogo, { LogoTile } from "../CosmoLogo";
+import NavTabs from "../NavTabs";
 import { STARS_EVENT, getStars } from "@/lib/stars";
 
 // Shared frame for the games: back link, title, and the kid's star count.
@@ -43,21 +44,28 @@ export default function GameShell({
     <div className="game-page">
       <Starfield />
       <div className="mars-glow" aria-hidden="true" />
-      <header className="game-top">
-        <Link href={backHref} className="game-back t-label">
-          ← {backLabel}
+      <header className="chat-header site-header">
+        <Link href="/" className="site-header__brand" aria-label="Ask Cosmo home">
+          <LogoTile size={36} />
+          <CosmoLogo size={17} className="site-header__word" />
         </Link>
-        <Link href="/" className="game-brand" aria-label="Cosmic Juniors home">
-          <LogoTile size={32} />
-          <span className="hero__eyebrow hero__eyebrow--sm">Cosmic Juniors</span>
-        </Link>
+        <NavTabs />
         <StarCount />
       </header>
       <div className="game-head">
+        {backHref !== "/" && (
+          <Link href={backHref} className="game-back t-label">
+            ← {backLabel}
+          </Link>
+        )}
         <h1 className="t-display">{title}</h1>
         {tagline && <p className="t-body c-muted">{tagline}</p>}
       </div>
       <main className="game-main">{children}</main>
+      <footer className="site-footer">
+        <span>Cosmic Juniors · NASA Space Apps Challenge 2026, Beirut</span>
+        <span>Photos and facts: NASA</span>
+      </footer>
     </div>
   );
 }

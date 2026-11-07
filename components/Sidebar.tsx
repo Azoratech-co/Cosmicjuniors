@@ -1,11 +1,10 @@
 "use client";
 
-import Link from "next/link";
 import { LogoTile } from "./CosmoLogo";
+import Explorer from "./Explorer";
 
 // Desktop-only sidebar: new chat, recent topics, and the Explorer Level card.
 
-const STARS_PER_LEVEL = 10;
 
 export default function Sidebar({
   stars,
@@ -18,9 +17,6 @@ export default function Sidebar({
   onNew: () => void;
   onPick: (q: string) => void;
 }) {
-  const level = Math.floor(stars / STARS_PER_LEVEL) + 1;
-  const into = stars % STARS_PER_LEVEL;
-  const toNext = STARS_PER_LEVEL - into;
 
   return (
     <aside className="sidebar">
@@ -31,9 +27,6 @@ export default function Sidebar({
       <button className="btn-purple t-label" onClick={onNew}>
         +&nbsp; New conversation
       </button>
-      <Link href="/games" className="games-link t-label">
-        Mission games
-      </Link>
 
       <nav className="history" aria-label="Recent adventures">
         {history.length > 0 && <span className="t-caption c-muted">Recent</span>}
@@ -44,15 +37,8 @@ export default function Sidebar({
         ))}
       </nav>
 
-      <div className="level-card">
-        <span className="t-subtitle">Explorer level {level}</span>
-        <div className="progress" role="progressbar" aria-valuemin={0} aria-valuemax={STARS_PER_LEVEL} aria-valuenow={into}>
-          <div className="progress__fill" style={{ width: `${(into / STARS_PER_LEVEL) * 100}%` }} />
-        </div>
-        <span className="t-caption c-muted">
-          {stars} stars · {toNext} more to level {level + 1}
-        </span>
-      </div>
+      <Explorer />
+      <p className="sidebar__foot">NASA Space Apps 2026 · Photos: NASA</p>
     </aside>
   );
 }

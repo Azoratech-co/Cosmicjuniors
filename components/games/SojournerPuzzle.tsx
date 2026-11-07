@@ -117,6 +117,10 @@ export default function SojournerPuzzle() {
     if (nextPlaced.every(Boolean)) {
       setFinishedIn(Math.round((Date.now() - (startedAt ?? Date.now())) / 1000));
       addStars(level.stars);
+      try {
+        const prev = JSON.parse(localStorage.getItem("cj-puzzle") || "{}");
+        localStorage.setItem("cj-puzzle", JSON.stringify({ solved: (prev.solved ?? 0) + 1 }));
+      } catch {}
     }
   };
 
