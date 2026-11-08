@@ -2,6 +2,7 @@
 
 import { LogoTile } from "./CosmoLogo";
 import Explorer from "./Explorer";
+import ThemePicker from "./ThemePicker";
 
 // Desktop-only sidebar: new chat, recent topics, and the Explorer Level card.
 
@@ -39,6 +40,7 @@ export default function Sidebar({
 
       <Explorer />
       <p className="sidebar__foot">NASA Space Apps 2026 · Photos: NASA</p>
+      <ThemePicker />
     </aside>
   );
 }

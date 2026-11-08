@@ -5,6 +5,7 @@ import { useEffect, useRef, useState } from "react";
 import Starfield from "../Starfield";
 import CosmoLogo, { LogoTile } from "../CosmoLogo";
 import NavTabs from "../NavTabs";
+import ThemePicker from "../ThemePicker";
 import { STARS_EVENT, getStars } from "@/lib/stars";
 
 // Shared frame for the games: back link, title, and the kid's star count.
@@ -65,6 +66,7 @@ export default function GameShell({
       <footer className="site-footer">
         <span>Cosmic Juniors · NASA Space Apps Challenge 2026, Beirut</span>
         <span>Photos and facts: NASA</span>
+        <ThemePicker />
       </footer>
     </div>
   );

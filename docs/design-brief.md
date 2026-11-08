@@ -111,4 +111,17 @@ The finished page should feel like a premium, dedicated AI-powered space explora
 
 ---
 
-Saved design versions (git branches): `backup/before-de-slop` (original purple), `backup/light-beige` (beige light theme).
+## Live designs
+
+All designs run on the same site as themes (see `app/themes.css` and `lib/themes.ts`).
+Open one with `?theme=<id>` or pick it on `/designs`; the choice is remembered on each device.
+
+| id | Design |
+|---|---|
+| `ink-sand` | Ink & Sand: sand #E8DCC8, midnight navy #1E2633, terracotta #C0674A (default) |
+| `cosmic` | Polished dark navy from this brief |
+| `beige` | Warm paper with star-chart dots |
+| `mission` | Flat near-black mission control |
+| `original` | The first purple + cyan look |
+
+Older full snapshots are also on git branches: `backup/before-de-slop`, `backup/light-beige`, `backup/cosmic-dark`.
