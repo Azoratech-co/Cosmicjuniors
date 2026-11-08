@@ -204,6 +204,10 @@ function parseAnswer(data: unknown, topics: Topic[]): { safety: SafetyCategory; 
     reply.references = used.map(toReference);
   }
 
+  if (typeof d.title === "string") {
+    const title = tidy(d.title).replace(/[?.!:;,"]+$/g, "").replace(/^["']|["']$/g, "").trim();
+    if (title.length >= 3 && title.length <= 40 && title.split(/\s+/).length <= 6) reply.title = title;
+  }
   if (Array.isArray(d.suggestions)) {
     reply.suggestions = d.suggestions
       .filter((s): s is string => typeof s === "string" && s.trim().length > 0)

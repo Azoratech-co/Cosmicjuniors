@@ -56,6 +56,8 @@ export interface ChatReply {
   /** True when every number in the answer was found in its sources. */
   checked?: boolean;
   story?: boolean;
+  /** A short name for the conversation's topic (used to name saved chats). */
+  title?: string;
   /** The AI was busy; the app may quietly ask again in a few seconds. */
   busy?: boolean;
   /** Follow-up questions shown as buttons. */

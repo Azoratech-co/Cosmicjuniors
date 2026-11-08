@@ -3,6 +3,8 @@
 import { useEffect, useRef, useState } from "react";
 import Composer from "./Composer";
 import Sidebar from "./Sidebar";
+import ChatsPanel from "./ChatsPanel";
+import { fallbackTitle, loadChats, saveChats, type SavedChat } from "@/lib/chats";
 import Starfield from "./Starfield";
 import { ChatHeader, MessageRow, QuickReplies, Typing, Welcome } from "./ChatParts";
 import type { ChatMessage, ChatMode, ChatReply } from "@/lib/types";
@@ -16,7 +18,9 @@ export default function ChatApp() {
   const [suggestions, setSuggestions] = useState<string[]>([]);
   const [thinking, setThinking] = useState(false);
   const [stars, setStars] = useState(0);
-  const [history, setHistory] = useState<string[]>([]);
+  const [chats, setChats] = useState<SavedChat[]>([]);
+  const [chatId, setChatId] = useState<string | null>(null);
+  const [panelOpen, setPanelOpen] = useState(false);
   // The bot message currently being "typed" on screen.
   const [revealingId, setRevealingId] = useState<string | null>(null);
   const [mode, setMode] = useState<ChatMode>("guide");
@@ -43,14 +47,49 @@ export default function ChatApp() {
 
   const addStar = () => addStars(1);
 
+  // Saved conversations (this browser only).
+  useEffect(() => setChats(loadChats()), []);
+
+  /** Save the current conversation. Its name is set once, from the first answer, and never changes. */
+  const persist = (id: string, msgs: ChatMessage[], title?: string) => {
+    setChats((all) => {
+      const existing = all.find((c) => c.id === id);
+      const now = Date.now();
+      const chat: SavedChat = existing
+        ? { ...existing, messages: msgs, updatedAt: now, title: existing.title || title || "" }
+        : { id, title: title || "", createdAt: now, updatedAt: now, messages: msgs };
+      return saveChats([chat, ...all.filter((c) => c.id !== id)]);
+    });
+  };
+
+  const openChat = (id: string) => {
+    const c = chats.find((x) => x.id === id);
+    if (!c || thinking) return;
+    setRevealingId(null);
+    setChatId(id);
+    setMessages(c.messages);
+    setSuggestions([]);
+  };
+
+  const deleteChat = (id: string) => {
+    setChats((all) => saveChats(all.filter((c) => c.id !== id)));
+    if (id === chatId) {
+      setChatId(null);
+      setMessages([]);
+      setSuggestions([]);
+    }
+  };
+
   const ask = async (text: string, askMode: ChatMode = mode) => {
     if (thinking || revealingId) return;
     const userMsg: ChatMessage = { id: uid(), role: "user", text, at: Date.now() };
     const next = [...messages, userMsg];
+    const id0 = chatId ?? uid();
+    if (!chatId) setChatId(id0);
     setMessages(next);
     setSuggestions([]);
     setThinking(true);
-    setHistory((h) => [text, ...h.filter((x) => x !== text)].slice(0, 6));
+    persist(id0, next);
     addStar();
 
     const send = async (): Promise<ChatReply> => {
@@ -73,19 +112,18 @@ export default function ChatApp() {
       }
       const id = uid();
       setRevealingId(id);
-      setMessages((m) => [
-        ...m,
-        {
-          id,
-          role: "bot",
-          text: reply.text,
-          source: reply.source,
-          references: reply.references,
-          checked: reply.checked,
-          story: reply.story,
-          at: Date.now(),
-        },
-      ]);
+      const botMsg: ChatMessage = {
+        id,
+        role: "bot",
+        text: reply.text,
+        source: reply.source,
+        references: reply.references,
+        checked: reply.checked,
+        story: reply.story,
+        at: Date.now(),
+      };
+      setMessages((m) => [...m, botMsg]);
+      persist(id0, [...next, botMsg], reply.title || fallbackTitle(next[0].text, reply.source));
       setSuggestions(reply.suggestions ?? []);
     } catch (err) {
       const text =
@@ -100,6 +138,7 @@ export default function ChatApp() {
 
   const reset = () => {
     setRevealingId(null);
+    setChatId(null);
     setMessages([]);
     setSuggestions([]);
   };
@@ -110,9 +149,25 @@ export default function ChatApp() {
     <div className="app">
       <Starfield />
       <div className="mars-glow" aria-hidden="true" />
-      <Sidebar stars={stars} history={history} onNew={reset} onPick={ask} />
+      <Sidebar
+        chats={chats}
+        currentId={chatId}
+        onNew={reset}
+        onOpen={openChat}
+        onDelete={deleteChat}
+        onSeeAll={() => setPanelOpen(true)}
+      />
+      <ChatsPanel
+        open={panelOpen}
+        onClose={() => setPanelOpen(false)}
+        onNew={reset}
+        chats={chats}
+        currentId={chatId}
+        onOpen={openChat}
+        onDelete={deleteChat}
+      />
       <main className="main">
-        <ChatHeader stars={stars} />
+        <ChatHeader stars={stars} onChats={() => setPanelOpen(true)} chatCount={chats.length} />
         <div className="scroll" ref={scrollRef}>
           <div className={`thread${empty ? " thread--empty" : ""}`} ref={threadRef}>
             {empty ? (

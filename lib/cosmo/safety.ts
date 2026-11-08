@@ -40,7 +40,7 @@ export function screenQuestion(text: string): SafetyCategory {
 
 /** Last check on Cosmo's own answer before a kid sees it. */
 export function screenAnswer(reply: ChatReply): boolean {
-  const all = [reply.text, ...(reply.suggestions ?? [])].join(" ");
+  const all = [reply.text, reply.title ?? "", ...(reply.suggestions ?? [])].join(" ");
   return !UNSAFE_WORDS.test(all) && !/https?:\/\//i.test(all);
 }
 

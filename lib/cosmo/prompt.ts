@@ -77,7 +77,8 @@ Reply with ONLY a JSON object:
   "text": "your answer",
   "sources": ["<ids of every note you used, the most important first>"] (empty if none),
   "fact": <index of one extra fact from the FIRST note in "sources" that you did NOT already say> or null,
-  "suggestions": ["2 or 3 short follow-up questions the kid might ask next, max 40 characters, no emojis"]
+  "suggestions": ["2 or 3 short follow-up questions the kid might ask next, max 40 characters, no emojis"],
+  "title": "a 2 to 4 word name for what this conversation is about, like a chapter title (e.g. \"Sojourner's Last Stop\", \"Apollo Flags Today\", \"Life on Mars\"). Title Case, no question mark, no emojis, never just copy the question."
 }
 
 Set "safety" by judging the kid's LATEST message:

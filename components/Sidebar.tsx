@@ -3,20 +3,26 @@
 import { LogoTile } from "./CosmoLogo";
 import Explorer from "./Explorer";
 import ThemePicker from "./ThemePicker";
+import { ChatList } from "./ChatsPanel";
+import type { SavedChat } from "@/lib/chats";
 
 // Desktop-only sidebar: new chat, recent topics, and the Explorer Level card.
 
 
 export default function Sidebar({
-  stars,
-  history,
+  chats,
+  currentId,
   onNew,
-  onPick,
+  onOpen,
+  onDelete,
+  onSeeAll,
 }: {
-  stars: number;
-  history: string[];
+  chats: SavedChat[];
+  currentId: string | null;
   onNew: () => void;
-  onPick: (q: string) => void;
+  onOpen: (id: string) => void;
+  onDelete: (id: string) => void;
+  onSeeAll: () => void;
 }) {
 
   return (
@@ -29,13 +35,16 @@ export default function Sidebar({
         +&nbsp; New conversation
       </button>
 
-      <nav className="history" aria-label="Recent adventures">
-        {history.length > 0 && <span className="t-caption c-muted">Recent</span>}
-        {history.map((h, i) => (
-          <button key={h + i} className={`history__item t-label${i === 0 ? " is-active" : ""}`} onClick={() => onPick(h)}>
-            {h}
-          </button>
-        ))}
+      <nav className="history" aria-label="Conversations">
+        <span className="history__head">
+          <span className="t-caption c-muted">Conversations</span>
+          {chats.length > 6 && (
+            <button className="history__all" onClick={onSeeAll}>
+              See all
+            </button>
+          )}
+        </span>
+        <ChatList chats={chats} currentId={currentId} onOpen={onOpen} onDelete={onDelete} limit={6} />
       </nav>
 
       <Explorer />
