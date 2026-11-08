@@ -275,7 +275,14 @@ export default function SojournerPuzzle() {
           stars={level.stars}
           sourceTitle="Mars Pathfinder"
           sourceUrl="https://science.nasa.gov/mission/mars-pathfinder/"
-          onAgain={() => reset(Math.min(levelIdx + 1, LEVELS.length - 1))}
+          onAgain={() => reset(levelIdx)}
+          againLabel={`Replay ${level.name}`}
+          onNext={levelIdx < LEVELS.length - 1 ? () => reset(levelIdx + 1) : undefined}
+          nextLabel={
+            levelIdx < LEVELS.length - 1
+              ? `Next level: ${LEVELS[levelIdx + 1].name} · ${LEVELS[levelIdx + 1].cols * LEVELS[levelIdx + 1].rows} pieces`
+              : undefined
+          }
           facts={[
             "This real photo shows Sojourner just after it rolled off the Pathfinder lander onto Mars.",
             "Pathfinder landed on July 4, 1997, in an ancient flood plain called Ares Vallis.",
@@ -285,6 +292,7 @@ export default function SojournerPuzzle() {
         >
           <p className="t-body-sm c-muted">
             {level.name} · {total} pieces in {fmt(finishedIn!)} with {moves} moves.
+            {levelIdx === LEVELS.length - 1 ? " You beat the hardest level!" : ""}
           </p>
         </WinPanel>
       )}

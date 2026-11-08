@@ -552,3 +552,6 @@ body { overscroll-behavior-y: none; }
 .chats-empty { margin: 0; font-size: 13px; color: var(--muted); }
 .sidebar .history { flex: 1; min-height: 0; overflow-y: auto; display: flex; flex-direction: column; gap: 8px; }
 @media (max-width: 640px) { .chat-header > .logo-tile { display: none; } }
+
+/* Hide the empty piece tray once the puzzle is finished. */
+.puzzle-tray[hidden] { display: none; }
