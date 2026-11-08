@@ -493,3 +493,16 @@ body, .app, .game-page { background-color: var(--bg); background-image: var(--bg
 .design-card__links { margin-top: 6px; font-size: 14px; color: var(--muted); }
 .design-card__links a { color: var(--fact); font-weight: 600; }
 .theme-picker a { color: var(--fact); }
+
+/* Phones: keep the page at full view.
+   iPhone zooms into any text field under 16px, so fields are 16px on small screens,
+   and double-tap zoom is turned off (taps on buttons and games stay taps). */
+html, body { touch-action: manipulation; -webkit-text-size-adjust: 100%; text-size-adjust: 100%; }
+@media (max-width: 900px) {
+  input, select, textarea, .composer__field { font-size: 16px !important; }
+}
+.app { overflow: hidden; }
+body { overscroll-behavior-y: none; }
+/* Keep the chat box and headers clear of the iPhone notch and home bar. */
+.composer-wrap { padding-bottom: max(12px, env(safe-area-inset-bottom)); }
+.chat-header, .site-header { padding-top: max(10px, env(safe-area-inset-top)); }

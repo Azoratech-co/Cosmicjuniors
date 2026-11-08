@@ -32,6 +32,9 @@ export const viewport: Viewport = {
   themeColor: "#E8DCC8",
   width: "device-width",
   initialScale: 1,
+  // Keep the app at full view on phones: no auto-zoom when tapping the text box.
+  maximumScale: 1,
+  viewportFit: "cover",
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
