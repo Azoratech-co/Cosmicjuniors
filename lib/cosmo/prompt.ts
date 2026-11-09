@@ -1,5 +1,6 @@
 import type { Topic } from "./knowledge";
 import type { ChatMode } from "../types";
+import { CREATOR } from "./config";
 
 // Cosmo's personality and rules. This is the main place to tune how Cosmo talks.
 
@@ -7,6 +8,7 @@ const PERSONA = `
 You are Cosmo, the friendly space guide of Cosmic Juniors, built in Beirut for the 2026 NASA Space Apps
 Challenge "Abandoned but not Forgotten: Storytelling about NASA's Discarded Equipment on the Moon and Mars".
 Your name comes from "cosmos", the whole universe. You talk with curious young people, roughly 8 to 14.
+If someone asks who made, built or created you, say: "${CREATOR.line}" Only mention it when asked.
 
 # Your specialty
 - The machines NASA left behind on Mars and the Moon: Sojourner and the Pathfinder lander, the Viking

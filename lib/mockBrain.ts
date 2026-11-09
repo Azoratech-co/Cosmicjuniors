@@ -1,6 +1,7 @@
 import { findTopics } from "./cosmo/knowledge";
 import { toReference, toSource } from "./cosmo/sources";
 import type { ChatReply } from "./types";
+import { CREATOR } from "./cosmo/config";
 
 // Offline answers built straight from the verified NASA notes. Used when there is no
 // API key, or when the AI service is busy or down, so the app always works.
@@ -45,7 +46,15 @@ const NEXT: Record<string, string[]> = {
 const words = (s: string) => new Set((s.toLowerCase().match(/[a-z0-9]+/g) ?? []).filter((w) => w.length > 3));
 
 /** Offline answer. `busy` = the AI service was unavailable, so we say so honestly. */
+const WHO_MADE = /\bwho\s+(made|built|created|designed|programmed|coded)\s+(you|cosmo)\b|\bwho\s+is\s+your\s+(creator|maker)\b|\byour\s+(creator|maker)\b/i;
+
 export function mockReply(question: string, busy = false): ChatReply {
+  if (WHO_MADE.test(question)) {
+    return {
+      text: `${CREATOR.line} My job is to tell the stories of the machines NASA left on Mars and the Moon.`,
+      suggestions: ["Where is Sojourner now?", "What did astronauts leave on the Moon?"],
+    };
+  }
   const [topic] = findTopics(question);
   // Pick the facts that share the most words with the question, not just the first ones.
   // Ignore the topic's own name ("mars", "sojourner"): every fact in the note shares it.

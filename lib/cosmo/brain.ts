@@ -1,6 +1,6 @@
 import "server-only";
 import { GroqError, availableModels, groqChat, hasGroqKey } from "./groq";
-import { LIMITS, MODELS } from "./config";
+import { CREATOR, LIMITS, MODELS } from "./config";
 import { buildSystemPrompt } from "./prompt";
 import { findTopics, getTopic, type Topic } from "./knowledge";
 import { toReference, toSource, unsupportedClaims, unsupportedNumbers, usedTopics } from "./sources";
@@ -55,7 +55,8 @@ async function answer(history: History, question: string, mode: ChatMode): Promi
   // answer mentions many things and could pull the next question back to the same topic.)
   const context = history.slice(0, -1).filter((m) => m.role === "user").slice(-1).map((m) => m.text).join(" ");
   const topics = findTopics(question, context);
-  const kidText = history.filter((m) => m.role === "user").map((m) => m.text).join(" ");
+  // Numbers the kid typed, plus the year in Cosmo's "who made you" line, always pass the fact-check.
+  const kidText = [...history.filter((m) => m.role === "user").map((m) => m.text), CREATOR.line].join(" ");
 
   try {
     // If the trick check itself is busy, carry on: the regex screen, the model's own safety label

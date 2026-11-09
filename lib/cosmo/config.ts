@@ -1,5 +1,11 @@
 // Central settings for Cosmo's brain. Change models or limits here.
 
+/** Who built Cosmo. Cosmo says this only when asked who made it. */
+export const CREATOR = {
+  name: "Ali Zayour",
+  line: "I was built by Ali Zayour and the Cosmic Juniors team in Beirut, for the 2026 NASA Space Apps Challenge.",
+};
+
 export const MODELS = {
   /** Writes Cosmo's answers. Tried in order: if one is busy (rate limited), the next is used. */
   // Each Groq model has its own free-tier rate limit, so more backups = more capacity.
