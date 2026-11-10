@@ -3,7 +3,7 @@
 export type Role = "user" | "bot";
 
 /** Who published a source: NASA, a trusted partner (.org), or official U.S. law. */
-export type SourceKind = "nasa" | "partner" | "law";
+export type SourceKind = "nasa" | "partner" | "law" | "story";
 
 /** One page an answer used, listed under it as a numbered reference. */
 export interface Reference {

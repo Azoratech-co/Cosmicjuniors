@@ -3,6 +3,7 @@ import { GroqError, availableModels, groqChat, hasGroqKey } from "./groq";
 import { CREATOR, LIMITS, MODELS } from "./config";
 import { buildSystemPrompt } from "./prompt";
 import { findTopics, getTopic, type Topic } from "./knowledge";
+import { ASKS_ABOUT_STORY, findStoryChapters } from "./stories";
 import { toReference, toSource, unsupportedClaims, unsupportedNumbers, usedTopics } from "./sources";
 import { SAFE_REPLIES, isTrickAttempt, screenAnswer, screenQuestion, type SafetyCategory } from "./safety";
 import { mockReply } from "../mockBrain";
@@ -49,12 +50,17 @@ async function answer(history: History, question: string, mode: ChatMode): Promi
   const quick = screenQuestion(question);
   if (quick !== "ok") return SAFE_REPLIES[quick];
 
-  if (!hasGroqKey()) return mockReply(question);
+  if (!hasGroqKey()) return mockReply(question, false, mode);
 
   // For follow-ups, the kid's previous question says what "it" means. (Not Cosmo's reply: a long
   // answer mentions many things and could pull the next question back to the same topic.)
   const context = history.slice(0, -1).filter((m) => m.role === "user").slice(-1).map((m) => m.text).join(" ");
-  const topics = findTopics(question, context);
+  // Storyline mode: the team's story chapters first, plus a little NASA background.
+  // Explain mode: NASA notes, plus story chapters when the kid asks about "the story".
+  const topics =
+    mode === "story"
+      ? [...findStoryChapters(question, context, 3), ...findTopics(question, context, 2)]
+      : [...findTopics(question, context), ...(ASKS_ABOUT_STORY.test(question) ? findStoryChapters(question, context, 2) : [])];
   // Numbers the kid typed, plus the year in Cosmo's "who made you" line, always pass the fact-check.
   const kidText = [...history.filter((m) => m.role === "user").map((m) => m.text), CREATOR.line].join(" ");
 
@@ -84,7 +90,7 @@ async function answer(history: History, question: string, mode: ChatMode): Promi
     }
     if (bad.length) {
       console.warn("Cosmo fact-check failed twice; answering from the notes.");
-      return mockReply(question);
+      return mockReply(question, false, mode);
     }
     if (!screenAnswer(draft.reply)) return SAFE_REPLIES.unsafe;
     draft.reply.checked = Boolean(draft.reply.references?.length);
@@ -94,7 +100,7 @@ async function answer(history: History, question: string, mode: ChatMode): Promi
   } catch (err) {
     // Log only the error, never the kid's message.
     console.error("Cosmo brain error:", err instanceof Error ? err.message : err);
-    return mockReply(question, true);
+    return mockReply(question, true, mode);
   }
 }
 

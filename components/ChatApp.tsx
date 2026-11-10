@@ -171,13 +171,7 @@ export default function ChatApp() {
         <div className="scroll" ref={scrollRef}>
           <div className={`thread${empty ? " thread--empty" : ""}`} ref={threadRef}>
             {empty ? (
-              <Welcome
-                onPick={(q) => ask(q)}
-                onStory={(q) => {
-                  setMode("story");
-                  ask(q, "story");
-                }}
-              />
+              <Welcome onPick={(q) => ask(q)} onStory={() => setMode("story")} storyMode={mode === "story"} />
             ) : (
               <>
                 {messages.map((m, i) => (
@@ -216,7 +210,7 @@ export default function ChatApp() {
                 <path d="M4 5.5C6.5 4 9.5 4 12 5.5 14.5 4 17.5 4 20 5.5V19c-2.5-1.5-5.5-1.5-8 0-2.5-1.5-5.5-1.5-8 0z" />
                 <path d="M12 5.5V19" />
               </svg>
-              Story
+              Storyline
             </button>
           </div>
           <Composer onSend={(q) => ask(q)} disabled={thinking || Boolean(revealingId)} />

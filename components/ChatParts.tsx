@@ -39,7 +39,7 @@ export function ChatHeader({ stars, onChats, chatCount = 0 }: { stars: number; o
   );
 }
 
-const KIND_LABEL: Record<SourceKind, string> = { nasa: "NASA", partner: "Partner · .org", law: "U.S. law" };
+const KIND_LABEL: Record<SourceKind, string> = { nasa: "NASA", partner: "Partner · .org", law: "U.S. law", story: "Our story" };
 const readLabel = (r: Reference) =>
   r.kind === "partner" ? `Read on ${new URL(r.url).hostname.replace(/^www\./, "")}` : r.kind === "law" ? "Read the law" : "Read on NASA.gov";
 
@@ -69,9 +69,11 @@ export function SourceCard({ source, compact }: { source: Source; compact?: bool
           </p>
         )}
         <p className="t-body-sm c-muted">{source.fact}</p>
-        <a className="btn-cyan t-label" href={source.url} target="_blank" rel="noopener noreferrer">
-          {readLabel(source)}
-        </a>
+        {source.kind !== "story" && source.url && (
+          <a className="btn-cyan t-label" href={source.url} target="_blank" rel="noopener noreferrer">
+            {readLabel(source)}
+          </a>
+        )}
       </div>
     </article>
   );
@@ -96,9 +98,13 @@ export function References({ items, checked }: { items: Reference[]; checked?: b
         {items.map((r, i) => (
           <li key={r.id}>
             <span className="refs__n t-caption">[{i + 1}]</span>
-            <a href={r.url} target="_blank" rel="noopener noreferrer" className="t-body-sm">
-              {r.title}
-            </a>
+            {r.kind === "story" || !r.url ? (
+              <span className="t-body-sm">{r.title}</span>
+            ) : (
+              <a href={r.url} target="_blank" rel="noopener noreferrer" className="t-body-sm">
+                {r.title}
+              </a>
+            )}
             <span className={`refs__kind refs__kind--${r.kind} t-caption`}>{KIND_LABEL[r.kind]}</span>
           </li>
         ))}
@@ -212,33 +218,54 @@ export function QuickReplies({ items, onPick }: { items: string[]; onPick: (q: s
 }
 
 // Starter questions about the machines NASA left on Mars and the Moon (the challenge theme).
-const starters: { q: string; icon: "mars" | "moon" | "shield" | "chute" }[] = [
+type StarterKind = "mars" | "moon" | "shield" | "chute" | "book";
+
+const storyStarters: { q: string; icon: StarterKind }[] = [
+  { q: "How does Sojourner's story begin?", icon: "book" },
+  { q: "Why was Sojourner's ramp blocked?", icon: "chute" },
+  { q: "Who is Barnacle Bill?", icon: "mars" },
+  { q: "How does Sojourner's story end?", icon: "book" },
+];
+
+const starters: { q: string; icon: StarterKind }[] = [
   { q: "Where is Sojourner now?", icon: "mars" },
   { q: "What did astronauts leave on the Moon?", icon: "moon" },
   { q: "Why protect the Apollo landing sites?", icon: "shield" },
   { q: "What did Perseverance leave behind?", icon: "chute" },
 ];
 
-function StarterIcon({ kind }: { kind: "mars" | "moon" | "shield" | "chute" }) {
+function StarterIcon({ kind }: { kind: StarterKind }) {
   const p = { width: 20, height: 20, viewBox: "0 0 24 24", fill: "none", stroke: "currentColor", strokeWidth: 1.8, strokeLinecap: "round" as const, strokeLinejoin: "round" as const, "aria-hidden": true };
   if (kind === "mars") return <svg {...p}><circle cx="12" cy="12" r="8" /><path d="M6 10c3 1 6 .5 9-1.5M7.5 15.5c2.5-1 5-1 8 .5" /></svg>;
   if (kind === "moon") return <svg {...p}><path d="M19 14.5A8 8 0 1 1 9.5 5a6.5 6.5 0 0 0 9.5 9.5z" /></svg>;
+  if (kind === "book") return <svg {...p}><path d="M4 5.5C6.5 4 9.5 4 12 5.5 14.5 4 17.5 4 20 5.5V19c-2.5-1.5-5.5-1.5-8 0-2.5-1.5-5.5-1.5-8 0z" /><path d="M12 5.5V19" /></svg>;
   if (kind === "shield") return <svg {...p}><path d="M12 3l7 3v5c0 4.5-3 8.2-7 10-4-1.8-7-5.5-7-10V6z" /><path d="M9 12l2 2 4-4" /></svg>;
   return <svg {...p}><path d="M4 11a8 8 0 0 1 16 0z" /><path d="M5 11l7 8 7-8M12 19v2" /></svg>;
 }
 
 /** Welcome screen with Card/Suggestion grid */
-export function Welcome({ onPick, onStory }: { onPick: (q: string) => void; onStory?: (q: string) => void }) {
+export function Welcome({
+  onPick,
+  onStory,
+  storyMode,
+}: {
+  onPick: (q: string) => void;
+  onStory?: () => void;
+  storyMode?: boolean;
+}) {
+  const list = storyMode ? storyStarters : starters;
   return (
     <section className="hero">
       <h1 className="hero__title">
         <span>Ask</span> <CosmoLogo size={56} />
       </h1>
       <p className="hero__text">
-        The machines NASA left on Mars and the Moon, with real sources.
+        {storyMode
+          ? "Ask about our stories: Sojourner's journey to Mars, and Spirit's adventure."
+          : "The machines NASA left on Mars and the Moon, with real sources."}
       </p>
       <div className="hero__chips">
-        {starters.map(({ q, icon }) => (
+        {list.map(({ q, icon }) => (
           <button key={q} className="hero-chip" onClick={() => onPick(q)}>
             <span className="hero-chip__icon">
               <StarterIcon kind={icon} />
@@ -247,13 +274,13 @@ export function Welcome({ onPick, onStory }: { onPick: (q: string) => void; onSt
           </button>
         ))}
       </div>
-      {onStory && (
-        <button className="hero-story" onClick={() => onStory("Tell me your story, Sojourner")}>
+      {onStory && !storyMode && (
+        <button className="hero-story" onClick={onStory}>
           <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
             <path d="M4 5.5C6.5 4 9.5 4 12 5.5 14.5 4 17.5 4 20 5.5V19c-2.5-1.5-5.5-1.5-8 0-2.5-1.5-5.5-1.5-8 0z" />
             <path d="M12 5.5V19" />
           </svg>
-          <span>Hear Sojourner tell its own story</span>
+          <span>Explore the Storyline</span>
         </button>
       )}
     </section>

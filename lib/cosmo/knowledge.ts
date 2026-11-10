@@ -1,3 +1,5 @@
+import { STORY_TOPICS } from "./stories";
+
 // Verified reference notes. Every fact below was taken from the linked page (checked October and
 // November 2026): NASA first, plus a few trusted partners (The Planetary Society, the U.S. law text).
 // Cosmo answers only from these notes and cites each page it used, so kids always see where a fact
@@ -11,7 +13,7 @@ export interface NasaImage {
   nasaId: string;
 }
 
-export type SourceKind = "nasa" | "partner" | "law";
+export type SourceKind = "nasa" | "partner" | "law" | "story";
 
 export interface Topic {
   id: string;
@@ -642,7 +644,7 @@ const VIEWS: Record<string, Topic["views"]> = {
 };
 for (const t of TOPICS) if (VIEWS[t.id]) t.views = VIEWS[t.id];
 
-const byId = new Map(TOPICS.map((t) => [t.id, t]));
+const byId = new Map([...TOPICS, ...STORY_TOPICS].map((t) => [t.id, t]));
 
 export function getTopic(id: string): Topic | undefined {
   return byId.get(id);

@@ -1,6 +1,7 @@
 import { findTopics } from "./cosmo/knowledge";
+import { findStoryChapters } from "./cosmo/stories";
 import { toReference, toSource } from "./cosmo/sources";
-import type { ChatReply } from "./types";
+import type { ChatMode, ChatReply } from "./types";
 import { CREATOR } from "./cosmo/config";
 
 // Offline answers built straight from the verified NASA notes. Used when there is no
@@ -43,19 +44,21 @@ const NEXT: Record<string, string[]> = {
   webb: ["Where is Webb?", "Why does Webb use infrared?"],
 };
 
+const STORY_NEXT = ["What happens next?", "How does the story end?", "Who is Barnacle Bill?"];
+
 const words = (s: string) => new Set((s.toLowerCase().match(/[a-z0-9]+/g) ?? []).filter((w) => w.length > 3));
 
 /** Offline answer. `busy` = the AI service was unavailable, so we say so honestly. */
 const WHO_MADE = /\bwho\s+(made|built|created|designed|programmed|coded)\s+(you|cosmo)\b|\bwho\s+is\s+your\s+(creator|maker)\b|\byour\s+(creator|maker)\b/i;
 
-export function mockReply(question: string, busy = false): ChatReply {
+export function mockReply(question: string, busy = false, mode: ChatMode = "guide"): ChatReply {
   if (WHO_MADE.test(question)) {
     return {
       text: `${CREATOR.line} My job is to tell the stories of the machines NASA left on Mars and the Moon.`,
       suggestions: ["Where is Sojourner now?", "What did astronauts leave on the Moon?"],
     };
   }
-  const [topic] = findTopics(question);
+  const [topic] = mode === "story" ? findStoryChapters(question) : findTopics(question);
   // Pick the facts that share the most words with the question, not just the first ones.
   // Ignore the topic's own name ("mars", "sojourner"): every fact in the note shares it.
   const common = topic ? words([topic.title, ...topic.keywords].join(" ")) : new Set<string>();
@@ -83,5 +86,5 @@ export function mockReply(question: string, busy = false): ChatReply {
   const picked = busy ? ranked.filter((x) => x.s > 0).slice(0, 2) : ranked.slice(0, 2);
   const text = lead + picked.sort((a, b) => a.i - b.i).map((x) => x.f).join(" ");
   // Built word for word from the notes, so every number is checked by definition.
-  return { text, source: toSource(topic, 2, text), references: [toReference(topic)], checked: true, suggestions: NEXT[topic.id], ...(busy ? { busy: true } : {}) };
+  return { text, source: toSource(topic, 2, text), references: [toReference(topic)], checked: true, suggestions: NEXT[topic.id] ?? (topic.kind === "story" ? STORY_NEXT : undefined), ...(busy ? { busy: true } : {}) };
 }
