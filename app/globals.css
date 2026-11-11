@@ -490,7 +490,6 @@ body.is-dragging, body.is-dragging * { -webkit-user-select: none !important; use
 .mission-log {
   width: 100%; max-width: 960px; margin-top: 8px; display: flex; flex-direction: column; gap: 14px; padding: 18px;
   border-radius: 16px; background: rgb(21 27 61 / 0.75); border: 1px solid var(--space-700);
-  -webkit-user-select: text; user-select: text;
 }
 .mission-log__head { display: flex; align-items: baseline; justify-content: space-between; gap: 12px; }
 .log-mission { display: flex; flex-direction: column; gap: 6px; }
@@ -564,3 +563,8 @@ body.is-dragging, body.is-dragging * { -webkit-user-select: none !important; use
   .mission-picker .mission-chip .t-caption { font-size: 10px; }
   .mission-picker .mission-chip .c-muted { display: none; }
 }
+
+/* Holding the game buttons on iPhone must not start a text selection or the Copy menu,
+   so nothing on a game page is selectable except the win screen. */
+.game-page, .game-page * { -webkit-user-select: none; user-select: none; -webkit-touch-callout: none; }
+.game-page .win-panel, .game-page .win-panel * { -webkit-user-select: text; user-select: text; }

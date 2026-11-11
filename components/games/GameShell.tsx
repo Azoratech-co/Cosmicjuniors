@@ -11,6 +11,20 @@ import { STARS_EVENT, getStars } from "@/lib/stars";
 
 export { StarCount } from "../site/StarCount";
 
+/** Stop long presses from selecting text or opening the Copy menu while playing (iPhone). */
+function useNoSelect() {
+  useEffect(() => {
+    const inGame = (e: Event) => e.target instanceof Element && !e.target.closest(".win-panel");
+    const block = (e: Event) => inGame(e) && e.preventDefault();
+    document.addEventListener("selectstart", block);
+    document.addEventListener("contextmenu", block);
+    return () => {
+      document.removeEventListener("selectstart", block);
+      document.removeEventListener("contextmenu", block);
+    };
+  }, []);
+}
+
 export default function GameShell({
   title,
   tagline,
@@ -24,6 +38,7 @@ export default function GameShell({
   backLabel?: string;
   children: React.ReactNode;
 }) {
+  useNoSelect();
   return (
     <div className="game-page">
       <Starfield />
