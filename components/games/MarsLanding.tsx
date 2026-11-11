@@ -4,6 +4,8 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import { WinPanel } from "./GameShell";
 import { Chevron } from "./Chevron";
 import { addStars } from "@/lib/stars";
+import { setEngine, sfx, unlock } from "@/lib/sound";
+import SoundToggle from "./SoundToggle";
 import { MISSIONS, loadJSON, saveJSON, type Mission } from "@/lib/missions";
 import { flame, loadImage } from "./art";
 
@@ -133,6 +135,10 @@ export default function MarsLanding() {
 
   const crash = (c: Crash, extra: Partial<typeof result> = {}) => {
     sim.current.wreck = c !== "off";
+    setEngine(0);
+    if (["fast", "rock", "burst"].includes(c)) sfx.hit();
+    if (c !== "off") sfx.fail();
+    else sfx.thud(0.6);
     setResult({ landStars: 0, sciStars: 0, distance: 0, speed: 0, ...extra, crash: c });
     go("crashed");
   };
@@ -149,6 +155,7 @@ export default function MarsLanding() {
       go("crashed");
       return;
     }
+    sfx.thud(0.7);
     const landStars = 3 + (distance <= s.site.zone * 0.3 ? 2 : 0);
     addStars(landStars);
     setResult({ landStars, sciStars: 0, distance, speed, crash: "fast" });
@@ -164,7 +171,11 @@ export default function MarsLanding() {
 
   const finishScience = (ok: boolean) => {
     if (phaseRef.current !== "science") return;
-    if (!ok) return go("scifail");
+    if (!ok) {
+      sfx.fail();
+      return go("scifail");
+    }
+    sfx.win();
     const sciStars = 3;
     addStars(sciStars);
     setResult((r) => {
@@ -192,6 +203,7 @@ export default function MarsLanding() {
     } else {
       s.tries -= 1;
       s.missFlash = 0.5;
+      sfx.buzz();
       setHud((h) => ({ ...h, tries: s.tries }));
       if (s.tries <= 0) finishScience(false);
     }
@@ -202,6 +214,7 @@ export default function MarsLanding() {
     const s = sim.current;
     const p = phaseRef.current;
     if (p === "ready" || p === "crashed") {
+      unlock();
       reset(SITES.indexOf(s.site));
       go("entry");
     } else if (p === "entry") {
@@ -213,12 +226,15 @@ export default function MarsLanding() {
         s.alt = 11000;
         s.vy = -s.speed * 0.25;
         s.chute = 0.01;
+        sfx.pop();
         go("chute");
       }
     } else if (p === "final" && s.site.method === "airbags" && s.rocketsAt < 0) {
       s.rocketsAt = s.alt;
+      sfx.inflate();
     } else if (p === "final" && s.site.method !== "airbags" && !s.cutAt) {
       s.cutAt = s.alt;
+      sfx.separate();
     } else if (p === "science" && s.site.task !== "drive") {
       tryTiming();
     } else if (p === "scifail") {
@@ -333,6 +349,13 @@ export default function MarsLanding() {
           s.needle += dt * (st.task === "seismo" ? 3.6 : 2.6);
         }
       }
+      // sound: hot-air roar during entry, wind under the parachute, engines when they fire
+      if (p === "entry") {
+        const k = Math.min(1, s.t / ENTRY_T);
+        setEngine(0.55 * Math.min(1, k * 2.2) * (1 - Math.max(0, (k - 0.85) / 0.15)) + 0.05, 0.6);
+      } else if (p === "chute") setEngine(0.15, 0.8);
+      else if (p === "final" || p === "crane") setEngine(s.burning ? 0.75 : 0.1, s.burning ? 0.35 : 0.85);
+      else setEngine(0);
       if (s.flyAway > 0) s.flyAway += dt;
       if (s.open > 0 && s.open < 1) s.open = Math.min(1, s.open + dt * 1.2);
       s.hitFlash = Math.max(0, s.hitFlash - dt);
@@ -355,7 +378,10 @@ export default function MarsLanding() {
       raf = requestAnimationFrame(loop);
     };
     raf = requestAnimationFrame(loop);
-    return () => cancelAnimationFrame(raf);
+    return () => {
+      cancelAnimationFrame(raf);
+      sfx.stopAll();
+    };
   }, []);
 
   const hold = (dir: number) => ({
@@ -397,12 +423,11 @@ export default function MarsLanding() {
     <div className="arcade landing">
       <div className="mission-picker" role="group" aria-label="Choose a landing mission">
         {SITES.map((s, i) => {
-          const locked = i > save.unlocked;
           const best = save.best[s.mission.id];
           return (
-            <button key={s.mission.id} className={`mission-chip${i === siteIdx ? " is-on" : ""}`} disabled={locked || busy} onClick={() => pickSite(i)}
-              aria-label={`${s.mission.name}, ${s.mission.site}, ${s.mission.year}${locked ? ", locked" : ""}`}>
-              <span className="t-caption c-cyan">{s.mission.year}{locked ? " · Locked" : best ? ` · ★ ${best}` : ""}</span>
+            <button key={s.mission.id} className={`mission-chip${i === siteIdx ? " is-on" : ""}`} disabled={busy} onClick={() => pickSite(i)}
+              aria-label={`${s.mission.name}, ${s.mission.site}, ${s.mission.year}`}>
+              <span className="t-caption c-cyan">{s.mission.year}{best ? ` · ★ ${best}` : ""}</span>
               <span className="t-label">{s.mission.name}</span>
               <span className="t-caption c-muted">{s.mission.site}</span>
             </button>
@@ -436,6 +461,7 @@ export default function MarsLanding() {
             <span className="t-label c-muted">Wind {hud.wind > 0.3 ? "→" : hud.wind < -0.3 ? "←" : "·"} {Math.abs(Math.round(hud.wind))} m/s{site.gusty ? " · gusty" : ""}</span>
           </>
         )}
+        <SoundToggle />
       </div>
 
       <div className="arcade-stage">
@@ -596,6 +622,7 @@ function stepFinal(s: Sim, dt: number, steer: number, thrust: boolean, crash: Cr
       if (-s.vy > 2.5) return crash("fast", { speed: v });
       if (onRock(st, s.x)) return crash("rock");
       s.flyAway = 0.01;
+      sfx.separate();
       return land(s.x, v);
     }
   }
@@ -623,6 +650,7 @@ function stepBounce(s: Sim, dt: number, crash: CrashFn, land: (x: number, v: num
     if (b.bounces === 0 && -b.vy > 22) return crash("burst", { speed: Math.round(-b.vy) });
     b.y = 0;
     b.bounces++;
+    sfx.thud(Math.min(1, -b.vy / 14));
     puff(s, b.x, 10);
     b.vy = -b.vy * 0.55;
     b.vx *= 0.75;

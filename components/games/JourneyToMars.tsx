@@ -5,6 +5,8 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import { WinPanel } from "./GameShell";
 import { Chevron } from "./Chevron";
 import { addStars } from "@/lib/stars";
+import { setEngine, sfx, unlock } from "@/lib/sound";
+import SoundToggle from "./SoundToggle";
 import { CRUISES, loadJSON, saveJSON } from "@/lib/missions";
 import { cloud, craft, debris, loadImage, mix, rocket, rockShape, spaceRock, type RocketState } from "./art";
 
@@ -61,7 +63,7 @@ export default function JourneyToMars() {
   const facts = cruise.mission.facts;
 
   const game = useRef({
-    phase: "countdown" as Phase, clock: 0, kind: CRUISES[0].rocket,
+    phase: "countdown" as Phase, clock: 0, beep: 0, kind: CRUISES[0].rocket,
     // launch
     alt: 0, rx: W / 2, ry: H - 68, rvx: 0, wind: 0, windT: 0, cam: 0, onCourse: 0, ascentT: 0,
     rs: { boosters: true, fairing: true, firstStage: true } as RocketState,
@@ -96,7 +98,7 @@ export default function JourneyToMars() {
       { at: 0.7, kind: "shield" as const, fact: -1 },
     ].sort((a, b) => a.at - b.at);
     Object.assign(g, {
-      phase: "countdown", clock: 0, kind: c.rocket,
+      phase: "countdown", clock: 0, beep: 0, kind: c.rocket,
       alt: 0, rx: W / 2, ry: H - 68, rvx: 0, wind: 0, windT: 1.5, cam: 0, onCourse: 0, ascentT: 0,
       rs: { boosters: true, fairing: true, firstStage: true }, event: 0, eventT: 0, staged: 0, puffs: [], pieces: [], sepT: 0,
       clouds: Array.from({ length: 9 }, (_, i) => ({ x: Math.random() * W, y: -260 - i * 340 - Math.random() * 120, w: 160 + Math.random() * 160, seed: Math.random() })),
@@ -116,6 +118,7 @@ export default function JourneyToMars() {
   useEffect(() => reset(0), [reset]);
 
   const begin = (idx = chapter) => {
+    unlock();
     setChapter(idx);
     reset(idx);
     setStatus("playing");
@@ -129,6 +132,7 @@ export default function JourneyToMars() {
 
   const onFact = useRef<(i: number) => void>(() => {});
   onFact.current = (i: number) => {
+    sfx.data();
     setRunFound((f) => (f.includes(i) ? f : [...f, i]));
     showFact(facts[i]);
     setSave((s) => {
@@ -148,6 +152,8 @@ export default function JourneyToMars() {
     const course = g.ascentT ? g.onCourse / g.ascentT : 0;
     const earned = 3 + g.found.length + (noHits ? 2 : 0) + (g.staged === EVENTS.length ? 1 : 0) + (course > 0.8 ? 1 : 0);
     addStars(earned);
+    setEngine(0);
+    sfx.win();
     setResult({ earned, perfect: noHits, staged: g.staged, course });
     setSave((s) => {
       const next = { ...s, unlocked: Math.max(s.unlocked, Math.min(CRUISES.length - 1, chapter + 1)) };
@@ -179,6 +185,7 @@ export default function JourneyToMars() {
     } else {
       g.sepT = 0.001;
     }
+    sfx.separate();
     g.event++;
     g.eventT = 0;
     setPrompt(null);
@@ -243,14 +250,27 @@ export default function JourneyToMars() {
       if (playing) {
         g.clock += dt;
         if (g.phase === "countdown") {
-          // engines light at T-0.4 s; smoke billows out of the flame trench
-          if (g.clock > COUNTDOWN - 0.4) emitPad(g, dt);
+          // countdown beeps; engines light at T-0.4 s and smoke billows out of the flame trench
+          const n = Math.ceil(COUNTDOWN - g.clock);
+          if (n !== g.beep && n > 0) {
+            g.beep = n;
+            sfx.beep();
+          }
+          if (g.clock > COUNTDOWN - 0.4) {
+            emitPad(g, dt);
+            setEngine(1, 0.3);
+          }
           if (g.clock >= COUNTDOWN) {
+            sfx.beep(true);
             g.phase = "ascent";
             setPhase("ascent");
           }
         } else if (g.phase === "ascent") {
           ascend(g, dt, sx);
+          // the roar fades as the air thins; the upper stage is much quieter
+          if (g.sepT > 0) setEngine(0);
+          else if (g.rs.firstStage) setEngine(1 - g.alt * 0.55, 0.25 + (1 - g.alt) * 0.5);
+          else setEngine(0.3, 0.2);
           const ev = EVENTS[g.event];
           if (ev && g.alt >= ev.at) {
             if (g.eventT === 0) setPrompt(ev.label);
@@ -269,8 +289,14 @@ export default function JourneyToMars() {
         } else {
           cruiseStep(g, dt, sx, sy, onFact.current, (left) => {
             setShields(left);
-            if (left <= 0) setStatus("lost");
+            if (left <= 0) {
+              setEngine(0);
+              sfx.fail();
+              setStatus("lost");
+            }
           });
+          // small thruster hiss while steering
+          setEngine(g.thrust.x || g.thrust.y ? 0.1 : 0, 0.9);
           if (g.progress >= 1 && statusRef.current === "playing") {
             statusRef.current = "won";
             onWin.current();
@@ -282,7 +308,7 @@ export default function JourneyToMars() {
           setProgress(g.progress);
           setAlt(g.alt);
         }
-      }
+      } else setEngine(0);
 
       // stars always drift a little
       const drift = g.phase === "cruise" && playing ? 1 : 0.15;
@@ -299,7 +325,10 @@ export default function JourneyToMars() {
       raf = requestAnimationFrame(loop);
     };
     raf = requestAnimationFrame(loop);
-    return () => cancelAnimationFrame(raf);
+    return () => {
+      cancelAnimationFrame(raf);
+      sfx.stopAll();
+    };
   }, []);
 
   const toLogical = (e: React.PointerEvent) => {
@@ -341,12 +370,15 @@ export default function JourneyToMars() {
             </span>
           </>
         ) : (
-          <>
+          status === "ready" ? (
+            <span className="t-label">Pick a mission to launch</span>
+          ) : <>
             <span className="t-label">{cruise.rocketName} · <span className="c-muted">Cape Canaveral, Florida</span></span>
             <span className="t-label">Altitude <b>{Math.round(alt * 190)} km</b></span>
             <span className="t-label c-muted">{fmtDate(cruise.launch)}</span>
           </>
         )}
+        <SoundToggle />
         {status === "playing" && (
           <button className="btn-ghost t-label" onClick={() => setStatus("paused")}>Pause</button>
         )}
@@ -377,11 +409,10 @@ export default function JourneyToMars() {
                 <h2 className="t-title">Choose your mission</h2>
                 <div className="chapter-list">
                   {CRUISES.map((c, i) => {
-                    const locked = i > save.unlocked;
                     const got = save.found[c.mission.id]?.length ?? 0;
                     return (
-                      <button key={c.mission.id} className={`chapter${i === chapter ? " is-on" : ""}`} disabled={locked} onClick={() => begin(i)}>
-                        <span className="t-caption c-cyan">Chapter {i + 1}{locked ? " · Locked" : ""}</span>
+                      <button key={c.mission.id} className={`chapter${i === chapter ? " is-on" : ""}`} onClick={() => begin(i)}>
+                        <span className="t-caption c-cyan">Chapter {i + 1}{i < save.unlocked ? " · Done" : ""}</span>
                         <span className="t-label">{c.mission.name}</span>
                         <span className="t-caption c-muted">
                           {c.rocketName} · {fmtDate(c.launch)} · {c.days} days to Mars · {got}/{c.mission.facts.length} facts
@@ -397,7 +428,7 @@ export default function JourneyToMars() {
               <>
                 <h2 className="t-title">Paused</h2>
                 <button className="btn-purple t-label" onClick={() => setStatus("playing")}>Resume</button>
-                <button className="btn-ghost t-label" onClick={() => setStatus("ready")}>Choose another mission</button>
+                <button className="btn-ghost t-label" onClick={() => { reset(chapter); setStatus("ready"); }}>Choose another mission</button>
               </>
             )}
             {status === "lost" && (
@@ -407,7 +438,7 @@ export default function JourneyToMars() {
                   Your {cruise.mission.name} cruise ended on day {day} of {cruise.days}. The facts you caught are saved in your Mission Log.
                 </p>
                 <button className="btn-purple t-label" onClick={() => begin()}>Launch again</button>
-                <button className="btn-ghost t-label" onClick={() => setStatus("ready")}>Choose another mission</button>
+                <button className="btn-ghost t-label" onClick={() => { reset(chapter); setStatus("ready"); }}>Choose another mission</button>
               </>
             )}
           </div>
@@ -482,7 +513,7 @@ export default function JourneyToMars() {
 }
 
 interface Game {
-  phase: Phase; clock: number; kind: "delta" | "atlas";
+  phase: Phase; clock: number; beep: number; kind: "delta" | "atlas";
   alt: number; rx: number; ry: number; rvx: number; wind: number; windT: number; cam: number; onCourse: number; ascentT: number;
   rs: RocketState; event: number; eventT: number; staged: number; puffs: Puff[]; pieces: Piece[]; clouds: Cloud[]; sepT: number;
   x: number; y: number; inv: number; hits: number; progress: number; spawn: number; difficulty: number; trip: number;
@@ -605,6 +636,7 @@ function cruiseStep(g: Game, dt: number, sx: number, sy: number, onFact: (i: num
         g.hits = Math.max(0, g.hits - 1);
         onHit(SHIELDS - g.hits);
         g.flash = 0.4;
+        sfx.repair();
       }
       return false;
     }
@@ -614,6 +646,7 @@ function cruiseStep(g: Game, dt: number, sx: number, sy: number, onFact: (i: num
   if (g.inv <= 0 && g.rocks.some((r) => Math.hypot(r.x - g.x, r.y - g.y) < r.r * 0.82 + 13)) {
     g.hits++;
     g.inv = 1.3;
+    sfx.hit();
     onHit(SHIELDS - g.hits);
   }
 }

@@ -3,6 +3,8 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { WinPanel } from "./GameShell";
 import { addStars } from "@/lib/stars";
+import { sfx, unlock } from "@/lib/sound";
+import SoundToggle from "./SoundToggle";
 
 // Sojourner Puzzle: a real NASA photo is cut into pieces that sit mixed up in a tray.
 // Drag a piece onto the picture (or tap a piece, then tap its spot). Pieces only snap
@@ -102,9 +104,11 @@ export default function SojournerPuzzle() {
   };
 
   const place = (id: number, cell: number) => {
+    unlock();
     start();
     setMoves((m) => m + 1);
     if (id !== cell) {
+      sfx.buzz();
       setWrongCell(cell);
       window.setTimeout(() => setWrongCell(null), 450);
       return;
@@ -114,7 +118,9 @@ export default function SojournerPuzzle() {
     setPlaced(nextPlaced);
     setTray((t) => t.filter((x) => x !== id));
     setSelected(null);
+    sfx.click();
     if (nextPlaced.every(Boolean)) {
+      sfx.win();
       setFinishedIn(Math.round((Date.now() - (startedAt ?? Date.now())) / 1000));
       addStars(level.stars);
       try {
@@ -203,6 +209,7 @@ export default function SojournerPuzzle() {
         <span className="t-label c-muted stat">
           {placedCount}/{total} pieces · {moves} moves · {fmt(elapsed)}
         </span>
+        <SoundToggle />
         <label className="toggle t-label">
           <input type="checkbox" checked={hint} onChange={(e) => setHint(e.target.checked)} /> Show guide
         </label>
