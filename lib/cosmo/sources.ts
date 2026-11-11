@@ -1,5 +1,6 @@
 import type { Topic } from "./knowledge";
 import type { Reference, Source } from "../types";
+import stories from "@/content/stories.json";
 
 const words = (s: string) => new Set(s.toLowerCase().match(/[a-z0-9]+/g) ?? []);
 
@@ -9,8 +10,40 @@ function overlap(fact: string, answer: Set<string>) {
   return w.length ? w.filter((x) => answer.has(x)).length / w.length : 1;
 }
 
-export function toReference(topic: Topic): Reference {
-  return { id: topic.id, title: topic.title, publisher: topic.publisher, url: topic.url, kind: topic.kind ?? "nasa" };
+const COMMON = new Set("that this with were from they their there then them what when which while into have been about would could after before over under just like also only some more most very each".split(" "));
+
+/**
+ * Link to the exact paragraph of the team's story that best matches `text`
+ * (e.g. /story/sojourner#chapter-3-p2), so a story reference opens right where the answer came from.
+ */
+export function storyLink(topic: Topic, text: string): string {
+  const m = topic.id.match(/^story-(\w+)-(\d+)$/);
+  if (!m) return topic.url;
+  const [, sid, n] = m;
+  const story = (stories as Record<string, { chapters: { n: number; paragraphs: string[] }[] }>)[sid];
+  const chapter = story?.chapters.find((c) => c.n === Number(n));
+  const base = `/story/${sid}#chapter-${n}`;
+  if (!chapter) return base;
+  const said = [...words(text)].filter((w) => w.length > 3 && !COMMON.has(w));
+  let best = -1;
+  let bestScore = 0;
+  chapter.paragraphs.forEach((p, i) => {
+    const pw = words(p);
+    const hits = said.filter((w) => pw.has(w)).length;
+    const score = hits / Math.sqrt(pw.size || 1);
+    if (hits >= 2 && score > bestScore) {
+      best = i;
+      bestScore = score;
+    }
+  });
+  return best < 0 ? base : `${base}-p${best + 1}`;
+}
+
+/** A numbered reference. For story chapters, `text` (the answer) picks the paragraph to link to. */
+export function toReference(topic: Topic, text = ""): Reference {
+  const kind = topic.kind ?? "nasa";
+  const url = kind === "story" ? storyLink(topic, text) : topic.url;
+  return { id: topic.id, title: topic.title, publisher: topic.publisher, url, kind };
 }
 
 /** Turn a knowledge-base topic into the source card shown under an answer. */
@@ -32,7 +65,7 @@ export function toSource(topic: Topic, factIndex: number | null, answer: string)
     .sort((a, b) => b.s - a.s);
   const view = scored[0]?.v;
   return {
-    ...toReference(topic),
+    ...toReference(topic, answer),
     heading: view?.title,
     fact: topic.facts[i],
     image: view?.image ?? topic.image,

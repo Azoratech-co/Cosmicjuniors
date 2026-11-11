@@ -341,3 +341,10 @@
   .card-touch__tag:first-child { opacity: 1; }
   .card-touch__progress i { transform: scaleX(.4); }
 }
+
+/* A paragraph opened from a Cosmo story reference */
+.chapter-block__text p { scroll-margin-top: 150px; }
+.chapter-block__text p.is-found { position: relative; border-radius: 12px; padding: 10px 14px; margin-left: -14px; margin-right: -14px;
+  background: color-mix(in srgb, var(--sky, #7cc4ff) 14%, transparent); box-shadow: inset 4px 0 0 var(--sky, #7cc4ff); animation: story-found 2.4s ease-out 1; }
+.chapter-block__text p.is-found::before { content: "From Cosmo's answer"; display: block; margin-bottom: 4px; font-size: 12px; font-weight: 700; letter-spacing: .04em; text-transform: uppercase; color: var(--sky, #7cc4ff); }
+@keyframes story-found { 0%, 30% { background: color-mix(in srgb, var(--sky, #7cc4ff) 34%, transparent); } }

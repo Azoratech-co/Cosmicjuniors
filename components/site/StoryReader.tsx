@@ -36,6 +36,19 @@ export default function StoryReader({ story, signVideos, nextStory }: { story: S
 
   useEffect(() => () => window.speechSynthesis?.cancel(), []);
 
+  // Opened from a Cosmo reference (e.g. #chapter-3-p2): land on that paragraph and mark it.
+  // Scroll again once photos above it have loaded and moved it down.
+  useEffect(() => {
+    const id = decodeURIComponent(window.location.hash.slice(1));
+    if (!/^chapter-\d+-p\d+$/.test(id)) return;
+    const el = document.getElementById(id);
+    if (!el) return;
+    el.classList.add("is-found");
+    const go = () => el.scrollIntoView({ block: "center" });
+    const timers = [100, 700, 1500].map((t) => window.setTimeout(go, t));
+    return () => timers.forEach(clearTimeout);
+  }, []);
+
   const readAloud = (n: number) => {
     const synth = window.speechSynthesis;
     if (!synth) return;
@@ -115,7 +128,7 @@ export default function StoryReader({ story, signVideos, nextStory }: { story: S
           <div className="chapter-block__text">
             {c.paragraphs.map((p, i) => (
               <Reveal key={i}>
-                <p className={p === "To be continued…" ? "tbc" : undefined}>{p}</p>
+                <p id={`chapter-${c.n}-p${i + 1}`} className={p === "To be continued…" ? "tbc" : undefined}>{p}</p>
               </Reveal>
             ))}
           </div>

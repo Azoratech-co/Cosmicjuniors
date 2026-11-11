@@ -86,5 +86,5 @@ export function mockReply(question: string, busy = false, mode: ChatMode = "guid
   const picked = busy ? ranked.filter((x) => x.s > 0).slice(0, 2) : ranked.slice(0, 2);
   const text = lead + picked.sort((a, b) => a.i - b.i).map((x) => x.f).join(" ");
   // Built word for word from the notes, so every number is checked by definition.
-  return { text, source: toSource(topic, 2, text), references: [toReference(topic)], checked: true, suggestions: NEXT[topic.id] ?? (topic.kind === "story" ? STORY_NEXT : undefined), ...(busy ? { busy: true } : {}) };
+  return { text, source: toSource(topic, 2, text), references: [toReference(topic, text)], checked: true, suggestions: NEXT[topic.id] ?? (topic.kind === "story" ? STORY_NEXT : undefined), ...(busy ? { busy: true } : {}) };
 }

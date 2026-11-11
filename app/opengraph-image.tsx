@@ -1,12 +1,11 @@
 import { ImageResponse } from "next/og";
-import { OG_SIZE, SitePreview, ogFonts, publicImage } from "@/lib/og-juniors";
+import { OG_SIZE, SitePreview, ogFonts } from "@/lib/og-sand";
 
 // Link preview for the whole website (WhatsApp, Instagram, Slack, iMessage, X, LinkedIn...).
-export const alt = "Cosmic Juniors: stories and facts about the machines NASA left on Mars and the Moon";
+export const alt = "Cosmic Juniors: the machines NASA left behind on Mars and the Moon, and the stories they still tell";
 export const size = OG_SIZE;
 export const contentType = "image/png";
 
 export default async function Image() {
-  const photo = await publicImage("figma/og-sojourner.jpg", "image/jpeg");
-  return new ImageResponse(<SitePreview photo={photo} />, { ...size, fonts: await ogFonts() });
+  return new ImageResponse(<SitePreview />, { ...size, fonts: await ogFonts() });
 }

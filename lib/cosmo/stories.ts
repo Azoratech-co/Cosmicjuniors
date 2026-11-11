@@ -30,7 +30,7 @@ function storyTopics(story: { id: string; title: string; by: string; chapters: C
     keywords: c.keywords,
     title: `${story.title} · Chapter ${c.n}: ${c.title}`,
     publisher: `Cosmic Juniors Storyline · by ${story.by}`,
-    url: "",
+    url: `/story/${story.id}#chapter-${c.n}`,
     facts: c.facts,
     image: c.image,
   }));

@@ -208,7 +208,7 @@ function parseAnswer(data: unknown, topics: Topic[]): { safety: SafetyCategory; 
   const used = usedTopics(text, topics, ids.map((id) => getTopic(id)!)).slice(0, 4);
   if (used.length) {
     reply.source = toSource(used[0], typeof d.fact === "number" ? d.fact : null, text);
-    reply.references = used.map(toReference);
+    reply.references = used.map((t) => toReference(t, text));
   }
 
   if (typeof d.title === "string") {

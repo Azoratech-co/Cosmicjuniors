@@ -69,6 +69,11 @@ export function SourceCard({ source, compact }: { source: Source; compact?: bool
           </p>
         )}
         <p className="t-body-sm c-muted">{source.fact}</p>
+        {source.kind === "story" && source.url && (
+          <a className="btn-cyan t-label story-jump" href={source.url}>
+            Read this part of the story →
+          </a>
+        )}
         {source.kind !== "story" && source.url && (
           <a className="btn-cyan t-label" href={source.url} target="_blank" rel="noopener noreferrer">
             {readLabel(source)}
@@ -98,8 +103,12 @@ export function References({ items, checked }: { items: Reference[]; checked?: b
         {items.map((r, i) => (
           <li key={r.id}>
             <span className="refs__n t-caption">[{i + 1}]</span>
-            {r.kind === "story" || !r.url ? (
+            {!r.url ? (
               <span className="t-body-sm">{r.title}</span>
+            ) : r.kind === "story" ? (
+              <a href={r.url} className="t-body-sm" title="Open this part of the story">
+                {r.title} ↗
+              </a>
             ) : (
               <a href={r.url} target="_blank" rel="noopener noreferrer" className="t-body-sm">
                 {r.title}
