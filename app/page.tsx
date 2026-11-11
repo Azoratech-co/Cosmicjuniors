@@ -5,6 +5,7 @@ import Starfield from "@/components/Starfield";
 import SiteHeader from "@/components/site/SiteHeader";
 import SiteFooter from "@/components/site/SiteFooter";
 import Reveal from "@/components/site/Reveal";
+import ChatCardArt from "@/components/site/ChatCardArt";
 import { ABOUT_US, GROUP_VIDEOS } from "@/lib/home";
 
 export const metadata: Metadata = {
@@ -14,7 +15,7 @@ export const metadata: Metadata = {
 
 // Homepage, built from the team's Figma ("Cosmic Juniors | iPad 11-inch Portrait").
 
-const MISSIONS = [
+const MISSIONS: { n: string; title: string; text: string; cta: string; href: string; img?: string; alt?: string; art?: "cosmo" }[] = [
   {
     n: "01",
     title: "Storyline",
@@ -39,14 +40,12 @@ const MISSIONS = [
     text: "Chat with Cosmo for more info, with real NASA sources.",
     cta: "Start chatting",
     href: "/chat",
-    img: "https://images-assets.nasa.gov/image/PIA26718/PIA26718~medium.jpg",
-    alt: "A NASA Deep Space Network antenna at Goldstone, California, under the Milky Way",
-    pos: "center 88%",
+    art: "cosmo",
   },
   {
     n: "04",
     title: "Games",
-    text: "Rebuild Sojourner, fly to Mars, and land at real NASA sites.",
+    text: "Rebuild Sojourner, launch a real rocket to Mars, and land like the real missions did.",
     cta: "Play now",
     href: "/games",
     img: "https://images-assets.nasa.gov/image/PIA24318/PIA24318~medium.jpg",
@@ -76,7 +75,11 @@ export default function HomePage() {
             <Reveal key={m.n} delay={i * 90}>
               <Link href={m.href} className="mission-card">
                 <span className="mission-card__media">
-                  <Image src={m.img} alt={m.alt} width={1536} height={864} sizes="(max-width: 700px) 92vw, 360px" style={m.pos ? { objectPosition: m.pos } : undefined} />
+                  {m.img ? (
+                    <Image src={m.img} alt={m.alt ?? ""} width={1536} height={864} sizes="(max-width: 700px) 92vw, 360px" />
+                  ) : (
+                    <ChatCardArt />
+                  )}
                 </span>
                 <span className="mission-card__n">{m.n}</span>
                 <span className="mission-card__title">{m.title}</span>

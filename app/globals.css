@@ -333,10 +333,10 @@ kbd { font-family: var(--font-body); font-size: 12px; padding: 1px 6px; border-r
 }
 .arcade-hud b { font-variant-numeric: tabular-nums; }
 .pip { display: inline-block; width: 10px; height: 10px; margin-left: 4px; border-radius: 3px; background: var(--space-700); vertical-align: -1px; }
-.pip.is-on { background: var(--brand-cyan); box-shadow: 0 0 8px rgb(61 214 245 / 0.6); }
+.pip.is-on { background: var(--brand-cyan); }
 .trip { flex: 1; min-width: 180px; display: flex; align-items: center; gap: 8px; }
 .trip__bar { flex: 1; height: 8px; border-radius: 999px; background: var(--space-700); overflow: hidden; }
-.trip__bar span { display: block; height: 100%; background: linear-gradient(90deg, #3d8bff, #ff8a5c); transition: width 0.1s linear; }
+.trip__bar span { display: block; height: 100%; background: #e0a066; transition: width 0.1s linear; }
 /* Fit the game to the screen height so the whole play area is always visible. */
 .arcade-stage { position: relative; width: min(100%, 480px, calc((100dvh - 230px) * 0.75)); min-width: 260px; }
 .landing .arcade-stage { width: min(100%, 960px, calc((100dvh - 250px) * 1.778)); }

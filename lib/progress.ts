@@ -35,7 +35,7 @@ export function getProgress() {
     { id: "first", name: "First contact", hint: "Ask Cosmo a question", earned: stars >= 1 },
     { id: "puzzle", name: "Rover rebuilder", hint: "Finish the Sojourner Puzzle", earned: (puzzle.solved ?? 0) > 0 },
     { id: "mars", name: "Reached Mars", hint: "Finish a Journey to Mars chapter", earned: (journey.unlocked ?? 0) >= 1 },
-    { id: "facts", name: "Data collector", hint: "Catch 5 data capsules", earned: facts >= 5 },
+    { id: "facts", name: "Data collector", hint: "Catch 5 science data signals in Journey to Mars", earned: facts >= 5 },
     { id: "landing", name: "Safe landing", hint: "Complete a Mars Landing mission", earned: landed >= 1 },
     { id: "stars", name: "Star captain", hint: "Collect 50 stars", earned: stars >= 50 },
   ];

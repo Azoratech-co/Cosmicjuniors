@@ -10,7 +10,7 @@ export interface Mission {
   kind: "rover" | "lander";
   source: { title: string; url: string };
   photo: { src: string; credit: string; alt: string };
-  /** Facts collected in Journey to Mars (data capsules). */
+  /** Facts collected in Journey to Mars (science data). */
   facts: string[];
   /** What the science task reveals in Mars Landing. */
   discovery: string;
@@ -121,11 +121,11 @@ export const MISSIONS: Record<string, Mission> = {
 export const daysBetween = (from: string, to: string) =>
   Math.round((Date.parse(to) - Date.parse(from)) / 86_400_000);
 
-/** Journey to Mars chapters: real launch and landing dates from NASA. */
+/** Journey to Mars chapters: real launch and landing dates and rockets (all launched from Cape Canaveral). */
 export const CRUISES = [
-  { mission: MISSIONS.pathfinder, launch: "1996-12-04", land: "1997-07-04", difficulty: 0 },
-  { mission: MISSIONS.spirit, launch: "2003-06-10", land: "2004-01-03", difficulty: 1 },
-  { mission: MISSIONS.perseverance, launch: "2020-07-30", land: "2021-02-18", difficulty: 2 },
+  { mission: MISSIONS.pathfinder, launch: "1996-12-04", land: "1997-07-04", difficulty: 0, rocket: "delta" as const, rocketName: "Delta II" },
+  { mission: MISSIONS.spirit, launch: "2003-06-10", land: "2004-01-03", difficulty: 1, rocket: "delta" as const, rocketName: "Delta II" },
+  { mission: MISSIONS.perseverance, launch: "2020-07-30", land: "2021-02-18", difficulty: 2, rocket: "atlas" as const, rocketName: "Atlas V" },
 ].map((c) => ({ ...c, days: daysBetween(c.launch, c.land) }));
 
 /** Small, safe localStorage helpers for saving campaign progress in this browser. */

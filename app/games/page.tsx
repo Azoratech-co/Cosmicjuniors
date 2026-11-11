@@ -5,9 +5,9 @@ import Explorer from "@/components/Explorer";
 
 export const metadata: Metadata = {
   title: "Mission Games · Cosmic Juniors",
-  description: "Three Mars mission games: rebuild Sojourner, fly real NASA cruises to Mars, and land at five real landing sites.",
-  openGraph: { title: "Mission Games · Cosmic Juniors", description: "Three Mars mission games: rebuild Sojourner, fly real NASA cruises to Mars, and land at five real landing sites.", url: "/games", siteName: "Cosmic Juniors", type: "website" },
-  twitter: { card: "summary_large_image", title: "Mission Games · Cosmic Juniors", description: "Three Mars mission games: rebuild Sojourner, fly real NASA cruises to Mars, and land at five real landing sites." },
+  description: "Three Mars mission games: rebuild Sojourner, launch and fly real NASA missions to Mars, and land at five real landing sites.",
+  openGraph: { title: "Mission Games · Cosmic Juniors", description: "Three Mars mission games: rebuild Sojourner, launch and fly real NASA missions to Mars, and land at five real landing sites.", url: "/games", siteName: "Cosmic Juniors", type: "website" },
+  twitter: { card: "summary_large_image", title: "Mission Games · Cosmic Juniors", description: "Three Mars mission games: rebuild Sojourner, launch and fly real NASA missions to Mars, and land at five real landing sites." },
 };
 
 const GAMES = [
@@ -25,21 +25,21 @@ const GAMES = [
     href: "/games/dodge",
     tag: "Mission 02 · Arcade",
     title: "Journey to Mars",
-    text: "Fly three real NASA cruises and dodge the lasers.",
+    text: "Launch the real rockets from Cape Canaveral, then cruise to Mars through the meteoroids.",
     level: 2,
     levelName: "Medium",
-    img: "https://images-assets.nasa.gov/image/PIA00407/PIA00407~small.jpg",
-    alt: "Mars seen from space",
+    img: "https://images-assets.nasa.gov/image/PIA04754/PIA04754~small.jpg",
+    alt: "The Delta II rocket launching Mars Pathfinder from Cape Canaveral in 1996",
   },
   {
     href: "/games/landing",
     tag: "Mission 03 · Skill",
     title: "Mars Landing",
-    text: "Land at five real NASA sites, then do the science.",
+    text: "Heat shield, parachute, airbags, engines or sky crane: land like the real missions did.",
     level: 3,
     levelName: "Hard",
-    img: "https://images-assets.nasa.gov/image/PIA04318/PIA04318~orig.jpg",
-    alt: "Sojourner near rocks on the Martian surface",
+    img: "https://images-assets.nasa.gov/image/PIA24428/PIA24428~small.jpg",
+    alt: "Perseverance being lowered to the surface of Mars by the sky crane, photographed from the descent stage",
   },
 ];
 
