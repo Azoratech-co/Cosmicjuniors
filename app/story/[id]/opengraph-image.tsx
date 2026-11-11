@@ -15,12 +15,12 @@ export default async function Image({ params }: { params: Promise<{ id: string }
     <PagePreview
       eyebrow="Storyline"
       title={name}
-      text={`${sub?.trim() ?? ""}. A story by ${s.authors}, with read-aloud and NASA photos.`}
+      text={`${sub?.trim() ?? ""}. A Cosmic Juniors story, with read-aloud and NASA photos.`}
       tag={{
         label: "Story",
         no: `No. ${String(STORY_IDS.indexOf(id as (typeof STORY_IDS)[number]) + 1).padStart(3, "0")}`,
         name,
-        lines: [`by ${s.authors}`, `${s.chapters.length} chapters`, s.status === "complete" ? "Complete" : "Still being written"],
+        lines: ["Cosmic Juniors Storyline", `${s.chapters.length} chapters`, s.status === "complete" ? "Complete" : "Still being written"],
         draw: DRAW.book,
         stamp: "Read the story",
       }}

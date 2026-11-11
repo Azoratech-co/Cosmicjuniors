@@ -17,7 +17,7 @@ export function generateStaticParams() {
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const s = getStory((await params).id);
   if (!s) return {};
-  return { title: `${s.title} · Cosmic Juniors Storyline`, description: `A story by ${s.authors}, the Cosmic Juniors team.` };
+  return { title: `${s.title} · Cosmic Juniors Storyline`, description: `A story from the Cosmic Juniors team, with read-aloud and NASA photos.` };
 }
 
 export default async function StoryPage({ params }: Props) {
@@ -33,7 +33,7 @@ export default async function StoryPage({ params }: Props) {
       <main className="site-main site-main--narrow">
         <div className="page-top">
           <div>
-            <p className="crumb">Storyline · by {story.authors}</p>
+            <p className="crumb">Storyline</p>
             <h1 className="display-title">{story.title.split(":")[0]}</h1>
             <p className="page-tagline">{story.title.split(":")[1]?.trim()}</p>
             <span className="title-accent" aria-hidden="true" />

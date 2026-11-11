@@ -13,7 +13,6 @@ export interface StoryChapter {
 export interface Story {
   id: "sojourner" | "spirit";
   title: string;
-  authors: string;
   status: string;
   chapters: StoryChapter[];
 }

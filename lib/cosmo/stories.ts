@@ -1,8 +1,7 @@
 import type { NasaImage, Topic } from "./knowledge";
 
 // The Cosmic Juniors Storyline: the team's own stories, retold chapter by chapter so Cosmo can
-// answer story questions. Sojourner merges Leah's and Lilian's manuscripts (Leah's chapters,
-// Lilian's scenes and ending). Spirit is Lilian's second story, still being written.
+// answer story questions. Spirit's story is still being written.
 // Facts were checked against NASA pages (Nov 2026) and corrected where the drafts differed.
 
 const img = (nasaId: string, file: string, alt: string, credit: string): NasaImage => ({
@@ -23,13 +22,13 @@ interface Chapter {
   image: NasaImage;
 }
 
-function storyTopics(story: { id: string; title: string; by: string; chapters: Chapter[] }): Topic[] {
+function storyTopics(story: { id: string; title: string; chapters: Chapter[] }): Topic[] {
   return story.chapters.map((c) => ({
     id: `story-${story.id}-${c.n}`,
     kind: "story",
     keywords: c.keywords,
     title: `${story.title} · Chapter ${c.n}: ${c.title}`,
-    publisher: `Cosmic Juniors Storyline · by ${story.by}`,
+    publisher: "Cosmic Juniors Storyline",
     url: `/story/${story.id}#chapter-${c.n}`,
     facts: c.facts,
     image: c.image,
@@ -211,14 +210,14 @@ const spiritChapters: Chapter[] = [
 ];
 
 export const STORY_TOPICS: Topic[] = [
-  ...storyTopics({ id: "sojourner", title: SOJOURNER, by: "Leah & Lilian", chapters: sojournerChapters }),
-  ...storyTopics({ id: "spirit", title: SPIRIT, by: "Lilian", chapters: spiritChapters }),
+  ...storyTopics({ id: "sojourner", title: SOJOURNER, chapters: sojournerChapters }),
+  ...storyTopics({ id: "spirit", title: SPIRIT, chapters: spiritChapters }),
 ];
 
 /** The table of contents, always given to Cosmo in Storyline mode so it knows the whole arc. */
 export const STORY_OUTLINE = [
-  `"${SOJOURNER}" by Leah & Lilian (finished): ${sojournerChapters.map((c) => `${c.n}. ${c.title}`).join("; ")}.`,
-  `"${SPIRIT}" by Lilian (still being written): ${spiritChapters.map((c) => `${c.n}. ${c.title}`).join("; ")}.`,
+  `"${SOJOURNER}" (finished): ${sojournerChapters.map((c) => `${c.n}. ${c.title}`).join("; ")}.`,
+  `"${SPIRIT}" (still being written): ${spiritChapters.map((c) => `${c.n}. ${c.title}`).join("; ")}.`,
 ].join("\n");
 
 const esc = (k: string) => k.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
