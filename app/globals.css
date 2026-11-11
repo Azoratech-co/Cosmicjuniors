@@ -498,7 +498,6 @@ body.is-dragging, body.is-dragging * { -webkit-user-select: none !important; use
 .log-mission li.is-locked { color: var(--text-muted); font-style: italic; opacity: 0.7; }
 .log-mission a { color: var(--text-muted); }
 @media (max-width: 720px) {
-  .mission-picker { grid-template-columns: none; grid-auto-flow: column; grid-auto-columns: 150px; overflow-x: auto; padding-bottom: 4px; }
   .stage-overlay { padding: 12px; gap: 8px; }
   .landing .stage-overlay .t-title { font-size: 18px; }
 }
@@ -555,3 +554,13 @@ body.is-dragging, body.is-dragging * { -webkit-user-select: none !important; use
 .refs__n { color: var(--brand-cyan); font-variant-numeric: tabular-nums; }
 .sound-toggle { display: inline-flex; align-items: center; gap: 6px; }
 @media (max-width: 640px) { .sound-toggle span { display: none; } }
+
+/* Phones: all five landing missions visible at once, in a 3 + 2 grid (no hidden sideways scroll). */
+@media (max-width: 720px) {
+  .mission-picker { grid-template-columns: repeat(6, 1fr); gap: 6px; overflow: visible; }
+  .mission-picker .mission-chip { grid-column: span 2; padding: 7px 8px; min-width: 0; }
+  .mission-picker .mission-chip:nth-child(n + 4) { grid-column: span 3; }
+  .mission-picker .mission-chip .t-label { font-size: 13px; line-height: 1.2; overflow-wrap: anywhere; }
+  .mission-picker .mission-chip .t-caption { font-size: 10px; }
+  .mission-picker .mission-chip .c-muted { display: none; }
+}
