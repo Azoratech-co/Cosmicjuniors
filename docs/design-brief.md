@@ -1,5 +1,10 @@
 # Cosmic Juniors — UI/UX Design Improvement Brief
 
+> **Design guide (from Nov 2026): Ink & Sand.** Every new page, card, preview and game screen follows the
+> Ink & Sand palette and feel: sand paper #E8DCC8 (surfaces #F3EBDD), midnight-navy ink #1E2633,
+> terracotta accent #C0674A. Editorial and confident, real NASA photos, no neon glows or gradients-for-show.
+> It is the site's default design; the other designs stay available in the footer picker.
+
 Page: https://cosmic-juniors.vercel.app
 Scope: Dedicated AI Chatbot & Games Page
 
@@ -119,6 +124,7 @@ Open one with `?theme=<id>` or pick it on `/designs`; the choice is remembered o
 | id | Design |
 |---|---|
 | `ink-sand` | Ink & Sand: sand #E8DCC8, midnight navy #1E2633, terracotta #C0674A (default) |
+| `juniors` | The team's Figma look: deep navy, plum cards, pink accents |
 | `cosmic` | Polished dark navy from this brief |
 | `beige` | Warm paper with star-chart dots |
 | `mission` | Flat near-black mission control |

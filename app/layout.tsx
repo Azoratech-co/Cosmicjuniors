@@ -31,7 +31,7 @@ export const metadata: Metadata = {
 };
 
 export const viewport: Viewport = {
-  themeColor: "#06152F",
+  themeColor: "#E8DCC8",
   width: "device-width",
   initialScale: 1,
   // Keep the app at full view on phones: no auto-zoom when tapping the text box.

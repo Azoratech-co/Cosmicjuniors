@@ -22,7 +22,7 @@ const W = 960;
 const H = 540;
 const GROUND = 498; // screen y of the surface
 const MARS_G = 3.71; // Mars gravity, m/s²
-const SAFE_LAND = 7; // max touchdown speed on engines / sky crane, m/s (game value, easier than real)
+const SAFE_LAND = 20; // max touchdown speed on engines / sky crane, m/s (game value, much easier than real)
 const SAFE_BAGS = 30; // max first-impact speed the airbags survive, m/s
 const ENTRY_T = 9.5;
 const CHUTE_EARLY = 600; // m/s: faster than this and the parachute tears
@@ -633,7 +633,7 @@ function stepFinal(s: Sim, dt: number, steer: number, thrust: boolean, crash: Cr
     const v = Math.round(-s.vy * 10) / 10;
     puff(s, s.x, 22);
     if (st.method === "skycrane") return crash("fast", { speed: v });
-    if (-s.vy > SAFE_LAND || Math.abs(s.vx) > 4) return crash("fast", { speed: v });
+    if (-s.vy > SAFE_LAND || Math.abs(s.vx) > 8) return crash("fast", { speed: v });
     if (onRock(st, s.x)) return crash("rock");
     return land(s.x, v);
   }

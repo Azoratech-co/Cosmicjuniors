@@ -252,10 +252,8 @@
 .chapter-block__text p.is-found::before { content: "From Cosmo's answer"; display: block; margin-bottom: 4px; font-size: 12px; font-weight: 700; letter-spacing: .04em; text-transform: uppercase; color: var(--sky, #7cc4ff); }
 @keyframes story-found { 0%, 30% { background: color-mix(in srgb, var(--sky, #7cc4ff) 34%, transparent); } }
 
-/* AI Chatbot card: Cosmo's wordmark on the navy logo tile, with a faint orbit ring */
-.chat-card-art { position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 10px; overflow: hidden;
-  background: radial-gradient(90% 120% at 50% 110%, #1b2552 0%, #0b1026 60%); color: #fff; }
-.chat-card-art__ring { position: absolute; left: 50%; top: 50%; width: 150%; height: 46%; translate: -50% -50%; rotate: -12deg; border-radius: 50%; border: 2px solid rgb(61 214 245 / 0.22); }
-.chat-card-art__title { position: relative; display: inline-flex; align-items: center; gap: 0.3em; font-family: var(--ff-display); font-weight: var(--display-weight, 700); font-size: 40px; line-height: 1; }
-.chat-card-art__title .cosmo-logo { color: #fff; }
-.chat-card-art__line { position: relative; font-size: 13px; font-weight: 600; color: rgb(255 255 255 / 0.72); letter-spacing: 0.01em; }
+/* AI Chatbot card: a speech bubble from Cosmo on the Perseverance photo (Ink & Sand colors) */
+.chat-card-bubble { position: absolute; left: 7%; top: 9%; display: flex; align-items: center; gap: 8px; max-width: 58%;
+  padding: 8px 12px 8px 8px; border-radius: 14px 14px 14px 4px; background: #f3ebdd; color: #1e2633;
+  font-size: 13px; font-weight: 600; line-height: 1.3; box-shadow: 0 6px 18px rgb(30 38 51 / 0.25); }
+.chat-card-bubble::after { content: ""; position: absolute; right: -10px; bottom: 10px; border: 6px solid transparent; border-left: 10px solid #f3ebdd; }
