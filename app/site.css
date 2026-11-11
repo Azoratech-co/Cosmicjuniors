@@ -246,3 +246,46 @@
   .nav-tabs__tab.is-on .nav-tabs__label { display: none; }
   .site-header__brand .logo-tile { width: 32px; height: 32px; }
 }
+
+/* ---------- AI Chatbot card art: a tiny chat on an 8s loop ---------- */
+.chat-art { position: absolute; inset: 0; display: flex; flex-direction: column; justify-content: center; gap: 7px; padding: 12px 14px; overflow: hidden;
+  background: radial-gradient(120% 90% at 85% 110%, #a94660 0%, transparent 55%), linear-gradient(160deg, #0b1f45 0%, #3a1640 100%);
+  font-family: var(--ff-inter, system-ui), system-ui, sans-serif; color: #fff; text-align: left; }
+.chat-art__stars { position: absolute; inset: 0; opacity: .7;
+  background-image: radial-gradient(1.5px 1.5px at 12% 18%, #fff 50%, transparent 51%), radial-gradient(1px 1px at 38% 8%, #fff 50%, transparent 51%),
+    radial-gradient(1.5px 1.5px at 62% 22%, #cfe3ff 50%, transparent 51%), radial-gradient(1px 1px at 92% 12%, #fff 50%, transparent 51%),
+    radial-gradient(1px 1px at 8% 78%, #fff 50%, transparent 51%), radial-gradient(1.5px 1.5px at 48% 92%, #fff 50%, transparent 51%);
+  animation: chat-twinkle 4s ease-in-out infinite; }
+.chat-art__mars { position: absolute; right: -26px; bottom: -30px; width: 96px; height: 96px; border-radius: 50%;
+  background: radial-gradient(circle at 35% 30%, #ffb27a, #c2410c 60%, #7c2d12); box-shadow: 0 0 40px rgba(255, 140, 80, .35); opacity: .9; }
+.chat-art > :not(.chat-art__stars):not(.chat-art__mars) { position: relative; }
+.chat-art__head { display: flex; align-items: center; gap: 6px; font-size: 11px; }
+.chat-art__head b { font-weight: 700; letter-spacing: .02em; }
+.chat-art__head i { font-style: normal; font-size: 9.5px; color: #7ee2a8; display: inline-flex; align-items: center; gap: 4px; }
+.chat-art__head i::before { content: ""; width: 6px; height: 6px; border-radius: 50%; background: #7ee2a8; }
+.chat-art__q { align-self: flex-end; max-width: 78%; padding: 6px 10px; border-radius: 12px 12px 3px 12px; background: #0b62c4; font-size: 12px; font-weight: 600;
+  animation: chat-q 8s var(--ease, ease) infinite both; }
+.chat-art__row { display: grid; grid-template-columns: 20px 1fr; align-items: end; gap: 6px; }
+.chat-art__row > svg { grid-row: 1; }
+.chat-art__dots, .chat-art__a { grid-column: 2; grid-row: 1; justify-self: start; }
+.chat-art__dots { display: inline-flex; gap: 4px; padding: 8px 10px; border-radius: 12px 12px 12px 3px; background: rgba(255,255,255,.14); animation: chat-dots 8s infinite both; }
+.chat-art__dots i { width: 5px; height: 5px; border-radius: 50%; background: #fff; animation: chat-bounce 1s ease-in-out infinite; }
+.chat-art__dots i:nth-child(2) { animation-delay: .15s; }
+.chat-art__dots i:nth-child(3) { animation-delay: .3s; }
+.chat-art__a { max-width: 88%; padding: 7px 10px; border-radius: 12px 12px 12px 3px; background: #fff; color: #0b1f45; font-size: 12px; line-height: 1.35;
+  animation: chat-a 8s var(--ease, ease) infinite both; }
+.chat-art__a mark { background: #ffe08a; color: inherit; border-radius: 4px; padding: 0 3px; }
+.chat-art__src { align-self: flex-start; margin-left: 26px; padding: 3px 9px; border-radius: 999px; background: #7a1f3d; border: 1px solid rgba(255,255,255,.25);
+  font-size: 10px; font-weight: 700; letter-spacing: .02em; animation: chat-src 8s var(--ease, ease) infinite both; }
+.mission-card:hover .chat-art__mars { transform: scale(1.06); transition: transform .6s var(--ease, ease); }
+
+@keyframes chat-q { 0%, 4% { opacity: 0; transform: translateY(8px) scale(.96); } 10%, 92% { opacity: 1; transform: none; } 100% { opacity: 0; } }
+@keyframes chat-dots { 0%, 14% { opacity: 0; } 18%, 34% { opacity: 1; } 38%, 100% { opacity: 0; } }
+@keyframes chat-a { 0%, 36% { opacity: 0; transform: translateY(8px); } 42%, 92% { opacity: 1; transform: none; } 100% { opacity: 0; } }
+@keyframes chat-src { 0%, 50% { opacity: 0; transform: scale(.8); } 56%, 92% { opacity: 1; transform: none; } 100% { opacity: 0; } }
+@keyframes chat-bounce { 50% { transform: translateY(-3px); } }
+@keyframes chat-twinkle { 50% { opacity: .35; } }
+@media (prefers-reduced-motion: reduce) {
+  .chat-art *, .chat-art__stars { animation: none !important; }
+  .chat-art__dots { display: none; }
+}

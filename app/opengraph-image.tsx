@@ -1,20 +1,12 @@
 import { ImageResponse } from "next/og";
-import { OG_SIZE, OgWordmark, PreviewCard } from "@/lib/og";
+import { OG_SIZE, SitePreview, ogFonts, publicImage } from "@/lib/og-juniors";
 
-// Link preview for the main page (WhatsApp, Slack, iMessage, X, LinkedIn...).
-export const alt = "Ask Cosmo: NASA-sourced answers about the machines NASA left on Mars and the Moon";
+// Link preview for the whole website (WhatsApp, Instagram, Slack, iMessage, X, LinkedIn...).
+export const alt = "Cosmic Juniors: stories and facts about the machines NASA left on Mars and the Moon";
 export const size = OG_SIZE;
 export const contentType = "image/png";
 
-export default function Image() {
-  return new ImageResponse(
-    (
-      <PreviewCard
-        eyebrow="Cosmic Juniors"
-        title={<OgWordmark size={84} prefix="Ask" />}
-        text="Your AI space guide. Real NASA facts and sources about the rovers and landers NASA left on Mars and the Moon."
-      />
-    ),
-    size,
-  );
+export default async function Image() {
+  const photo = await publicImage("figma/og-sojourner.jpg", "image/jpeg");
+  return new ImageResponse(<SitePreview photo={photo} />, { ...size, fonts: await ogFonts() });
 }

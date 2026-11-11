@@ -13,21 +13,21 @@ const grover = Irish_Grover({ subsets: ["latin"], weight: "400", variable: "--ff
 const serif = Fraunces({ subsets: ["latin"], weight: ["500", "600", "700"], variable: "--ff-serif" });
 
 const DESCRIPTION =
-  "Cosmo tells the stories of the rovers, landers and experiments NASA left on Mars and the Moon, with facts and sources from NASA. Built for NASA Space Apps 2026.";
+  "Stories and facts about the machines NASA left on Mars and the Moon: read our stories, meet the explorers, ask Cosmo, and play mission games. NASA Space Apps 2026, Beirut.";
 
 export const metadata: Metadata = {
   metadataBase: new URL("https://cosmic-juniors.vercel.app"),
-  title: "Cosmic Juniors · Ask Cosmo",
+  title: "Cosmic Juniors",
   description: DESCRIPTION,
   applicationName: "Cosmic Juniors",
   openGraph: {
     type: "website",
     siteName: "Cosmic Juniors",
-    title: "Ask Cosmo · Cosmic Juniors",
+    title: "Cosmic Juniors · The next generation of space explorers",
     description: DESCRIPTION,
     url: "/",
   },
-  twitter: { card: "summary_large_image", title: "Ask Cosmo · Cosmic Juniors", description: DESCRIPTION },
+  twitter: { card: "summary_large_image", title: "Cosmic Juniors · The next generation of space explorers", description: DESCRIPTION },
 };
 
 export const viewport: Viewport = {

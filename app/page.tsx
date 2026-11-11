@@ -5,7 +5,7 @@ import Starfield from "@/components/Starfield";
 import SiteHeader from "@/components/site/SiteHeader";
 import SiteFooter from "@/components/site/SiteFooter";
 import Reveal from "@/components/site/Reveal";
-import CosmoLogo from "@/components/CosmoLogo";
+import ChatCardArt from "@/components/site/ChatCardArt";
 import { ABOUT_US, GROUP_VIDEOS } from "@/lib/home";
 
 export const metadata: Metadata = {
@@ -77,9 +77,7 @@ export default function HomePage() {
                   {m.img ? (
                     <Image src={m.img} alt={m.alt ?? ""} width={1536} height={864} sizes="(max-width: 700px) 92vw, 360px" />
                   ) : (
-                    <span className="mission-card__cosmo">
-                      <CosmoLogo size={44} />
-                    </span>
+                    <ChatCardArt />
                   )}
                 </span>
                 <span className="mission-card__n">{m.n}</span>
