@@ -50,6 +50,22 @@ export default function ChatApp() {
   // Saved conversations (this browser only).
   useEffect(() => setChats(loadChats()), []);
 
+  // Links like /chat?q=Tell me about Spirit (from explorer and story pages) start the conversation.
+  const startedFromLink = useRef(false);
+  useEffect(() => {
+    if (startedFromLink.current) return;
+    startedFromLink.current = true;
+    const sp = new URLSearchParams(window.location.search);
+    const m = sp.get("mode") === "story" ? "story" : "guide";
+    const q = sp.get("q")?.trim().slice(0, 300);
+    if (sp.get("mode") === "story") setMode("story");
+    if (q) {
+      window.history.replaceState(null, "", "/chat");
+      ask(q, m);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
   /** Save the current conversation. Its name is set once, from the first answer, and never changes. */
   const persist = (id: string, msgs: ChatMessage[], title?: string) => {
     setChats((all) => {

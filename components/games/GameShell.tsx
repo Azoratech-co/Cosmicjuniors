@@ -3,30 +3,13 @@
 import Link from "next/link";
 import { useEffect, useRef, useState } from "react";
 import Starfield from "../Starfield";
-import CosmoLogo, { LogoTile } from "../CosmoLogo";
-import NavTabs from "../NavTabs";
-import ThemePicker from "../ThemePicker";
+import SiteHeader from "../site/SiteHeader";
+import SiteFooter from "../site/SiteFooter";
 import { STARS_EVENT, getStars } from "@/lib/stars";
 
 // Shared frame for the games: back link, title, and the kid's star count.
 
-export function StarCount() {
-  const [stars, setStars] = useState(0);
-  useEffect(() => {
-    const sync = () => setStars(getStars());
-    sync();
-    window.addEventListener(STARS_EVENT, sync);
-    return () => window.removeEventListener(STARS_EVENT, sync);
-  }, []);
-  return (
-    <span className="stars-badge t-label" aria-label={`${stars} stars collected`}>
-      <svg width="12" height="12" viewBox="0 0 24 24" aria-hidden="true">
-        <path d="M12 2l3.1 6.3 6.9 1-5 4.9 1.2 6.8L12 17.8 5.8 21l1.2-6.8-5-4.9 6.9-1z" fill="currentColor" />
-      </svg>
-      {stars}
-    </span>
-  );
-}
+export { StarCount } from "../site/StarCount";
 
 export default function GameShell({
   title,
@@ -45,14 +28,7 @@ export default function GameShell({
     <div className="game-page">
       <Starfield />
       <div className="mars-glow" aria-hidden="true" />
-      <header className="chat-header site-header">
-        <Link href="/" className="site-header__brand" aria-label="Ask Cosmo home">
-          <LogoTile size={36} />
-          <CosmoLogo size={17} className="site-header__word" />
-        </Link>
-        <NavTabs />
-        <StarCount />
-      </header>
+      <SiteHeader />
       <div className="game-head">
         {backHref !== "/" && (
           <Link href={backHref} className="game-back t-label">
@@ -63,11 +39,7 @@ export default function GameShell({
         {tagline && <p className="t-body c-muted">{tagline}</p>}
       </div>
       <main className="game-main">{children}</main>
-      <footer className="site-footer">
-        <span>Cosmic Juniors · NASA Space Apps Challenge 2026, Beirut</span>
-        <span>Photos and facts: NASA</span>
-        <ThemePicker />
-      </footer>
+      <SiteFooter />
     </div>
   );
 }

@@ -1,13 +1,15 @@
 import type { Metadata, Viewport } from "next";
-import { Fraunces, IBM_Plex_Mono, IBM_Plex_Sans, Inter } from "next/font/google";
+import { Fraunces, IBM_Plex_Mono, IBM_Plex_Sans, Inter, Irish_Grover } from "next/font/google";
 import "./globals.css";
 import "./themes.css";
+import "./site.css";
 import { THEME_SCRIPT } from "@/lib/themes";
 
 // Fonts for every design (see app/themes.css): each theme picks its heading, body and data fonts.
 const plex = IBM_Plex_Sans({ subsets: ["latin"], weight: ["400", "500", "600", "700"], variable: "--ff-plex" });
 const mono = IBM_Plex_Mono({ subsets: ["latin"], weight: ["400", "500"], variable: "--ff-mono" });
 const inter = Inter({ subsets: ["latin"], weight: ["400", "500", "600", "700"], variable: "--ff-inter" });
+const grover = Irish_Grover({ subsets: ["latin"], weight: "400", variable: "--ff-grover" });
 const serif = Fraunces({ subsets: ["latin"], weight: ["500", "600", "700"], variable: "--ff-serif" });
 
 const DESCRIPTION =
@@ -29,7 +31,7 @@ export const metadata: Metadata = {
 };
 
 export const viewport: Viewport = {
-  themeColor: "#E8DCC8",
+  themeColor: "#06152F",
   width: "device-width",
   initialScale: 1,
   // Keep the app at full view on phones: no auto-zoom when tapping the text box.
@@ -39,7 +41,7 @@ export const viewport: Viewport = {
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="en" className={`${plex.variable} ${mono.variable} ${inter.variable} ${serif.variable}`} suppressHydrationWarning>
+    <html lang="en" className={`${plex.variable} ${mono.variable} ${inter.variable} ${serif.variable} ${grover.variable}`} suppressHydrationWarning>
       <head>
         <script dangerouslySetInnerHTML={{ __html: THEME_SCRIPT }} />
       </head>

@@ -12,6 +12,7 @@ const securityHeaders = [
 const nextConfig: NextConfig = {
   reactStrictMode: true,
   poweredByHeader: false,
+  images: { remotePatterns: [{ protocol: "https", hostname: "images-assets.nasa.gov" }] },
   async headers() {
     return [{ source: "/:path*", headers: securityHeaders }];
   },

@@ -1,5 +1,6 @@
 // All live designs. Each id matches a block in app/themes.css.
 export const THEMES = [
+  { id: "juniors", name: "Juniors", note: "The team's Figma design: deep navy, plum cards, pink accents, playful titles.", swatch: ["#06152f", "#172944", "#812d51", "#6ab7ff"] },
   { id: "cosmic", name: "Cosmic", note: "Polished dark navy with cyan and purple. The design brief.", swatch: ["#080d22", "#172045", "#7c5cff", "#5bd4f5"] },
   { id: "ink-sand", name: "Ink & Sand", note: "Sand paper, midnight-navy ink, terracotta. Editorial and confident.", swatch: ["#e8dcc8", "#1e2633", "#c0674a", "#f3ebdd"] },
   { id: "beige", name: "Beige", note: "Warm paper with a star-chart dot grid and Mars rust.", swatch: ["#f4efe6", "#1f1b16", "#c2502a", "#fbf8f2"] },
@@ -8,7 +9,7 @@ export const THEMES = [
 ] as const;
 
 export type ThemeId = (typeof THEMES)[number]["id"];
-export const DEFAULT_THEME: ThemeId = "ink-sand";
+export const DEFAULT_THEME: ThemeId = "juniors";
 export const THEME_KEY = "cj-theme";
 
 /** Runs in <head> before the page paints, so there's no flash of the wrong design. */

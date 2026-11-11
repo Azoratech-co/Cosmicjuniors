@@ -47,6 +47,14 @@ html {
   --caption-case: uppercase;
   --overlay: rgb(8 13 34 / 0.8);
   --canvas-line: var(--line);
+  /* Site tokens (homepage, explorers, story). Other themes derive them from their own colors. */
+  --plum: var(--surface);
+  --plum-deep: var(--surface);
+  --pink: var(--fact);
+  --pink-line: var(--line-strong);
+  --rose: var(--line-strong);
+  --sky: var(--fact);
+  --top-accent: var(--primary);
   color-scheme: dark;
 }
 
@@ -220,6 +228,54 @@ html[data-theme="original"] {
 html[data-theme="original"] .hero-chip { border: 2px solid var(--fact); color: var(--fact); background: rgb(11 16 38 / 0.35); }
 html[data-theme="original"] .hero-chip__icon { background: transparent; }
 html[data-theme="original"] .game-card__play { background: transparent; color: var(--fact); padding-left: 0; }
+
+/* ---------- Juniors: the team's Figma design (default) ---------- */
+html[data-theme="juniors"] {
+  --bg: #06152f;
+  --bg-img: radial-gradient(520px 520px at 96% -4%, rgb(31 66 130 / 0.45), transparent 70%);
+  --surface: #172944;
+  --surface-2: #1f3456;
+  --glass: rgb(6 21 47 / 0.88);
+  --line: #2c3f61;
+  --line-strong: #425171;
+  --text: #ffffff;
+  --muted: #c9daef;
+  --primary: #7c2847;
+  --primary-hover: #93315a;
+  --on-primary: #ffffff;
+  --fact: #6ab7ff;
+  --fact-ink: #cfe6ff;
+  --focus: #62b6ff;
+  --star: #ffd166;
+  --good: #4ade80;
+  --user-bg: #7c2847;
+  --user-ink: #ffffff;
+  --tab-on-bg: #7c2847;
+  --tab-on-ink: #ffffff;
+  --level-bg: linear-gradient(125.7deg, #812d51 14%, #320d2b 86%);
+  --bar: #6ab7ff;
+  --stars-opacity: 0.75;
+  --planet-opacity: 0;
+  --r-sm: 12px;
+  --r-md: 17px;
+  --r-lg: 22px;
+  --shadow-1: none;
+  --shadow-2: 0 14px 40px rgb(2 6 20 / 0.45);
+  --ff-display: var(--ff-grover);
+  --ff-body: var(--ff-inter);
+  --ff-data: var(--ff-inter);
+  --display-weight: 400;
+  --caption-case: uppercase;
+  --overlay: rgb(6 21 47 / 0.85);
+  --plum: linear-gradient(125.7deg, #812d51 14.3%, #320d2b 85.7%);
+  --plum-deep: linear-gradient(143deg, #51132f 14.3%, #210e2a 85.7%);
+  --pink: #f7d3df;
+  --pink-line: #e0a3bb;
+  --rose: #b16b85;
+  --sky: #6ab7ff;
+  --top-accent: #0b62c4;
+  color-scheme: dark;
+}
 
 /* =====================================================================
    Shared mapping: older rules use these names, so they follow the theme too.

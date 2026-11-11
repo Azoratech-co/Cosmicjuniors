@@ -34,7 +34,7 @@ export default function DesignList() {
               </span>
               <span className="design-card__note">{t.note}</span>
               <span className="design-card__links">
-                <Link href={`/?theme=${t.id}`}>Open chat</Link> · <Link href={`/games?theme=${t.id}`}>Open games</Link>
+                <Link href={`/?theme=${t.id}`}>Open site</Link> · <Link href={`/chat?theme=${t.id}`}>Open chat</Link> · <Link href={`/games?theme=${t.id}`}>Open games</Link>
               </span>
             </div>
           </div>
