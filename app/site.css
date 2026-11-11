@@ -289,3 +289,55 @@
   .chat-art *, .chat-art__stars { animation: none !important; }
   .chat-art__dots { display: none; }
 }
+
+/* ---------- Games card art: a lander touches down (8s loop) ---------- */
+.games-art { position: absolute; inset: 0; display: block; font-family: var(--ff-inter, system-ui), system-ui, sans-serif; color: #fff; }
+.games-art svg { width: 100%; height: 100%; display: block; }
+.games-art g, .games-art path { transform-box: fill-box; }
+.games-art__lander { animation: ga-drop 8s cubic-bezier(.3,.1,.3,1) infinite both; }
+.games-art__chute { transform-origin: 50% 100%; animation: ga-chute 8s infinite both; }
+.games-art__flame { transform-origin: 50% 0; animation: ga-flame 8s infinite both; }
+.games-art__dust { transform-origin: 50% 100%; animation: ga-dust 8s infinite both; }
+.games-art__pad { transform-origin: 50% 50%; animation: ga-pad 1.6s ease-in-out infinite; }
+.games-art__stars { animation: chat-twinkle 4s ease-in-out infinite; }
+.games-art__hud { position: absolute; left: 10px; top: 10px; display: flex; gap: 5px; }
+.games-art__hud i { font-style: normal; font-size: 10px; font-weight: 700; padding: 3px 8px; border-radius: 999px; background: rgba(255,255,255,.12); border: 1px solid rgba(255,255,255,.2); }
+.games-art__hud i.is-on { background: #7a1f3d; border-color: #e0a3bb; }
+.games-art__stars-count { position: absolute; right: 10px; bottom: 10px; font-size: 11px; font-weight: 800; color: #ffe08a; padding: 3px 8px; border-radius: 999px; background: rgba(11,31,69,.6); }
+.games-art__win { position: absolute; left: 50%; top: 40%; translate: -50% 0; padding: 6px 12px; border-radius: 999px; background: #fff; color: #0b1f45; font-weight: 800; font-size: 13px; white-space: nowrap; box-shadow: 0 6px 20px rgba(0,0,0,.35);
+  animation: ga-win 8s var(--ease, ease) infinite both; }
+.mission-card:hover .games-art__lander { animation-duration: 6s; }
+
+@keyframes ga-drop { 0% { transform: translateY(-120px); opacity: 0; } 6% { opacity: 1; } 45% { transform: translateY(-34px); } 66%, 92% { transform: translateY(26px); opacity: 1; } 100% { transform: translateY(26px); opacity: 0; } }
+@keyframes ga-chute { 0%, 40% { opacity: 1; transform: none; } 50%, 100% { opacity: 0; transform: translate(40px, -40px) rotate(25deg); } }
+@keyframes ga-flame { 0%, 44% { opacity: 0; transform: scaleY(.3); } 50% { opacity: 1; transform: scaleY(1.1); } 56% { transform: scaleY(.8); } 62% { opacity: 1; transform: scaleY(1); } 66%, 100% { opacity: 0; transform: scaleY(.3); } }
+@keyframes ga-dust { 0%, 64% { opacity: 0; transform: scale(.4); } 70% { opacity: .9; transform: scale(1.1); } 82%, 100% { opacity: 0; transform: scale(1.6); } }
+@keyframes ga-pad { 50% { opacity: .55; transform: scale(1.06); } }
+@keyframes ga-win { 0%, 68% { opacity: 0; transform: translateY(6px) scale(.85); } 73%, 92% { opacity: 1; transform: none; } 100% { opacity: 0; } }
+
+/* ---------- Touches over the Storyline and Wiki pictures ---------- */
+.card-touch { position: absolute; inset: 0; pointer-events: none; font-family: var(--ff-inter, system-ui), system-ui, sans-serif; color: #fff; }
+.card-touch__pill { position: absolute; left: 10px; bottom: 14px; display: inline-flex; align-items: center; gap: 7px; padding: 5px 10px; border-radius: 999px;
+  background: rgba(11,31,69,.72); backdrop-filter: blur(4px); font-size: 11px; font-weight: 700; }
+.card-touch__wave { display: inline-flex; align-items: center; gap: 2px; height: 12px; }
+.card-touch__wave i { width: 3px; height: 100%; border-radius: 2px; background: #7cc4ff; animation: ct-wave 1s ease-in-out infinite; transform-origin: 50% 50%; }
+.card-touch__wave i:nth-child(2) { animation-delay: .2s; }
+.card-touch__wave i:nth-child(3) { animation-delay: .4s; }
+.card-touch__wave i:nth-child(4) { animation-delay: .1s; }
+.card-touch__progress { position: absolute; left: 0; right: 0; bottom: 0; height: 4px; background: rgba(255,255,255,.18); }
+.card-touch__progress i { display: block; height: 100%; background: #7cc4ff; animation: ct-read 9s linear infinite; transform-origin: 0 50%; }
+.card-touch__tag { position: absolute; right: 10px; top: 10px; padding: 4px 10px; border-radius: 999px; background: #7a1f3d; border: 1px solid #e0a3bb;
+  font-size: 11px; font-weight: 700; opacity: 0; animation: ct-tag 9s var(--ease, ease) infinite both; }
+.card-touch__tag::before { content: "🔍 "; }
+
+@keyframes ct-wave { 0%, 100% { transform: scaleY(.35); } 50% { transform: scaleY(1); } }
+@keyframes ct-read { from { transform: scaleX(0); } to { transform: scaleX(1); } }
+@keyframes ct-tag { 0% { opacity: 0; transform: translateY(-6px); } 4%, 30% { opacity: 1; transform: none; } 34%, 100% { opacity: 0; transform: translateY(6px); } }
+
+@media (prefers-reduced-motion: reduce) {
+  .games-art *, .card-touch * { animation: none !important; }
+  .games-art__chute, .games-art__flame, .games-art__dust, .games-art__win { opacity: 0; }
+  .games-art__lander { transform: translateY(26px); }
+  .card-touch__tag:first-child { opacity: 1; }
+  .card-touch__progress i { transform: scaleX(.4); }
+}

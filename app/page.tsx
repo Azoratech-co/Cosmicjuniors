@@ -6,6 +6,8 @@ import SiteHeader from "@/components/site/SiteHeader";
 import SiteFooter from "@/components/site/SiteFooter";
 import Reveal from "@/components/site/Reveal";
 import ChatCardArt from "@/components/site/ChatCardArt";
+import GamesCardArt from "@/components/site/GamesCardArt";
+import { StoryTouch, WikiTouch } from "@/components/site/CardTouches";
 import { ABOUT_US, GROUP_VIDEOS } from "@/lib/home";
 
 export const metadata: Metadata = {
@@ -15,7 +17,7 @@ export const metadata: Metadata = {
 
 // Homepage, built from the team's Figma ("Cosmic Juniors | iPad 11-inch Portrait").
 
-const MISSIONS = [
+const MISSIONS: { n: string; title: string; text: string; cta: string; href: string; img?: string; alt?: string; touch?: "story" | "wiki"; art?: "games" }[] = [
   {
     n: "01",
     title: "Storyline",
@@ -24,6 +26,7 @@ const MISSIONS = [
     href: "/story/sojourner",
     img: "/figma/home-storyline.png",
     alt: "Sojourner rover on the surface of Mars",
+    touch: "story",
   },
   {
     n: "02",
@@ -33,6 +36,7 @@ const MISSIONS = [
     href: "/explorers",
     img: "/figma/home-wiki.png",
     alt: "Mars rovers on the Martian surface",
+    touch: "wiki",
   },
   {
     n: "03",
@@ -47,8 +51,7 @@ const MISSIONS = [
     text: "Rebuild Sojourner, fly to Mars, and land at real NASA sites.",
     cta: "Play now",
     href: "/games",
-    img: "https://images-assets.nasa.gov/image/PIA00407/PIA00407~small.jpg",
-    alt: "Mars seen from space",
+    art: "games",
   },
 ];
 
@@ -75,7 +78,13 @@ export default function HomePage() {
               <Link href={m.href} className="mission-card">
                 <span className="mission-card__media">
                   {m.img ? (
-                    <Image src={m.img} alt={m.alt ?? ""} width={1536} height={864} sizes="(max-width: 700px) 92vw, 360px" />
+                    <>
+                      <Image src={m.img} alt={m.alt ?? ""} width={1536} height={864} sizes="(max-width: 700px) 92vw, 360px" />
+                      {m.touch === "story" && <StoryTouch />}
+                      {m.touch === "wiki" && <WikiTouch />}
+                    </>
+                  ) : m.art === "games" ? (
+                    <GamesCardArt />
                   ) : (
                     <ChatCardArt />
                   )}
