@@ -22,9 +22,11 @@ const W = 960;
 const H = 540;
 const GROUND = 498; // screen y of the surface
 const MARS_G = 3.71; // Mars gravity, m/s²
+const SAFE_LAND = 7; // max touchdown speed on engines / sky crane, m/s (game value, easier than real)
+const SAFE_BAGS = 30; // max first-impact speed the airbags survive, m/s
 const ENTRY_T = 9.5;
-const CHUTE_EARLY = 520; // m/s: faster than this and the parachute tears
-const CHUTE_LATE = 330;
+const CHUTE_EARLY = 600; // m/s: faster than this and the parachute tears
+const CHUTE_LATE = 300;
 const FINAL_ALT = 800; // m: the camera zooms from here to the ground
 const SAVE_KEY = "cj-landing";
 
@@ -49,8 +51,8 @@ const SITES: Site[] = [
   { mission: MISSIONS.viking1, method: "engines", zone: 45, rocks: [[-32, 1.1], [22, 0.8], [58, 1.3], [-70, 1.5]], sand: [], wind: 2, gusty: false, start: 2, task: "scoop", window: 0.18 },
   { mission: MISSIONS.pathfinder, method: "airbags", zone: 80, rocks: [[-20, 0.9], [9, 0.6], [30, 1.2], [-48, 1.4], [55, 0.8], [26.5, 0.5], [34, 0.7]], sand: [[7, 10]], wind: 3, gusty: false, start: 2.5, task: "drive", rover: "Sojourner" },
   { mission: MISSIONS.spirit, method: "airbags", zone: 70, rocks: [[-25, 1.2], [14, 0.7], [40, 1.1], [-55, 1.6], [26, 0.6], [33, 0.5]], sand: [[4, 8], [11, 14]], wind: 4, gusty: false, start: 3, task: "drive", rover: "Spirit" },
-  { mission: MISSIONS.insight, method: "engines", zone: 35, rocks: [[-28, 0.6], [44, 0.7]], sand: [], wind: 4, gusty: true, start: 3, task: "seismo", window: 0.11 },
-  { mission: MISSIONS.perseverance, method: "skycrane", zone: 30, rocks: [[-14, 1.2], [19, 1.0], [-35, 1.6], [42, 1.4], [8, 0.5], [26, 0.6], [33, 0.7]], sand: [[5, 8], [12, 15]], wind: 3, gusty: true, start: 3.5, task: "drive", rover: "Perseverance" },
+  { mission: MISSIONS.insight, method: "engines", zone: 45, rocks: [[-28, 0.6], [44, 0.7]], sand: [], wind: 4, gusty: true, start: 3, task: "seismo", window: 0.11 },
+  { mission: MISSIONS.perseverance, method: "skycrane", zone: 45, rocks: [[-14, 1.2], [19, 1.0], [-35, 1.6], [42, 1.4], [8, 0.5], [26, 0.6], [33, 0.7]], sand: [[5, 8], [12, 15]], wind: 3, gusty: true, start: 3.5, task: "drive", rover: "Perseverance" },
 ];
 
 const METHOD_TEXT: Record<Method, string> = {
@@ -537,9 +539,9 @@ function CrashText({ crash, result, site }: { crash: Crash; result: { distance: 
   const t: Record<Crash, [string, string]> = {
     tore: ["The parachute tore", `It opened at ${result.speed.toLocaleString("en-US")} m/s, too fast for the fabric. Wait until the speed is inside the window.`],
     late: ["Parachute too late", "The air slowed the capsule, but the parachute never opened. Open it inside the window."],
-    fast: ["Too fast!", `The lander hit the ground at ${result.speed} m/s. ${site.method === "airbags" ? "" : "Start the engines earlier and keep the descent under 3 m/s."}`],
+    fast: ["Too fast!", `The lander hit the ground at ${result.speed} m/s. ${site.method === "airbags" ? "" : `Start the engines earlier and keep the descent under ${SAFE_LAND} m/s.`}`],
     rock: ["Landed on a boulder", "The lander tipped over on a rock. Steer to a clear patch of ground."],
-    burst: ["The airbags burst", `They hit the ground at ${result.speed} m/s. Fire the rockets when the lander is between about 70 and 135 m up.`],
+    burst: ["The airbags burst", `They hit the ground at ${result.speed} m/s. Fire the rockets when the lander is between about 60 and 190 m up.`],
     off: ["Safe, but off target", `You landed gently, ${result.distance} m from the center of the zone (+1 star), but too far for the science. Steer closer during entry.`],
     fuel: ["Out of fuel", "The engines ran dry before touchdown. Cut the parachute a little lower, and only fire the engines when you need to slow down."],
   };
@@ -608,7 +610,7 @@ function stepFinal(s: Sim, dt: number, steer: number, thrust: boolean, crash: Cr
   s.alt += s.vy * dt;
 
   if (st.method === "skycrane" && s.cutAt) {
-    if (s.cable === 0 && s.alt < 22 && s.alt > 8 && -s.vy < 3) {
+    if (s.cable === 0 && s.alt < 30 && s.alt > 6 && -s.vy < SAFE_LAND) {
       s.cable = 0.01;
       crane();
     }
@@ -619,7 +621,7 @@ function stepFinal(s: Sim, dt: number, steer: number, thrust: boolean, crash: Cr
     const roverAlt = s.alt - s.cable;
     if (roverAlt <= 0 && s.cable > 0) {
       const v = Math.round(-s.vy * 10) / 10;
-      if (-s.vy > 2.5) return crash("fast", { speed: v });
+      if (-s.vy > SAFE_LAND) return crash("fast", { speed: v });
       if (onRock(st, s.x)) return crash("rock");
       s.flyAway = 0.01;
       sfx.separate();
@@ -631,7 +633,7 @@ function stepFinal(s: Sim, dt: number, steer: number, thrust: boolean, crash: Cr
     const v = Math.round(-s.vy * 10) / 10;
     puff(s, s.x, 22);
     if (st.method === "skycrane") return crash("fast", { speed: v });
-    if (-s.vy > 3 || Math.abs(s.vx) > 2.5) return crash("fast", { speed: v });
+    if (-s.vy > SAFE_LAND || Math.abs(s.vx) > 4) return crash("fast", { speed: v });
     if (onRock(st, s.x)) return crash("rock");
     return land(s.x, v);
   }
@@ -647,7 +649,7 @@ function stepBounce(s: Sim, dt: number, crash: CrashFn, land: (x: number, v: num
   s.x = b.x;
   s.alt = b.y;
   if (b.y <= 0) {
-    if (b.bounces === 0 && -b.vy > 22) return crash("burst", { speed: Math.round(-b.vy) });
+    if (b.bounces === 0 && -b.vy > SAFE_BAGS) return crash("burst", { speed: Math.round(-b.vy) });
     b.y = 0;
     b.bounces++;
     sfx.thud(Math.min(1, -b.vy / 14));
@@ -873,9 +875,9 @@ function draw(ctx: CanvasRenderingContext2D, s: Sim, phase: Phase, t: number, ma
   ctx.fillStyle = "rgba(40,24,14,0.85)";
   const tip =
     phase === "chute" ? (s.shieldDrop >= 0 ? "Heat shield released. Falling under the parachute…" : "Parachute open!")
-      : phase === "final" && st.method === "airbags" && s.rocketsAt < 0 ? "Fire the rockets when the lander is 70 to 135 m above the ground"
+      : phase === "final" && st.method === "airbags" && s.rocketsAt < 0 ? "Fire the rockets when the lander is 60 to 190 m above the ground"
       : phase === "final" && st.method !== "airbags" && !s.cutAt ? "Cut the parachute and start the engines (lower = less fuel, but less time)"
-      : (phase === "final" || phase === "crane") && st.method !== "airbags" ? (st.method === "skycrane" ? "Hold the engines to slow down. Below 20 m at under 3 m/s, the sky crane lowers the rover" : "Hold the engines to slow down. Touch down under 3 m/s on clear ground")
+      : (phase === "final" || phase === "crane") && st.method !== "airbags" ? (st.method === "skycrane" ? `Hold the engines to slow down. Below 30 m at under ${SAFE_LAND} m/s, the sky crane lowers the rover` : `Hold the engines to slow down. Touch down under ${SAFE_LAND} m/s on clear ground`)
       : phase === "bounce" ? "Bouncing on the airbags…"
       : science && st.task === "drive" ? "Hold → to drive, let go to stop. Stop at the target rock to analyze it."
       : "";
