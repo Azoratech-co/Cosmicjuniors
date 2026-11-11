@@ -1,5 +1,5 @@
 import { ImageResponse } from "next/og";
-import { DRAW, OG_SIZE, PagePreview, ogFonts } from "@/lib/og-sand";
+import { DRAW, OG_SIZE, PagePreview, ogFonts } from "@/lib/og-cosmic";
 import { EXPLORERS } from "@/lib/explorers";
 
 export const alt = "Mars & Moon Explorers: the rovers and landers NASA left behind";

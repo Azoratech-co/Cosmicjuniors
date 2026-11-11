@@ -1,5 +1,5 @@
 import { ImageResponse } from "next/og";
-import { DRAW, OG_SIZE, PagePreview, ogFonts } from "@/lib/og-sand";
+import { DRAW, OG_SIZE, PagePreview, ogFonts } from "@/lib/og-cosmic";
 
 export const alt = "Mission Games: Sojourner Puzzle, Journey to Mars and Mars Landing";
 export const size = OG_SIZE;

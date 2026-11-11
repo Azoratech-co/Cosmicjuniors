@@ -48,6 +48,17 @@ export default async function StoryPage({ params }: Props) {
             </Link>
           ))}
         </div>
+        {id === "sojourner" && (
+          <Link href={`/story/${id}/film`} className="film-banner">
+            <span className="film-banner__play" aria-hidden="true">
+              <svg width="22" height="22" viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z" /></svg>
+            </span>
+            <span>
+              <strong>Watch the story</strong>
+              <span>A narrated film with real NASA photos and animated scenes. About 5 minutes.</span>
+            </span>
+          </Link>
+        )}
         <StoryReader story={story} signVideos={SIGN_VIDEOS[id] ?? {}} nextStory={next ? { id: next.id, title: next.title.split(":")[0] } : undefined} />
       </main>
       <SiteFooter />

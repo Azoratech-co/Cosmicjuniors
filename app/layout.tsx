@@ -3,6 +3,7 @@ import { Fraunces, IBM_Plex_Mono, IBM_Plex_Sans, Inter, Irish_Grover } from "nex
 import "./globals.css";
 import "./themes.css";
 import "./site.css";
+import "./film.css";
 import { THEME_SCRIPT } from "@/lib/themes";
 
 // Fonts for every design (see app/themes.css): each theme picks its heading, body and data fonts.
@@ -31,7 +32,7 @@ export const metadata: Metadata = {
 };
 
 export const viewport: Viewport = {
-  themeColor: "#E8DCC8",
+  themeColor: "#080D22",
   width: "device-width",
   initialScale: 1,
   // Keep the app at full view on phones: no auto-zoom when tapping the text box.

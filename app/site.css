@@ -252,8 +252,17 @@
 .chapter-block__text p.is-found::before { content: "From Cosmo's answer"; display: block; margin-bottom: 4px; font-size: 12px; font-weight: 700; letter-spacing: .04em; text-transform: uppercase; color: var(--sky, #7cc4ff); }
 @keyframes story-found { 0%, 30% { background: color-mix(in srgb, var(--sky, #7cc4ff) 34%, transparent); } }
 
-/* AI Chatbot card: a speech bubble from Cosmo on the Perseverance photo (Ink & Sand colors) */
+/* AI Chatbot card: a speech bubble from Cosmo on the Perseverance photo */
 .chat-card-bubble { position: absolute; left: 7%; top: 9%; display: flex; align-items: center; gap: 8px; max-width: 58%;
-  padding: 8px 12px 8px 8px; border-radius: 14px 14px 14px 4px; background: #f3ebdd; color: #1e2633;
-  font-size: 13px; font-weight: 600; line-height: 1.3; box-shadow: 0 6px 18px rgb(30 38 51 / 0.25); }
-.chat-card-bubble::after { content: ""; position: absolute; right: -10px; bottom: 10px; border: 6px solid transparent; border-left: 10px solid #f3ebdd; }
+  padding: 8px 12px 8px 8px; border-radius: 14px 14px 14px 4px; background: var(--surface-2, #172045); color: var(--text, #eef1ff);
+  border: 1px solid var(--line-strong); font-size: 13px; font-weight: 600; line-height: 1.3; box-shadow: 0 8px 24px rgb(2 4 16 / 0.45); }
+.chat-card-bubble::after { content: ""; position: absolute; right: -10px; bottom: 10px; border: 6px solid transparent; border-left: 10px solid var(--surface-2, #172045); }
+
+/* "Watch the story" banner on the story page */
+.film-banner { display: flex; align-items: center; gap: 16px; margin: 18px 0 8px; padding: 16px 18px; border-radius: var(--r-lg); text-decoration: none; color: var(--text);
+  background: linear-gradient(135deg, rgb(124 92 255 / 0.22), rgb(91 212 245 / 0.12)); border: 1px solid var(--line-strong); }
+.film-banner:hover { border-color: var(--fact); }
+.film-banner > span:last-child { display: flex; flex-direction: column; gap: 4px; }
+.film-banner strong { font-size: 18px; }
+.film-banner > span:last-child > span { font-size: 14px; color: var(--muted); }
+.film-banner__play { flex-shrink: 0; display: grid; place-items: center; width: 52px; height: 52px; border-radius: 50%; color: #fff; background: linear-gradient(135deg, #7c5cff, #6250f2); box-shadow: 0 8px 24px rgb(124 92 255 / 0.4); }

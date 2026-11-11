@@ -1,5 +1,5 @@
 import { ImageResponse } from "next/og";
-import { DRAW, OG_SIZE, PagePreview, ogFonts } from "@/lib/og-sand";
+import { DRAW, OG_SIZE, PagePreview, ogFonts } from "@/lib/og-cosmic";
 import { EXPLORERS, getExplorer } from "@/lib/explorers";
 import { getTopic } from "@/lib/cosmo/knowledge";
 
