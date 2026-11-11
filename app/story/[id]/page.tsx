@@ -1,12 +1,17 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import Starfield from "@/components/Starfield";
 import SiteHeader from "@/components/site/SiteHeader";
 import SiteFooter from "@/components/site/SiteFooter";
-import BackLink from "@/components/site/BackLink";
-import StoryReader from "@/components/site/StoryReader";
-import { SIGN_VIDEOS, STORY_IDS, getStory } from "@/lib/storyline";
+import StoryScroll from "@/components/site/StoryScroll";
+import { STORY_IDS, getStory } from "@/lib/storyline";
+import { SOJOURNER_SCENES } from "@/lib/story/sojourner";
+import StoryText from "@/components/site/StoryText";
+
+// The Storyline tab. Stories with scenes open as one continuous scroll (a framed picture on a
+// starry stage, the story's lines rising through it). The others show their full text for now.
+
+const SCENES = { sojourner: SOJOURNER_SCENES } as const;
 
 type Props = { params: Promise<{ id: string }> };
 
@@ -17,50 +22,26 @@ export function generateStaticParams() {
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const s = getStory((await params).id);
   if (!s) return {};
-  return { title: `${s.title} · Cosmic Juniors Storyline`, description: `A story from the Cosmic Juniors team, with read-aloud and NASA photos.` };
+  return { title: `${s.title} · Cosmic Juniors Storyline`, description: "Scroll through the story with real NASA photos, and ask Cosmo about any moment." };
 }
 
 export default async function StoryPage({ params }: Props) {
   const { id } = await params;
   const story = getStory(id);
   if (!story) notFound();
-  const next = id === "sojourner" ? getStory("spirit") : undefined;
-
+  const scenes = SCENES[id as keyof typeof SCENES];
+  if (!scenes) return <StoryText id={id} />;
+  const [name, sub] = story.title.split(":");
+  const chapters = Object.fromEntries(story.chapters.map((c) => [c.n, c.title]));
   return (
-    <div className="site-page">
-      <Starfield />
+    <div className="site-page story-scroll-page">
       <SiteHeader />
-      <main className="site-main site-main--narrow">
-        <div className="page-top">
-          <div>
-            <p className="crumb">Storyline</p>
-            <h1 className="display-title">{story.title.split(":")[0]}</h1>
-            <p className="page-tagline">{story.title.split(":")[1]?.trim()}</p>
-            <span className="title-accent" aria-hidden="true" />
-          </div>
-          <BackLink href="/" label="Back to main page" />
-        </div>
-        <div className="story-switch" role="tablist" aria-label="Stories">
-          {STORY_IDS.map((sid) => (
-            <Link key={sid} href={`/story/${sid}`} role="tab" aria-selected={sid === id} className={sid === id ? "is-on" : ""}>
-              {sid === "sojourner" ? "Sojourner" : "Spirit"}
-              {sid === "spirit" && <span className="story-switch__tag">in progress</span>}
-            </Link>
-          ))}
-        </div>
-        {id === "sojourner" && (
-          <Link href={`/story/${id}/film`} className="film-banner">
-            <span className="film-banner__play" aria-hidden="true">
-              <svg width="22" height="22" viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z" /></svg>
-            </span>
-            <span>
-              <strong>Watch the story</strong>
-              <span>A narrated film with real NASA photos and animated scenes. About 5 minutes.</span>
-            </span>
-          </Link>
-        )}
-        <StoryReader story={story} signVideos={SIGN_VIDEOS[id] ?? {}} nextStory={next ? { id: next.id, title: next.title.split(":")[0] } : undefined} />
-      </main>
+      <StoryScroll scenes={scenes} storyTitle={name} storySubtitle={sub?.trim() ?? ""} chapters={chapters} folder={`/story/${id}/`} />
+      <div className="ss-after">
+        <Link className="btn-purple cta" href={`/story/${id}/text`}>Read the full story</Link>
+        <Link className="btn-ghost cta" href="/chat?mode=story">Ask Cosmo about the story</Link>
+        <Link className="btn-ghost cta" href="/story/spirit">Next: Spirit&apos;s story</Link>
+      </div>
       <SiteFooter />
     </div>
   );

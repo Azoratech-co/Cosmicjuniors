@@ -3,7 +3,6 @@ import { Fraunces, IBM_Plex_Mono, IBM_Plex_Sans, Inter, Irish_Grover } from "nex
 import "./globals.css";
 import "./themes.css";
 import "./site.css";
-import "./film.css";
 import { THEME_SCRIPT } from "@/lib/themes";
 
 // Fonts for every design (see app/themes.css): each theme picks its heading, body and data fonts.

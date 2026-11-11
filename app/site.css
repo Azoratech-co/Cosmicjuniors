@@ -266,3 +266,76 @@
 .film-banner strong { font-size: 18px; }
 .film-banner > span:last-child > span { font-size: 14px; color: var(--muted); }
 .film-banner__play { flex-shrink: 0; display: grid; place-items: center; width: 52px; height: 52px; border-radius: 50%; color: #fff; background: linear-gradient(135deg, #7c5cff, #6250f2); box-shadow: 0 8px 24px rgb(124 92 255 / 0.4); }
+
+/* ---------- Story scroll (/story/[id]): one continuous scroll, a framed picture on a starry stage ---------- */
+.ss { position: relative; }
+.ss-stage { position: sticky; top: 0; height: 100svh; overflow: hidden; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 14px; padding: 16px; }
+.ss-sky { position: absolute; inset: 0; z-index: 0;
+  background:
+    radial-gradient(1.2px 1.2px at 12% 18%, #fff 50%, transparent 52%), radial-gradient(1px 1px at 27% 72%, #fff 50%, transparent 52%),
+    radial-gradient(1.4px 1.4px at 44% 12%, #cfe3ff 50%, transparent 52%), radial-gradient(1px 1px at 63% 84%, #fff 50%, transparent 52%),
+    radial-gradient(1.2px 1.2px at 78% 26%, #fff 50%, transparent 52%), radial-gradient(1px 1px at 91% 62%, #ffe2b8 50%, transparent 52%),
+    radial-gradient(1px 1px at 6% 52%, #fff 50%, transparent 52%), radial-gradient(1.3px 1.3px at 35% 44%, #fff 50%, transparent 52%),
+    radial-gradient(1px 1px at 55% 33%, #fff 50%, transparent 52%), radial-gradient(1.2px 1.2px at 86% 8%, #cfe3ff 50%, transparent 52%),
+    radial-gradient(900px 600px at 15% 0%, rgb(124 92 255 / 0.22), transparent 60%),
+    radial-gradient(900px 700px at 100% 100%, rgb(79 124 255 / 0.18), transparent 60%),
+    #070b1d;
+  background-size: 340px 340px, 420px 420px, 380px 380px, 460px 460px, 300px 300px, 520px 520px, 360px 360px, 440px 440px, 400px 400px, 480px 480px, auto, auto, auto; }
+.ss-head, .ss-frame, .ss-meta, .ss-progress { position: relative; z-index: 1; }
+.ss-head { display: flex; flex-direction: column; align-items: center; gap: 2px; text-align: center; transition: opacity 0.4s ease; min-height: 46px; }
+.ss-head.is-hidden, .ss-meta.is-hidden { opacity: 0; }
+.ss-head__n { font-size: 13px; font-weight: 700; letter-spacing: 0.14em; text-transform: uppercase; color: var(--fact); }
+.ss-head__t { font-size: clamp(18px, 2.2vw, 24px); font-weight: 700; color: var(--text); }
+
+.ss-frame { width: min(1200px, calc(100vw - 32px), calc((100svh - 190px) * 16 / 9)); aspect-ratio: 16 / 9; }
+.ss-layer { position: absolute; inset: 0; opacity: 0; visibility: hidden; will-change: opacity; }
+.ss-pic { position: absolute; inset: 0; overflow: hidden; border-radius: 22px; background: #05070f; border: 1px solid var(--line-strong);
+  box-shadow: 0 30px 80px rgb(2 4 16 / 0.65), 0 0 0 1px rgb(255 255 255 / 0.03) inset; }
+.ss-pic__main { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; transform-origin: 50% 50%; will-change: transform; }
+.ss-pic--contain .ss-pic__main { object-fit: contain; }
+.ss-pic--pan .ss-pic__main { width: auto; max-width: none; height: 100%; inset: 0 auto 0 0; object-fit: cover; }
+.ss-pic__blur { position: absolute; inset: -40px; width: calc(100% + 80px); height: calc(100% + 80px); object-fit: cover; filter: blur(28px) brightness(0.45) saturate(1.2); }
+.ss-pic.is-gray .ss-pic__main { filter: grayscale(1) contrast(1.06); }
+
+.ss-card { position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 10px; text-align: center; padding: 20px; }
+.ss-card__n { font-size: 14px; font-weight: 700; letter-spacing: 0.16em; text-transform: uppercase; color: var(--fact); }
+.ss-card__t { margin: 0; max-width: 16ch; font-size: clamp(34px, 5.4vw, 72px); font-weight: 700; line-height: 1.05; letter-spacing: -0.02em; color: var(--text); text-shadow: 0 6px 40px rgb(124 92 255 / 0.35); }
+.ss-card__t--story { font-size: clamp(44px, 7vw, 96px); }
+.ss-card__sub { margin: 0; font-size: clamp(18px, 2.4vw, 28px); color: var(--muted); }
+.ss-card__hint { margin-top: 18px; display: inline-flex; align-items: center; gap: 6px; font-size: 14px; font-weight: 600; color: var(--fact); animation: ss-hint 2.2s ease-in-out infinite; }
+@keyframes ss-hint { 50% { transform: translateY(6px); } }
+
+.ss-bubble { position: absolute; top: 0; left: 5%; max-width: min(46%, 520px); padding: 14px 18px; border-radius: 18px 18px 18px 6px; z-index: 2;
+  background: rgb(8 13 34 / 0.8); border: 1px solid var(--line-strong); color: var(--text); backdrop-filter: blur(10px);
+  font-size: clamp(15px, 1.5vw, 20px); line-height: 1.45; font-weight: 500; box-shadow: 0 14px 40px rgb(2 4 16 / 0.5);
+  opacity: 0; visibility: hidden; will-change: transform, opacity; }
+.ss-bubble.is-right { left: auto; right: 5%; border-radius: 18px 18px 6px 18px; }
+
+.ss-meta { width: min(1200px, calc(100vw - 32px), calc((100svh - 190px) * 16 / 9)); transition: opacity 0.4s ease; }
+.ss-caption { display: none; }
+.ss-meta__row { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+.ss-credit { font-size: 12px; color: var(--muted); min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.ss-meta__end { display: inline-flex; align-items: center; gap: 12px; flex-shrink: 0; }
+.ss-ask { display: inline-flex; align-items: center; gap: 6px; height: 34px; padding: 0 12px; border-radius: 10px; font-size: 13px; font-weight: 700; color: #fff; text-decoration: none;
+  background: linear-gradient(135deg, #7c5cff, #6250f2); }
+.ss-count { font-size: 12px; font-weight: 600; color: var(--muted); font-variant-numeric: tabular-nums; }
+.ss-progress { position: absolute; right: 10px; top: 50%; translate: 0 -50%; width: 3px; height: 40svh; border-radius: 3px; background: rgb(140 156 255 / 0.18); }
+.ss-progress span { display: block; width: 100%; border-radius: 3px; background: linear-gradient(180deg, #7c5cff, #5bd4f5); transition: height 0.3s ease; }
+
+.ss-after { position: relative; z-index: 1; display: flex; flex-wrap: wrap; justify-content: center; gap: 12px; padding: 40px 16px 60px; }
+
+/* Phones: the frame fills the width and the story line sits under it */
+@media (max-width: 760px), (max-aspect-ratio: 1/1) {
+  .ss-stage { justify-content: flex-start; padding-top: 72px; }
+  .ss-frame, .ss-meta { width: min(calc(100vw - 24px), calc((100svh - 330px) * 4 / 5)); }
+  .ss-frame { aspect-ratio: 4 / 5; }
+  .ss-pic { border-radius: 16px; }
+  .ss-bubble { display: none; }
+  .ss-caption { display: block; margin: 4px 0 10px; min-height: 5.6em; font-size: 18px; line-height: 1.5; color: var(--text); }
+  .ss-progress { display: none; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .ss-card__hint { animation: none; }
+}
+/* the story stage takes the whole screen; the site header scrolls away above it */
+.site-page.story-scroll-page > .site-header { position: relative; }

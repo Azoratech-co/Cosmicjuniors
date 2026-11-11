@@ -22,7 +22,7 @@ export function storyLink(topic: Topic, text: string): string {
   const [, sid, n] = m;
   const story = (stories as Record<string, { chapters: { n: number; paragraphs: string[] }[] }>)[sid];
   const chapter = story?.chapters.find((c) => c.n === Number(n));
-  const base = `/story/${sid}#chapter-${n}`;
+  const base = `/story/${sid}/text#chapter-${n}`;
   if (!chapter) return base;
   const said = [...words(text)].filter((w) => w.length > 3 && !COMMON.has(w));
   let best = -1;
