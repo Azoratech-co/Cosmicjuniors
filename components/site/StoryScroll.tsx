@@ -163,6 +163,12 @@ export default function StoryScroll({ scenes, storyTitle, storySubtitle, chapter
                         loop
                         playsInline
                         preload="metadata"
+                        onCanPlay={(e) => {
+                          // a clip that finishes loading while its scene is on screen starts right away
+                          const v = e.currentTarget;
+                          const layer = v.closest(".ss-layer") as HTMLElement | null;
+                          if (layer && Number(layer.style.opacity) > 0.01 && v.paused) v.play().catch(() => {});
+                        }}
                       />
                     ) : load ? (
                       // eslint-disable-next-line @next/next/no-img-element

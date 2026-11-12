@@ -41,25 +41,25 @@ export const SOJOURNER_SCENES: StoryScene[] = [
 
   { chapter: 2, card: true },
   {
-    chapter: 2, image: S + "mars-canyon.jpg", fit: "contain", zoom: [0.9, 1.25], credit: "Mars from space · NASA/JPL",
+    chapter: 2, image: S + "v06.jpg", video: "v06.mp4", zoom: [1, 1.04], credit: "AI illustration based on: Mars from space · NASA/JPL",
     text: "On July 4, 1997, Mars Pathfinder plunged into the thin Martian air at tremendous speed, protected by its heat shield.",
     ask: "Why did Pathfinder need a heat shield?",
   },
   {
-    chapter: 2, image: S + "parachute-test.jpg", credit: "A Mars parachute being tested on Earth · NASA/JPL",
+    chapter: 2, image: S + "v07.jpg", video: "v07.mp4", zoom: [1, 1.04], credit: "AI illustration based on: A Mars parachute being tested on Earth · NASA/JPL",
     text: "Then came the parachute. The heat shield was released, and the lander hung beneath it on a tether.",
   },
   {
-    chapter: 2, image: S + "airbags-test.jpg", credit: "Engineers test Pathfinder's multi-lobed airbags on Earth · NASA",
+    chapter: 2, image: S + "v08.jpg", video: "v08.mp4", zoom: [1, 1.04], credit: "AI illustration based on: Engineers test Pathfinder's multi-lobed airbags on Earth · NASA",
     text: "As the ground rushed closer, enormous airbags inflated around the lander to absorb the force of impact.",
     ask: "How did Pathfinder's airbags work?",
   },
   {
-    chapter: 2, image: S + "landed.jpg", credit: "Pathfinder on Mars, July 4, 1997, with Sojourner still on its petal · NASA/JPL",
+    chapter: 2, image: S + "v09.jpg", video: "v09.mp4", zoom: [1, 1.04], credit: "AI illustration based on: Pathfinder on Mars, July 4, 1997, with Sojourner still on its petal · NASA/JPL",
     text: "It struck the surface and bounced. Once, twice, and again and again: about fifteen times.",
   },
   {
-    chapter: 2, image: S + "panorama.jpg", fit: "pan", credit: "The first 360° panorama of the landing site · NASA/JPL",
+    chapter: 2, image: S + "v10.jpg", video: "v10.mp4", zoom: [1, 1.04], credit: "AI illustration based on: The first 360° panorama of the landing site · NASA/JPL",
     text: "And for a moment, the landscape seemed untouched by time: reddish dust, scattered rocks, and a pale, hazy sky.",
     ask: "Why did NASA land Pathfinder in Ares Vallis?",
   },
