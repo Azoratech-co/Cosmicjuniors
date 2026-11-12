@@ -15,26 +15,26 @@ export const SOJOURNER_SCENES: StoryScene[] = [
 
   { chapter: 1, card: true },
   {
-    chapter: 1, image: S + "prep.jpg", fit: "contain", credit: "Workers take a final look at Mars Pathfinder before it is sealed in the rocket · NASA",
+    chapter: 1, image: S + "v01.jpg", video: "v01.mp4", zoom: [1, 1.04], credit: "Workers take a final look at Mars Pathfinder before it is sealed in the rocket · NASA · AI-enhanced",
     text: "Beyond the blue skies of Earth, a powerful rocket stood ready for one of humanity's most ambitious journeys.",
     ask: "What rocket launched Mars Pathfinder?",
   },
   {
-    chapter: 1, image: S + "spacecraft.jpg", fit: "contain", credit: "The Mars Pathfinder spacecraft at Kennedy Space Center, 1996 · NASA",
+    chapter: 1, image: S + "v02.jpg", video: "v02.mp4", zoom: [1, 1.04], credit: "The Mars Pathfinder spacecraft at Kennedy Space Center, 1996 · NASA · AI-enhanced",
     text: "At its top rested a spacecraft carrying a small but remarkable explorer: Sojourner, folded safely inside the Mars Pathfinder lander.",
     ask: "How did Sojourner fit inside the Pathfinder lander?",
   },
   {
-    chapter: 1, image: S + "launch.jpg", fit: "contain", credit: "The real launch, Cape Canaveral, Dec. 4, 1996 · NASA/JPL",
+    chapter: 1, image: S + "v03.jpg", video: "v03.mp4", zoom: [1, 1.04], credit: "The launch of Mars Pathfinder, Cape Canaveral, Dec. 4, 1996 · NASA/JPL · AI-enhanced",
     text: "On December 4, 1996, flames roared beneath the rocket as it lifted away from Earth.",
     ask: "When did Mars Pathfinder launch?",
   },
   {
-    chapter: 1, image: S + "earth.jpg", fit: "contain", credit: "Earth from space, photographed by the Apollo 17 crew · NASA",
+    chapter: 1, image: S + "v04.jpg", video: "v04.mp4", zoom: [1, 1.04], credit: "Earth from space, photographed by the Apollo 17 crew · NASA · AI-enhanced",
     text: "Within moments, the blue sky gave way to the deep, endless blackness of space, and Earth became a blue sphere wrapped in white clouds.",
   },
   {
-    chapter: 1, image: S + "mars.jpg", fit: "contain", zoom: [0.55, 0.8], credit: "Mars in color, from Viking orbiter images · NASA/JPL",
+    chapter: 1, image: S + "v05.jpg", video: "v05.mp4", zoom: [1, 1.04], credit: "Mars in color, from Viking orbiter images · NASA/JPL · AI-enhanced",
     text: "For nearly seven months the spacecraft travelled through space. As months passed, Mars grew closer.",
     ask: "How long did it take Pathfinder to fly to Mars?",
   },
