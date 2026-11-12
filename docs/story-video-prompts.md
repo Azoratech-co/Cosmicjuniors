@@ -6,7 +6,8 @@ How to use:
    Cosmic Juniors Higgsfield account (the one on the Ultra plan). Unlimited generations do **not** work from
    Claude Code, which is why this runs there.
 2. Paste **everything in the box below** (the master prompt + the scene list) as your first message.
-3. Then say: **"Do scenes 01 to 05."** When they're done, **"Do scenes 06 to 10"**, and so on up to 27.
+3. Then say: **"Do scenes 06 to 10."** When they're done, **"Do scenes 11 to 15"**, and so on up to 27.
+   At the end, say **"Redo scenes 01 to 05 in the storybook look"** (the first batch was made in a photo look).
    Small batches keep the chat from getting too long.
 4. When all 27 are done, tell Claude Code (the website session): **"the clips are ready"**. It will find them
    in the Higgsfield library by their `[CJ-Sxx]` tag, download them and put them into the story.
@@ -30,27 +31,38 @@ We pay NOTHING. Every image and video MUST be paid with the free UNLIMITED allow
 - Put everything in one Higgsfield project called "Cosmic Juniors – Sojourner Story" (create it once, reuse it).
 - Start EVERY prompt with the scene tag, e.g. "[CJ-S05]" for scene 05. This is how the website finds the files.
 
-=== THE LOOK ===
-"Real, but with an AI look": the photo must stay recognisably the real NASA picture (same hardware, same
-composition, same landscape), but re-rendered as a cinematic, high-detail, photoreal film still:
-soft volumetric light, rich but natural colour, gentle film grain, shallow depth of field where it fits,
-16:9 widescreen. Same grade for all 27 scenes so they feel like one film.
-Never add: text, logos, captions, watermarks, extra rovers, astronauts on Mars, aliens, or invented machines.
+=== THE LOOK (match the reference: a painted storybook) ===
+Every still and clip must look like a page from a beautiful children's picture book, painted in oils/gouache:
+visible soft brush strokes, rich colour, warm glowing light, gentle and magical, never scary.
+Palette for the whole film: deep navy night skies full of small stars, soft lavender/purple clouds lit gold,
+warm amber firelight; on Mars, rusty orange ground, butterscotch haze and pink-tan skies; Martian sunsets
+glow blue around the Sun. Wide, calm, well-composed shots, like an establishing shot in an animated film.
+Keep it TRUE to the real NASA photo: same hardware, same layout, same landscape, just repainted.
+Never add: text, captions, watermarks, extra rovers, astronauts on Mars, aliens, faces on machines, or
+invented machines. Real logos already on the hardware (like NASA on the rocket) are fine.
 Hardware must stay accurate:
 - Sojourner: small six-wheeled rover, flat dark solar panel on top, metal wheels with cleats, about knee-high.
 - Pathfinder lander: a low three-sided (tetrahedral) lander whose three petals open flat, covered in solar
   cells, with a small mast camera; white multi-lobed airbags around it during landing.
-- The launch: a Delta II rocket at night at Cape Canaveral (it launched at 1:56 am), bright flame, white smoke.
+- The launch: a Delta II rocket (teal-green first stage, white side boosters) at night at Cape Canaveral
+  (it launched at 1:56 am), bright flame, billowing smoke.
 - Mars sky: pale butterscotch / hazy pinkish-tan by day; Martian sunsets glow blue near the Sun.
+
+=== MOTION ===
+Like the reference: the camera stays almost still (a very slow push-in at most), and the SUBJECT moves:
+the rocket lifts off, smoke billows, the parachute sways, dust drifts, the Sun sinks, stars twinkle,
+clouds slide slowly. Smooth and gentle. Nothing morphs, melts, or changes shape.
 
 === FOR EACH SCENE (do them in order) ===
 1. Import the scene's NASA photo with media_import_url (URL in the list below).
 2. STILL: generate one 16:9 image with an image model the unlimited allowance covers (prefer Nano Banana Pro),
-   the imported photo as the image reference, prompt = "[CJ-Sxx] " + the scene's STILL prompt + the look above.
+   the imported photo as the image reference, prompt = "[CJ-Sxx] " + the scene's STILL prompt + "Repaint this
+   photo as a painted children's storybook illustration in the look described above, keeping the same
+   composition and hardware."
 3. CLIP: generate one video with a video model the unlimited allowance covers (prefer Seedance 2.0 or 2.5),
    the still from step 2 as the start image, 16:9, 5 seconds, NO audio (generate_audio: false),
    the highest resolution the unlimited allowance covers, prompt = "[CJ-Sxx] " + the scene's CLIP prompt.
-   Camera moves must be slow and smooth, like a documentary. Nothing should morph or melt.
+   Follow the MOTION rules above.
 4. After each batch, reply with a short table: scene | still job id | video job id | OK or problem.
 
 === SCENES ===
@@ -112,9 +124,9 @@ S12 photo: petals-test.jpg
   STILL: A lander with three open petals and deflated airbags on a red rocky test field, like Mars.
   CLIP: Slow crane move over the lander; shadows slide across the petals.
 
-S13 photo: tracks.jpg (black-and-white rover photo)
+S13 photo: tracks.jpg (a black-and-white rover photo: paint it in colour)
   STILL: Fresh six-wheel rover tracks pressed into fine Martian soil, first tracks ever on another planet,
-  keep it black-and-white with a subtle warm tint.
+  painted in warm Martian colours.
   CLIP: Camera glides slowly along the tracks toward the horizon.
 
 S14 photo: /figma/home-storyline.png  (full URL: https://cosmic-juniors.vercel.app/figma/home-storyline.png)
@@ -122,8 +134,8 @@ S14 photo: /figma/home-storyline.png  (full URL: https://cosmic-juniors.vercel.a
   close so it feels small but brave.
   CLIP: The rover rolls forward very slowly, wheels turning; camera tracks beside it at ground level.
 
-S15 photo: rock-garden.jpg (black-and-white)
-  STILL: Sojourner driving carefully through a field of rocks, the "Rock Garden", keep black-and-white.
+S15 photo: rock-garden.jpg (black-and-white: paint it in colour)
+  STILL: Sojourner driving carefully through a field of rocks, the "Rock Garden".
   CLIP: The rover inches forward very slowly; camera stays still; a little dust lifts.
 
 S16 photo: dsn.jpg
@@ -143,8 +155,8 @@ S19 photo: twin-peaks.jpg
   CLIP: Slow push-in; for a moment a ghostly shimmer of ancient water flows between the rocks, then fades
   away to dry ground.
 
-S20 photo: yogi-view.jpg (black-and-white, fisheye)
-  STILL: The rock Yogi seen through Sojourner's own camera, black-and-white, wide lens.
+S20 photo: yogi-view.jpg (black-and-white wide-angle photo: paint it in colour)
+  STILL: The big rock Yogi seen up close from rover height, as if through Sojourner's own eyes.
   CLIP: Gentle wobble as if the rover's camera is adjusting; very slow zoom.
 
 S21 photo: panorama.jpg
@@ -163,8 +175,8 @@ S24 photo: dsn.jpg
   STILL: The NASA radio dish at night, listening, a lonely silhouette against the Milky Way.
   CLIP: Very slow push-in on the dish; stars wheel overhead; complete stillness, waiting.
 
-S25 photo: orbit.jpg (grey orbital photo)
-  STILL: The Pathfinder landing region seen from Mars orbit, grey cratered plains, keep it grey and real.
+S25 photo: orbit.jpg (grey orbital photo: paint it in Mars colours)
+  STILL: The Pathfinder landing region seen from Mars orbit, cratered rusty plains seen from high above.
   CLIP: Slow zoom down toward the surface, as if from a passing spacecraft.
 
 S26 photo: /figma/home-wiki.png  (full URL: https://cosmic-juniors.vercel.app/figma/home-wiki.png)
