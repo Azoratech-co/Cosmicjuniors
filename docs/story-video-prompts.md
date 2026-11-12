@@ -189,3 +189,64 @@ S27 photo: landed.jpg
   Earth a tiny bright blue dot.
   CLIP: Camera slowly pulls back and up; the stars glitter; the little rover stays still. Abandoned, not forgotten.
 ```
+
+---
+
+## Narration (voice-over) — Higgsfield, unlimited only
+
+The website is ready for narration: each scene plays its own line while it is on screen, and a
+**Narration** button appears once the files are in. Two Higgsfield voice models take the free unlimited
+allowance: **Text to Speech V2** (`text2speech_v2`) and **Seed Audio 1.0** (`seed_audio`).
+The allowance ends **15 November**, so do this before then.
+
+Paste this in Claude chat / Cowork (Higgsfield connector on):
+
+```text
+Make the narration for "Sojourner: The Journey Through the Stars", a kids' story website. Use the Higgsfield tools.
+
+MONEY RULE: we pay NOTHING. On EVERY generate_audio call set use_unlim: true. First call models_explore
+(type: audio, unlim: true) and only use a model + voice the unlimited allowance covers (text2speech_v2 or
+seed_audio). If anything would cost even 1 credit, STOP and tell me. count 1, no variants.
+
+VOICE: one warm, calm, realistic storyteller voice for all 27 lines, like a nature-documentary narrator
+reading a bedtime story to children: clear, gentle, unhurried, a little wonder in it, never dramatic or
+robotic. English. Pick ONE preset voice (try 2-3 on line N01 first, then keep the best one for all lines,
+same settings every time). Output mp3.
+
+Put every file in the project "Cosmic Juniors – Sojourner Story". Start each prompt/text label with its tag
+(e.g. [CJ-N01]) where the tool allows a label; the TEXT spoken must be exactly the line below, without the tag.
+
+When all 27 are done, reply with a table: line | job id | OK or problem.
+
+LINES:
+[CJ-N01] Beyond the blue skies of Earth, a powerful rocket stood ready for one of humanity's most ambitious journeys.
+[CJ-N02] At its top rested a spacecraft carrying a small but remarkable explorer: Sojourner, folded safely inside the Mars Pathfinder lander.
+[CJ-N03] On December 4, 1996, flames roared beneath the rocket as it lifted away from Earth.
+[CJ-N04] Within moments, the blue sky gave way to the deep, endless blackness of space, and Earth became a blue sphere wrapped in white clouds.
+[CJ-N05] For nearly seven months the spacecraft travelled through space. As months passed, Mars grew closer.
+[CJ-N06] On July 4, 1997, Mars Pathfinder plunged into the thin Martian air at tremendous speed, protected by its heat shield.
+[CJ-N07] Then came the parachute. The heat shield was released, and the lander hung beneath it on a tether.
+[CJ-N08] As the ground rushed closer, enormous airbags inflated around the lander to absorb the force of impact.
+[CJ-N09] It struck the surface and bounced. Once, twice, and again and again: about fifteen times.
+[CJ-N10] And for a moment, the landscape seemed untouched by time: reddish dust, scattered rocks, and a pale, hazy sky.
+[CJ-N11] The lander's petals unfolded, but the landing had not gone perfectly: one airbag had not pulled back completely, and it blocked Sojourner's ramp.
+[CJ-N12] Engineers on Earth studied the pictures and worked toward a solution. Every command had to travel the enormous distance to Mars.
+[CJ-N13] On the night of July 5, 1997, Sojourner rolled down the ramp. For the first time, a wheeled robot was exploring another planet.
+[CJ-N14] Sojourner stood only about thirty centimetres tall and weighed about 10.6 kilograms.
+[CJ-N15] It moved slowly, about one centimetre per second. One small mistake on an unfamiliar world could create a serious problem.
+[CJ-N16] Sojourner could not talk to Earth directly. The lander relayed its messages to the large radio antennas back home.
+[CJ-N17] Every rock could hold clues about the history of Mars.
+[CJ-N18] Sojourner pressed its APXS instrument against rocks with names like Barnacle Bill, Yogi, Scooby Doo and Chimp, to find out what they were made of.
+[CJ-N19] Rounded pebbles suggested that, long ago, water had once moved through this part of Mars.
+[CJ-N20] A radio signal could take several minutes to travel between Earth and Mars, so every drive had to be planned in advance.
+[CJ-N21] Sojourner was built for a seven-day mission. It kept exploring for eighty-three days.
+[CJ-N22] On September 27, 1997, the last data arrived from Pathfinder. Sojourner had just studied a rock named Chimp.
+[CJ-N23] On October 7, Earth heard from Pathfinder for the last time.
+[CJ-N24] Engineers kept trying for months. On March 10, 1998, NASA listened one last time. No signal came.
+[CJ-N25] Today, Sojourner remains at the Pathfinder landing site on Mars. No spacecraft ever came to bring it home.
+[CJ-N26] Its journey prepared the way for the rovers that followed: Spirit, Opportunity, Curiosity and Perseverance.
+[CJ-N27] Somewhere on Mars, the little rover remains. Abandoned. But never forgotten.
+```
+
+Then tell Claude Code (the website session): **"the narration is ready"**. It will download the files to
+`public/story/sojourner/audio/01.mp3 … 27.mp3` and switch `NARRATION` to `true` in `lib/story/sojourner.ts`.

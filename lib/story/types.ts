@@ -15,6 +15,12 @@ export interface StoryScene {
   /** Where a panorama starts (0 = left edge). */
   panFrom?: number;
   gray?: boolean;
+  /** Which part of the picture to keep when the frame crops it (CSS object-position), e.g. "75% 50%". */
+  focus?: string;
+  /** A date or mission time shown in the frame's corner (only real, checked dates). */
+  stamp?: string;
+  /** Narration for this scene (an audio file in the story folder), when the team has recorded it. */
+  audio?: string;
   /** A question for Cosmo about this scene. */
   ask?: string;
 }
