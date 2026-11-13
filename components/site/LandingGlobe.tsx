@@ -3,15 +3,15 @@
 import dynamic from "next/dynamic";
 import { Component, useCallback, useId, useMemo, useRef, useState, type ReactNode } from "react";
 import type { Group } from "three";
-import { formatLandingCoordinates, marsRoverSites, opportunityLanding, type MarsLandingSite, type MarsRoverSite } from "@/lib/landing-sites";
+import { marsRoverSites, opportunityLanding, type MarsLandingSite, type MarsRoverSite } from "@/lib/landing-sites";
 import styles from "./LandingGlobe.module.css";
 import { detailedCoordinates, getJourneyDefinition, getRouteSnapshot, routeCoordinates, solRange } from "@/lib/mars-journeys";
+import MarsLandingInfo from "./MarsLandingInfo";
 import MarsSitePicker from "./MarsSitePicker";
 import { useMarsJourney } from "./useMarsJourney";
 
 const Scene = dynamic(() => import("./LandingGlobeScene"), { ssr: false });
 const ExplorerWindow = dynamic(() => import("./MarsExplorerWindow"), { ssr: false });
-const dateFormat = new Intl.DateTimeFormat("en", { dateStyle: "medium", timeZone: "UTC" });
 
 class GlobeBoundary extends Component<{ children: ReactNode; onError: () => void }, { failed: boolean }> {
   state = { failed: false };
@@ -128,17 +128,7 @@ export default function MarsLandingGlobe({ site }: { site: MarsLandingSite }) {
             <MarsSitePicker selected={selected.id} onSelect={selectSite} />
             <p className={styles.note}>Dashed markers show approximate arrival sites for the two 1971 PrOP-M attempts.</p>
           </details>
-          <p className={styles.place}>{selected.name}</p>
-          <p>{selected.region}</p>
-          <p className={styles.coordinates}>{formatLandingCoordinates(selected, selected.approximate)}</p>
-          <p className={styles.date}>{selected.agency} · {selected.id === "mars-2-prop-m" ? "Impact" : "Landed"}{" "}
-            <time dateTime={selected.arrivalDate}>{dateFormat.format(new Date(`${selected.arrivalDate}T00:00:00Z`))}</time> UTC</p>
-          <p className={styles.summary}>{selected.summary}</p>
-          {selected.approximate && <p className={styles.note}>Dashed marker: approximate lander location. This rover never drove on Mars.</p>}
-          <div className={styles.sources}>
-            <a href={selected.source} target="_blank" rel="noopener noreferrer">NASA mission reference</a>
-            {selected.coordinateSource !== selected.source && <a href={selected.coordinateSource} target="_blank" rel="noopener noreferrer">NASA coordinates</a>}
-          </div>
+          <MarsLandingInfo site={selected} />
           <div className={styles.journeySummary}>
             <strong>{definition.endpointLabel} · {definition.endpointArea}</strong>
             {snapshot && <p>{detailedCoordinates(snapshot.last)}<br />{solRange(snapshot.last)} · snapshot {snapshot.snapshotDate}</p>}

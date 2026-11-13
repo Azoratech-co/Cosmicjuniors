@@ -4,9 +4,10 @@ import dynamic from "next/dynamic";
 import { createPortal } from "react-dom";
 import { Component, useCallback, useEffect, useId, useMemo, useRef, useState, type PointerEvent, type ReactNode } from "react";
 import type { Group } from "three";
-import { formatLandingCoordinates, marsRoverSites, type MarsRoverSite } from "@/lib/landing-sites";
+import { marsRoverSites, type MarsRoverSite } from "@/lib/landing-sites";
 import styles from "./MarsExplorerWindow.module.css";
 import { getRouteSnapshot, routeCoordinates } from "@/lib/mars-journeys";
+import MarsLandingInfo from "./MarsLandingInfo";
 import MarsSitePicker from "./MarsSitePicker";
 import { useMarsJourney } from "./useMarsJourney";
 
@@ -33,9 +34,10 @@ export default function MarsExplorerWindow({ site, initialMode = "globe", onSele
   const [status, setStatus] = useState<"loading" | "ready" | "failed">("loading");
   const [camera, setCamera] = useState(initialCamera);
   const [focusVersion, setFocusVersion] = useState(0);
-  const [panelOpen, setPanelOpen] = useState(true);
+  const [panelOpen, setPanelOpen] = useState(false);
   const [sitesOpen, setSitesOpen] = useState(true);
-  const [infoOpen, setInfoOpen] = useState(false);
+  const [infoOpen, setInfoOpen] = useState(true);
+  const information = useRef<HTMLElement>(null);
   const [mode, setMode] = useState(initialMode);
   const [focusLatest, setFocusLatest] = useState(false);
   const snapshot = getRouteSnapshot(site.id);
@@ -51,13 +53,18 @@ export default function MarsExplorerWindow({ site, initialMode = "globe", onSele
     const previousOverflow = document.body.style.overflow;
     element?.showModal();
     document.body.style.overflow = "hidden";
-    if (window.matchMedia("(max-width: 640px)").matches) setPanelOpen(false);
     return () => {
       if (closeTimer.current) clearTimeout(closeTimer.current);
       element?.close();
       document.body.style.overflow = previousOverflow;
     };
   }, []);
+
+  useEffect(() => {
+    if (mode === "globe" && infoOpen) {
+      information.current?.scrollIntoView({ block: "nearest", inline: "nearest" });
+    }
+  }, [infoOpen, mode, site.id]);
 
   function close() {
     if (closing) return;
@@ -137,7 +144,7 @@ export default function MarsExplorerWindow({ site, initialMode = "globe", onSele
       }}
       onCancel={(event) => { event.preventDefault(); close(); }}
       onClick={(event) => { if (event.target === event.currentTarget) close(); }}>
-      <div className={styles.window}>
+      <div className={styles.window} data-mode={mode}>
         <header className={styles.titlebar}>
           <span className={styles.planetIcon} aria-hidden="true" />
           <h2 id={title}>Mars explorer</h2>
@@ -178,17 +185,35 @@ export default function MarsExplorerWindow({ site, initialMode = "globe", onSele
           {mode === "journey" && <JourneyPanel key={site.id} site={site} data={journey.data} loading={journey.loading} failed={journey.failed} retry={journey.retry} />}
 
           <p id={hint} className={styles.hint} hidden={mode !== "globe"}>Drag to rotate &middot; Scroll or pinch to zoom</p>
-          {mode === "globe" && infoOpen && (
-            <section id={`${title}-site-info`} className={styles.infoCard} aria-label="Landing site information" aria-live="polite">
-              <p className={styles.siteLabel}>{site.rover} &middot; {site.approximate ? "Approximate arrival site" : "Landing site"}</p>
-              <h3>{site.name}</h3>
-              <p>{site.region} &middot; {formatLandingCoordinates(site, site.approximate)}</p>
-              <p>{site.summary}</p>
-              <a href={site.source} target="_blank" rel="noopener noreferrer">NASA mission reference</a>
-            </section>
-          )}
         </div>
         <aside className={styles.controls} aria-label="Mars explorer controls">
+          {mode === "globe" && (
+            <section ref={information} id={`${title}-site-info`} className={styles.infoCard} aria-label="Landing site information"
+              aria-live="polite" hidden={!infoOpen}>
+              <MarsLandingInfo site={site} />
+            </section>
+          )}
+          <section className={styles.sitePanel} aria-label="Landing sites">
+            <button type="button" className={styles.panelToggle} aria-expanded={sitesOpen} aria-controls={`${title}-sites`}
+              onClick={() => setSitesOpen((value) => !value)}>
+              Landing sites <span aria-hidden="true">{sitesOpen ? "?" : "+"}</span>
+            </button>
+            <div id={`${title}-sites`} hidden={!sitesOpen}>
+              <MarsSitePicker selected={site.id} onSelect={(next) => {
+                onSelect(next);
+                findSite();
+                setInfoOpen(true);
+              }} />
+              {mode === "globe" && (
+                <div className={styles.infoToggle}>
+                  <button type="button" className={styles.reset} aria-expanded={infoOpen} aria-controls={`${title}-site-info`}
+                    onClick={() => setInfoOpen((value) => !value)}>
+                    {infoOpen ? "Hide site information" : "Show site information"}
+                  </button>
+                </div>
+              )}
+            </div>
+          </section>
           <section className={styles.cameraPanel} hidden={mode !== "globe"} aria-label="Camera controls">
             <button type="button" className={styles.panelToggle} aria-expanded={panelOpen} aria-controls={`${title}-camera`}
               onClick={() => setPanelOpen((value) => !value)}>
@@ -213,24 +238,6 @@ export default function MarsExplorerWindow({ site, initialMode = "globe", onSele
                   setFocusLatest(true); setCamera((current) => ({ ...current, autoRotate: false })); setFocusVersion((value) => value + 1);
                 }}>Find last mapped position</button>}
               </fieldset>
-            </div>
-          </section>
-          <section className={styles.sitePanel} aria-label="Landing sites">
-            <button type="button" className={styles.panelToggle} aria-expanded={sitesOpen} aria-controls={`${title}-sites`}
-              onClick={() => setSitesOpen((value) => !value)}>
-              Landing sites <span aria-hidden="true">{sitesOpen ? "?" : "+"}</span>
-            </button>
-            <div id={`${title}-sites`} hidden={!sitesOpen}>
-              <MarsSitePicker selected={site.id} onSelect={(next) => { onSelect(next); findSite(); }} />
-              <div className={styles.siteInfo}>
-                <span className={styles.siteLabel}>{site.approximate ? "Approximate arrival site" : "Landing site"}</span>
-                <strong>{site.name}</strong>
-                <p>{formatLandingCoordinates(site, site.approximate)}</p>
-                {mode === "globe" && <button type="button" className={styles.reset} aria-expanded={infoOpen}
-                  onClick={() => setInfoOpen((value) => !value)}>
-                  {infoOpen ? "Hide site information" : "Show site information"}
-                </button>}
-              </div>
             </div>
           </section>
         </aside>
