@@ -1,5 +1,6 @@
 import { lunarRover } from "./lunar-rover";
 import { apolloLander, insightLander } from "./lander-models";
+import { sojournerModel } from "./sojourner-model";
 
 type Point = readonly [number, number, number];
 
@@ -154,6 +155,7 @@ const models: Partial<Record<string, RoverModel>> = {
       url: "https://science.nasa.gov/photojournal/sweeping-view-of-the-columbia-hills-and-gusev-crater-approximate-true-color/",
     },
   },
+  sojourner: sojournerModel,
   "lunar-rover": lunarRover,
   insight: insightLander,
   "tranquility-base": apolloLander,
