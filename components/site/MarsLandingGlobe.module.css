@@ -1,0 +1,52 @@
+.card {
+  display: grid;
+  grid-template-columns: minmax(0, 0.9fr) minmax(0, 1.1fr);
+  align-items: center;
+  margin-block: 16px 28px;
+  border: 1px solid var(--line-strong);
+  border-radius: var(--r-lg);
+  background: var(--surface);
+  color: var(--text);
+}
+
+.copy { padding: 24px; }
+.copy h2 { margin: 0 0 12px; font-size: clamp(20px, 3vw, 28px); }
+.copy p { margin: 0 0 5px; }
+.coordinates { color: var(--muted); font-size: 14px; }
+.ring {
+  display: inline-block;
+  width: 12px;
+  height: 12px;
+  margin-inline-end: 7px;
+  border: 2px solid;
+  border-radius: 50%;
+}
+.copy button {
+  margin-block: 13px;
+  min-height: 44px;
+  padding-inline: 12px;
+  border: 1px solid var(--line-strong);
+  border-radius: 8px;
+  color: inherit;
+  background: transparent;
+  font: inherit;
+  cursor: pointer;
+}
+.sources { display: flex; flex-wrap: wrap; gap: 6px 12px; font-size: 12px; }
+.sources a { color: inherit; text-decoration: underline; }
+.globe {
+  height: 300px;
+  min-width: 0;
+  border-radius: var(--r-lg);
+  touch-action: pan-y;
+  cursor: grab;
+}
+.globe:active { cursor: grabbing; }
+.notice { padding: 24px; }
+.card :is(button, a, .globe):focus-visible { outline: 2px solid var(--primary); outline-offset: 2px; }
+
+@media (max-width: 640px) {
+  .card { grid-template-columns: minmax(0, 1fr); }
+  .copy { padding: 18px 18px 0; }
+  .globe { height: 260px; }
+}
