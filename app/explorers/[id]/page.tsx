@@ -6,9 +6,9 @@ import SiteHeader from "@/components/site/SiteHeader";
 import SiteFooter from "@/components/site/SiteFooter";
 import Reveal from "@/components/site/Reveal";
 import RoverHero from "@/components/site/RoverHero";
-import MarsLandingGlobe from "@/components/site/MarsLandingGlobe";
+import LandingGlobe from "@/components/site/LandingGlobe";
 import OpportunityOrbit from "@/components/site/OpportunityOrbit";
-import { opportunityLanding } from "@/lib/mars-landing-sites";
+import { LANDING_GLOBES } from "@/lib/landing-sites";
 import RoverViewer from "@/components/rovers/RoverViewer";
 import BackLink from "@/components/site/BackLink";
 import { EXPLORERS, explorerFacts, explorerSources, getExplorer } from "@/lib/explorers";
@@ -90,7 +90,7 @@ export default async function ExplorerPage({ params }: Props) {
           </Reveal>
         )}
 
-        {e.id === "opportunity" && <MarsLandingGlobe site={opportunityLanding} />}
+        {LANDING_GLOBES[e.id] && <LandingGlobe data={LANDING_GLOBES[e.id]!} />}
         {e.id === "opportunity" && <OpportunityOrbit />}
 
         <Reveal className="section-banner">

@@ -3,16 +3,12 @@
 import { Canvas, useLoader } from "@react-three/fiber";
 import { Suspense, type RefObject } from "react";
 import { DoubleSide, MathUtils, Quaternion, SRGBColorSpace, TextureLoader, Vector3, type Group } from "three";
-import { landingView, type MarsLandingSite } from "@/lib/mars-landing-sites";
+import { GLOBE_MAPS, landingView, type LandingGlobeData } from "@/lib/landing-sites";
 
-function MarsSurface({ site, globe }: { site: MarsLandingSite; globe: RefObject<Group | null> }) {
-  const map = useLoader(TextureLoader, "/models/mars/viking-global.jpg");
+function Surface({ data, globe }: { data: LandingGlobeData; globe: RefObject<Group | null> }) {
+  const map = useLoader(TextureLoader, GLOBE_MAPS[data.world].image);
   map.colorSpace = SRGBColorSpace;
-  const { pitch, yaw } = landingView(site);
-  // SphereGeometry maps the left edge of the NASA mosaic (-180°) to -X.
-  const longitude = MathUtils.degToRad(site.longitude);
-  const normal = new Vector3(Math.cos(pitch) * Math.cos(longitude), Math.sin(pitch), -Math.cos(pitch) * Math.sin(longitude));
-  const markerOrientation = new Quaternion().setFromUnitVectors(new Vector3(0, 0, 1), normal);
+  const { pitch, yaw } = landingView(data.sites[0]);
 
   return (
     <group ref={globe} rotation={[pitch, yaw, 0, "XYZ"]}>
@@ -20,20 +16,31 @@ function MarsSurface({ site, globe }: { site: MarsLandingSite; globe: RefObject<
         <sphereGeometry args={[1, 64, 40]} />
         <meshStandardMaterial map={map} roughness={1} />
       </mesh>
-      <mesh position={normal.clone().multiplyScalar(1.012)} quaternion={markerOrientation}>
-        <ringGeometry args={[0.052, 0.069, 48]} />
-        <meshBasicMaterial color={site.color} side={DoubleSide} toneMapped={false} />
-      </mesh>
-      <mesh position={normal.clone().multiplyScalar(1.015)} quaternion={markerOrientation}>
-        <circleGeometry args={[0.017, 24]} />
-        <meshBasicMaterial color={site.color} side={DoubleSide} toneMapped={false} />
-      </mesh>
+      {data.sites.map((site) => {
+        // SphereGeometry maps the left edge of the NASA maps (-180°) to -X.
+        const lat = MathUtils.degToRad(site.latitude);
+        const lon = MathUtils.degToRad(site.longitude);
+        const normal = new Vector3(Math.cos(lat) * Math.cos(lon), Math.sin(lat), -Math.cos(lat) * Math.sin(lon));
+        const turn = new Quaternion().setFromUnitVectors(new Vector3(0, 0, 1), normal);
+        return (
+          <group key={site.name}>
+            <mesh position={normal.clone().multiplyScalar(1.012)} quaternion={turn}>
+              <ringGeometry args={[0.052, 0.069, 48]} />
+              <meshBasicMaterial color={site.color} side={DoubleSide} toneMapped={false} />
+            </mesh>
+            <mesh position={normal.clone().multiplyScalar(1.015)} quaternion={turn}>
+              <circleGeometry args={[0.017, 24]} />
+              <meshBasicMaterial color={site.color} side={DoubleSide} toneMapped={false} />
+            </mesh>
+          </group>
+        );
+      })}
     </group>
   );
 }
 
-export default function MarsGlobeScene({ site, globe, redraw }: {
-  site: MarsLandingSite;
+export default function LandingGlobeScene({ data, globe, redraw }: {
+  data: LandingGlobeData;
   globe: RefObject<Group | null>;
   redraw: RefObject<(() => void) | null>;
 }) {
@@ -47,7 +54,7 @@ export default function MarsGlobeScene({ site, globe, redraw }: {
     >
       <ambientLight intensity={0.85} />
       <directionalLight position={[-3, 4, 6]} intensity={2} />
-      <Suspense fallback={null}><MarsSurface site={site} globe={globe} /></Suspense>
+      <Suspense fallback={null}><Surface data={data} globe={globe} /></Suspense>
     </Canvas>
   );
 }

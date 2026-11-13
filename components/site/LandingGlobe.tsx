@@ -1,12 +1,12 @@
 "use client";
 
 import dynamic from "next/dynamic";
-import { Component, useRef, type ReactNode } from "react";
+import { Component, useId, useRef, useState, type ReactNode } from "react";
 import type { Group } from "three";
-import { landingView, type MarsLandingSite } from "@/lib/mars-landing-sites";
-import styles from "./MarsLandingGlobe.module.css";
+import { GLOBE_MAPS, landingView, type LandingGlobeData, type LandingSite } from "@/lib/landing-sites";
+import styles from "./LandingGlobe.module.css";
 
-const Scene = dynamic(() => import("./MarsGlobeScene"), { ssr: false });
+const Scene = dynamic(() => import("./LandingGlobeScene"), { ssr: false });
 
 class GlobeBoundary extends Component<{ children: ReactNode }, { failed: boolean }> {
   state = { failed: false };
@@ -20,7 +20,10 @@ class GlobeBoundary extends Component<{ children: ReactNode }, { failed: boolean
   }
 }
 
-export default function MarsLandingGlobe({ site }: { site: MarsLandingSite }) {
+export default function LandingGlobe({ data }: { data: LandingGlobeData }) {
+  const [site, setSite] = useState<LandingSite>(data.sites[0]);
+  const heading = useId();
+  const planet = data.world === "moon" ? "Moon" : "Mars";
   const globe = useRef<Group | null>(null);
   const redraw = useRef<(() => void) | null>(null);
   const drag = useRef<{ id: number; x: number; y: number } | null>(null);
@@ -32,29 +35,45 @@ export default function MarsLandingGlobe({ site }: { site: MarsLandingSite }) {
     redraw.current?.();
   }
 
-  function findLandingSite() {
+  function findLandingSite(target: LandingSite = site) {
+    setSite(target);
     if (!globe.current) return;
-    const { pitch, yaw } = landingView(site);
+    const { pitch, yaw } = landingView(target);
     globe.current.rotation.set(pitch, yaw, 0, "XYZ");
     redraw.current?.();
   }
 
   return (
-    <section className={styles.card} aria-labelledby="opportunity-landing-title">
+    <section className={styles.card} aria-labelledby={heading}>
       <div className={styles.copy}>
-        <h2 id="opportunity-landing-title">Where Opportunity landed</h2>
-        <p><span className={styles.ring} style={{ borderColor: site.color }} aria-hidden="true" />{site.name}, Meridiani Planum</p>
-        <p className={styles.coordinates}>1.95° S, 354.47° E</p>
-        <button type="button" onClick={findLandingSite}>Find landing site</button>
+        <h2 id={heading}>{data.title}</h2>
+        {data.sites.length > 1 ? (
+          <ul className={styles.sites}>
+            {data.sites.map((s) => (
+              <li key={s.name}>
+                <button type="button" aria-pressed={s === site} onClick={() => findLandingSite(s)}>
+                  <span className={styles.ring} style={{ borderColor: s.color }} aria-hidden="true" />
+                  <span className={styles.siteText}><strong>{s.label}</strong><span>{s.region}</span><small>{s.coordinates}</small></span>
+                </button>
+              </li>
+            ))}
+          </ul>
+        ) : (
+          <>
+            <p><span className={styles.ring} style={{ borderColor: site.color }} aria-hidden="true" />{site.name}, {site.region}</p>
+            <p className={styles.coordinates}>{site.coordinates}</p>
+            <button type="button" onClick={() => findLandingSite()}>Find landing site</button>
+          </>
+        )}
         <div className={styles.sources}>
-          <a href={site.source}>NASA mission</a>
-          <a href="https://trek.nasa.gov/tiles/apidoc/trekAPI.html?body=mars">NASA Mars Trek imagery</a>
+          <a href={data.source.url}>{data.source.label}</a>
+          <a href={GLOBE_MAPS[data.world].url}>{GLOBE_MAPS[data.world].label}</a>
         </div>
       </div>
       <div
         className={styles.globe}
         role="group"
-        aria-label="Mars globe. Drag or use arrow keys to rotate. Press Home to find the landing site."
+        aria-label={`${planet} globe. Drag or use arrow keys to rotate. Press Home to find the landing site.`}
         tabIndex={0}
         onPointerDown={(event) => {
           if (event.button !== 0 || !event.isPrimary || !globe.current) return;
@@ -81,7 +100,7 @@ export default function MarsLandingGlobe({ site }: { site: MarsLandingSite }) {
           event.preventDefault();
         }}
       >
-        <GlobeBoundary><Scene site={site} globe={globe} redraw={redraw} /></GlobeBoundary>
+        <GlobeBoundary><Scene data={data} globe={globe} redraw={redraw} /></GlobeBoundary>
       </div>
     </section>
   );
