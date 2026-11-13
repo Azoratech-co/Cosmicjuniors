@@ -370,12 +370,24 @@ html.ss-snap { scroll-snap-type: y proximity; }
 .ss-count { min-width: 52px; text-align: center; font-size: 12px; font-weight: 700; color: var(--ss-muted); font-variant-numeric: tabular-nums; }
 .ss-ask:focus-visible, .ss-btn:focus-visible, .ss-card__hint:focus-visible { outline: 2px solid var(--ss-gold); outline-offset: 2px; }
 
+/* the way out of the story: a Back button that opens the site's other tabs */
+.ss-exit { position: absolute; top: 14px; left: 16px; z-index: 5; }
+.ss-exit__btn { display: inline-flex; align-items: center; gap: 6px; height: 38px; padding: 0 14px 0 10px; border-radius: 999px; font: inherit; font-size: 14px; font-weight: 700; cursor: pointer;
+  color: var(--ss-text); background: rgb(7 11 29 / 0.7); border: 1px solid rgb(243 200 122 / 0.45); backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px); }
+.ss-exit__btn:hover, .ss-exit__btn[aria-expanded="true"] { border-color: var(--ss-gold); color: var(--ss-gold); }
+.ss-exit__btn:focus-visible, .ss-exit__link:focus-visible { outline: 2px solid var(--ss-gold); outline-offset: 2px; }
+.ss-exit__menu { position: absolute; top: 46px; left: 0; min-width: 190px; display: flex; flex-direction: column; padding: 6px; border-radius: 14px;
+  background: rgb(10 14 36 / 0.96); border: 1px solid rgb(255 255 255 / 0.14); box-shadow: 0 20px 50px rgb(2 4 16 / 0.6); }
+.ss-exit__link { display: flex; align-items: center; gap: 10px; padding: 10px 12px; border-radius: 10px; font-size: 14px; font-weight: 600; color: var(--ss-text); text-decoration: none; }
+.ss-exit__link:hover { background: rgb(255 255 255 / 0.07); color: var(--ss-gold); }
+
 .ss-after { position: relative; z-index: 1; display: flex; flex-wrap: wrap; justify-content: center; gap: 12px; padding: 40px 16px 60px; }
 
 /* Phones and tall screens: a 4:5 window, the story line under it */
 @media (max-width: 760px), (max-aspect-ratio: 1/1) {
-  .ss { --ss-w: min(calc(100vw - 32px), calc((100svh - 330px) * 4 / 5)); }
-  .ss-stage { padding-top: max(20px, env(safe-area-inset-top)); gap: 10px; }
+  .ss { --ss-w: min(calc(100vw - 32px), calc((100svh - 380px) * 4 / 5)); }
+  .ss-stage { padding-top: max(64px, calc(env(safe-area-inset-top) + 56px)); gap: 10px; }
+  .ss-exit { top: max(12px, calc(env(safe-area-inset-top) + 8px)); }
   .ss-view { aspect-ratio: 4 / 5; border-radius: 18px; }
   .ss-frame { border-radius: 16px; }
   .ss-corner { width: 16px; height: 16px; }

@@ -8,7 +8,7 @@ import { usePathname } from "next/navigation";
 
 const ICON = { width: 16, height: 16, viewBox: "0 0 24 24", fill: "none", stroke: "currentColor", strokeWidth: 2, strokeLinecap: "round" as const, strokeLinejoin: "round" as const, "aria-hidden": true };
 
-const TABS = [
+export const TABS = [
   { href: "/", label: "Home", match: (p: string) => p === "/", icon: <svg {...ICON}><path d="M4 11l8-7 8 7v9h-5v-6H9v6H4z" /></svg> },
   { href: "/story/sojourner", label: "Story", match: (p: string) => p.startsWith("/story"), icon: <svg {...ICON}><path d="M4 5.5C6.5 4 9.5 4 12 5.5 14.5 4 17.5 4 20 5.5V19c-2.5-1.5-5.5-1.5-8 0-2.5-1.5-5.5-1.5-8 0z" /><path d="M12 5.5V19" /></svg> },
   { href: "/explorers", label: "Explorers", match: (p: string) => p.startsWith("/explorers"), icon: <svg {...ICON}><circle cx="11" cy="11" r="6.5" /><path d="M16 16l4.5 4.5" /></svg> },
