@@ -1,0 +1,41 @@
+.panel { position: absolute; inset: 0; display: grid; grid-template-columns: minmax(0, 1.65fr) minmax(260px, 0.85fr); overflow: auto; overscroll-behavior: contain; background: #0b101c; color: #e6edff; }
+.mapColumn { min-width: 0; padding: 22px; }
+.mapHeading { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 8px; margin-bottom: 14px; }
+.mapHeading h3 { margin: 0; font-size: 18px; }
+.mapHeading > span { color: #a4b5d0; font-size: 11px; }
+.map { width: 100%; display: block; border: 1px solid #303b52; border-radius: 12px; }
+.note { font-size: 12px; line-height: 1.65; color: #a4b5d0; }
+.legend { display: flex; flex-wrap: wrap; gap: 8px 16px; font-size: 12px; color: #c0cde4; }
+.sidebar { min-width: 0; padding: 22px; border-left: 1px solid #2c3549; background: #111827; }
+.sidebar h3 { margin: 0 0 10px; font-size: 16px; }
+.visits { padding: 0; margin: 14px 0; list-style: none; display: grid; gap: 6px; }
+.visits button { width: 100%; display: flex; gap: 10px; align-items: center; text-align: start; }
+.visits button > span:first-child { display: grid; place-items: center; width: 25px; height: 25px; border: 1px solid #8090b1; border-radius: 50%; flex-shrink: 0; }
+.visits small { display: block; margin-top: 3px; font-size: 10px; color: #a4b5d0; }
+.visits button[aria-pressed="true"] { border-color: #b8a6ff; background: #30294e; }
+.panel button { min-height: 44px; padding: 9px 12px; border: 1px solid #3d4a65; border-radius: 8px; color: #e6edff; background: #1a253a; font: inherit; font-size: 12px; cursor: pointer; }
+.panel button:hover { background: #2c3b55; }
+.panel button:disabled { opacity: 0.45; cursor: default; }
+.panel a { color: #c9bbff; text-decoration: underline; text-underline-offset: 3px; font-size: 12px; }
+.landmarkInfo { padding: 12px 0; font-size: 13px; line-height: 1.6; }
+.landmarkInfo p { margin: 5px 0; color: #b9c7df; }
+.endpoint { margin-top: 20px; padding: 16px; border: 1px solid #4e4770; border-radius: 10px; background: #191d30; font-size: 12px; line-height: 1.7; }
+.endpoint > strong { font-size: 14px; }
+.endpoint p { margin: 8px 0; }
+.endpoint .kicker { margin-top: 0; color: #bcaaff; font-size: 11px; font-weight: 700; }
+.endpointButton { width: 100%; margin-top: 10px; }
+.recordBox { padding: 16px; border: 1px solid #303b52; border-radius: 10px; margin-top: 14px; background: #131c2d; }
+.recordBox > label { display: flex; align-items: center; flex-wrap: wrap; gap: 10px; font-size: 13px; }
+.recordBox > label span { margin-left: auto; color: #bcaaff; font-size: 12px; }
+.recordBox input[type="range"] { width: 100%; min-height: 36px; accent-color: #ad96ff; }
+.recordButtons { display: flex; align-items: center; justify-content: space-between; gap: 10px; flex-wrap: wrap; }
+.recordButtons label { display: flex; align-items: center; gap: 6px; font-size: 12px; }
+.recordButtons input { width: 88px; min-height: 44px; border: 1px solid #53627e; border-radius: 6px; color: #e6edff; background: #0b1321; padding: 6px; font: inherit; }
+.recordBox > p { margin-bottom: 0; font-size: 12px; line-height: 1.7; }
+.recordBox > p span { color: #a4b5d0; }
+.links { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 14px; }
+.figure { margin: 0 0 20px; }
+.figure img { display: block; width: 100%; height: auto; border-radius: 10px; background: #080d16; }
+.figure figcaption { margin-top: 9px; font-size: 12px; line-height: 1.7; color: #b9c7df; }
+.panel :is(button, a, input):focus-visible { outline: 2px solid #c4b6ff; outline-offset: 3px; }
+@media (max-width: 760px) { .panel { grid-template-columns: minmax(0, 1fr); } .mapColumn, .sidebar { padding: 16px; } .sidebar { border-left: 0; border-top: 1px solid #2c3549; } }

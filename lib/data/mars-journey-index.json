@@ -1,0 +1,146 @@
+{
+  "spirit": {
+    "file": "/models/mars/routes/spirit.json",
+    "snapshotDate": "2026-11-13",
+    "stopCount": 8804,
+    "segmentCount": 1,
+    "coordinateCount": 7562,
+    "first": [
+      175.475837,
+      -14.565828,
+      1,
+      1,
+      "0",
+      "0"
+    ],
+    "last": [
+      175.525377,
+      -14.600366,
+      2169,
+      2209,
+      "138",
+      "1230"
+    ],
+    "maxRecordedSol": 2209,
+    "sources": [
+      {
+        "url": "https://an.rsl.wustl.edu/mera/AN/meri/MER/traverse/MERA_traverse.zip",
+        "sha256": "937e579e23b0de3ca574c6606e29d9a3ea8e2605eebf52aa32454e8bc396b46a",
+        "bytes": 383560
+      },
+      {
+        "url": "https://an.rsl.wustl.edu/mera/AN/meri/MER/traverse/MERA_traverse.lbl",
+        "sha256": "d9f7f3a7ea1334f520377eb2a90a80e0f16bf1ab0c0292fbea376eb7ab8d79e1",
+        "bytes": 6454
+      }
+    ]
+  },
+  "opportunity": {
+    "file": "/models/mars/routes/opportunity.json",
+    "snapshotDate": "2026-11-13",
+    "stopCount": 21104,
+    "segmentCount": 1,
+    "coordinateCount": 19964,
+    "first": [
+      354.47448,
+      -1.948173,
+      1,
+      1,
+      "0",
+      "0"
+    ],
+    "last": [
+      354.651023,
+      -2.330925,
+      5076,
+      5081,
+      "210",
+      "277"
+    ],
+    "maxRecordedSol": 5081,
+    "sources": [
+      {
+        "url": "https://an.rsl.wustl.edu/mera/AN/meri/MER/traverse/MERB_traverse_5130.zip",
+        "sha256": "6d099b39ccba6e46ee057e34d8d205215a0c09f393948e57ce21fa8860d9ee92",
+        "bytes": 1164689
+      },
+      {
+        "url": "https://an.rsl.wustl.edu/mera/AN/meri/MER/traverse/MERB_traverse_5130.lbl",
+        "sha256": "e5aa91bcd6f89c9a48d39cdb3c410db2120c6a1bb3617f752fa65f9ffaa6df0e",
+        "bytes": 6140
+      }
+    ]
+  },
+  "curiosity": {
+    "file": "/models/mars/routes/curiosity.json",
+    "snapshotDate": "2026-11-13",
+    "stopCount": 1389,
+    "segmentCount": 68,
+    "coordinateCount": 25693,
+    "first": [
+      137.441633,
+      -4.589467,
+      3,
+      3,
+      "2",
+      "0"
+    ],
+    "last": [
+      137.388886,
+      -4.82602331,
+      5073,
+      5073,
+      "125",
+      "2490"
+    ],
+    "maxRecordedSol": 5073,
+    "sources": [
+      {
+        "url": "https://mars.nasa.gov/mmgis-maps/MSL/Layers/json/MSL_traverse.json",
+        "sha256": "c22752254772c8edaee295986cf6a188daf088957f29d042cd62862365cdf3f5",
+        "bytes": 1357951
+      },
+      {
+        "url": "https://mars.nasa.gov/mmgis-maps/MSL/Layers/json/MSL_waypoints.json",
+        "sha256": "5a32324f4b8ba22ebdfac50a503e195f47ccdc876ad4c15b19e29dc7cef15a09",
+        "bytes": 665124
+      }
+    ]
+  },
+  "perseverance": {
+    "file": "/models/mars/routes/perseverance.json",
+    "snapshotDate": "2026-11-13",
+    "stopCount": 708,
+    "segmentCount": 20,
+    "coordinateCount": 35010,
+    "first": [
+      77.45088572,
+      18.44462715,
+      13,
+      13,
+      "3",
+      "0"
+    ],
+    "last": [
+      77.23322287,
+      18.43559434,
+      2022,
+      2022,
+      "93",
+      "0"
+    ],
+    "maxRecordedSol": 2022,
+    "sources": [
+      {
+        "url": "https://mars.nasa.gov/mmgis-maps/M20/Layers/json/M20_traverse.json",
+        "sha256": "6ddd0ece913d75b45d105946082f95ed84e68f4718b68d32a4421dc30877e7e6",
+        "bytes": 1723218
+      },
+      {
+        "url": "https://mars.nasa.gov/mmgis-maps/M20/Layers/json/M20_waypoints.json",
+        "sha256": "bd143ee69241229926abd373e6305b8bbb326d6b5a7b4a8d6935262696f93dc4",
+        "bytes": 603126
+      }
+    ]
+  }
+}
