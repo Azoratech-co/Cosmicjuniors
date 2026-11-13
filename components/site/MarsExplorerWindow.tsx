@@ -7,6 +7,7 @@ import type { Group } from "three";
 import { marsRoverSites, type MarsRoverSite } from "@/lib/landing-sites";
 import styles from "./MarsExplorerWindow.module.css";
 import { getRouteSnapshot, routeCoordinates } from "@/lib/mars-journeys";
+import type { LandingMarkerProjection } from "./LandingGlobeScene";
 import MarsLandingInfo from "./MarsLandingInfo";
 import MarsSitePicker from "./MarsSitePicker";
 import { useMarsJourney } from "./useMarsJourney";
@@ -28,6 +29,9 @@ export default function MarsExplorerWindow({ site, initialMode = "globe", onSele
   const dialog = useRef<HTMLDialogElement>(null);
   const globe = useRef<Group | null>(null);
   const redraw = useRef<(() => void) | null>(null);
+  const cancelFocus = useRef<(() => void) | null>(null);
+  const pickSite = useRef<((x: number, y: number) => MarsRoverSite | undefined) | null>(null);
+  const tap = useRef<{ id: number; x: number; y: number } | null>(null);
   const pointers = useRef(new Map<number, { x: number; y: number }>());
   const closeTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const [closing, setClosing] = useState(false);
@@ -38,6 +42,12 @@ export default function MarsExplorerWindow({ site, initialMode = "globe", onSele
   const [sitesOpen, setSitesOpen] = useState(true);
   const [infoOpen, setInfoOpen] = useState(true);
   const information = useRef<HTMLElement>(null);
+  const viewport = useRef<HTMLDivElement>(null);
+  const leader = useRef<SVGSVGElement>(null);
+  const leaderLine = useRef<SVGLineElement>(null);
+  const leaderDot = useRef<SVGCircleElement>(null);
+  const marker = useRef<LandingMarkerProjection | null>(null);
+  const [visibleSite, setVisibleSite] = useState<string | null>(null);
   const [mode, setMode] = useState(initialMode);
   const [focusLatest, setFocusLatest] = useState(false);
   const snapshot = getRouteSnapshot(site.id);
@@ -46,7 +56,44 @@ export default function MarsExplorerWindow({ site, initialMode = "globe", onSele
   const title = useId();
   const hint = useId();
   const onReady = useCallback(() => setStatus("ready"), []);
-  const onError = useCallback(() => { pointers.current.clear(); setStatus("failed"); }, []);
+  const onError = useCallback(() => { pointers.current.clear(); tap.current = null; setStatus("failed"); }, []);
+
+  const drawLeader = useCallback(() => {
+    const line = leaderLine.current;
+    const dot = leaderDot.current;
+    const bounds = leader.current?.getBoundingClientRect();
+    const canvas = viewport.current?.getBoundingClientRect();
+    const card = information.current?.getBoundingClientRect();
+    const controls = information.current?.parentElement?.getBoundingClientRect();
+    const point = marker.current;
+    if (!line || !dot || !bounds?.width || !bounds.height || !canvas?.width || !card?.height || !controls) return;
+    const y = card.top + 24;
+    const connected = !!point && y >= controls.top && y < controls.bottom;
+    leader.current?.setAttribute("data-connected", String(connected));
+    if (!point || !connected) return;
+    const x = canvas.left + canvas.width * point.x;
+    const markerY = canvas.top + canvas.height * point.y;
+    const startX = `${(x - bounds.left) / bounds.width * 100}%`;
+    const startY = `${(markerY - bounds.top) / bounds.height * 100}%`;
+    const beside = card.left >= canvas.right - 1;
+    const endX = beside ? card.left : Math.min(card.right - 12, Math.max(card.left + 12, x));
+    const endY = beside ? y : Math.max(card.top, controls.top);
+    line.setAttribute("x1", startX);
+    line.setAttribute("y1", startY);
+    line.setAttribute("x2", `${(endX - bounds.left) / bounds.width * 100}%`);
+    line.setAttribute("y2", `${(endY - bounds.top) / bounds.height * 100}%`);
+    dot.setAttribute("cx", startX);
+    dot.setAttribute("cy", startY);
+  }, []);
+
+  const projectMarker = useCallback((point: LandingMarkerProjection | null) => {
+    const previous = marker.current?.siteId ?? null;
+    marker.current = point;
+    const next = point?.siteId ?? null;
+    if (next !== previous) setVisibleSite(next);
+    drawLeader();
+  }, [drawLeader]);
+  const calloutVisible = status !== "ready" || visibleSite === site.id;
 
   useEffect(() => {
     const element = dialog.current;
@@ -63,8 +110,9 @@ export default function MarsExplorerWindow({ site, initialMode = "globe", onSele
   useEffect(() => {
     if (mode === "globe" && infoOpen) {
       information.current?.scrollIntoView({ block: "nearest", inline: "nearest" });
+      drawLeader();
     }
-  }, [infoOpen, mode, site.id]);
+  }, [drawLeader, infoOpen, mode, site.id, calloutVisible]);
 
   function close() {
     if (closing) return;
@@ -80,12 +128,19 @@ export default function MarsExplorerWindow({ site, initialMode = "globe", onSele
     setFocusVersion((value) => value + 1);
   }
 
+  function selectLandingSite(next: MarsRoverSite) {
+    onSelect(next);
+    findSite();
+    setInfoOpen(true);
+  }
+
   function zoom(factor: number) {
     setCamera((current) => ({ ...current, zoom: Math.max(0.7, Math.min(1.7, current.zoom * factor)) }));
   }
 
   function rotate(x: number, y: number) {
     if (!globe.current) return;
+    cancelFocus.current?.();
     globe.current.rotation.y += x;
     globe.current.rotation.x = Math.max(-1.45, Math.min(1.45, globe.current.rotation.x + y));
     redraw.current?.();
@@ -94,6 +149,9 @@ export default function MarsExplorerWindow({ site, initialMode = "globe", onSele
   function pointerDown(event: PointerEvent<HTMLDivElement>) {
     if (status !== "ready" || event.button !== 0 || pointers.current.size >= 2) return;
     setCamera((current) => current.autoRotate ? { ...current, autoRotate: false } : current);
+    tap.current = pointers.current.size === 0
+      ? { id: event.pointerId, x: event.clientX, y: event.clientY }
+      : null;
     pointers.current.set(event.pointerId, { x: event.clientX, y: event.clientY });
     event.currentTarget.setPointerCapture(event.pointerId);
   }
@@ -102,6 +160,9 @@ export default function MarsExplorerWindow({ site, initialMode = "globe", onSele
     const previous = pointers.current.get(event.pointerId);
     if (!previous) return;
     const next = { x: event.clientX, y: event.clientY };
+    const start = tap.current;
+    if (start && Math.hypot(next.x - start.x, next.y - start.y) <= 5) return;
+    tap.current = null;
     pointers.current.set(event.pointerId, next);
     if (pointers.current.size === 2) {
       const other = [...pointers.current.entries()].find(([id]) => id !== event.pointerId)?.[1];
@@ -112,8 +173,20 @@ export default function MarsExplorerWindow({ site, initialMode = "globe", onSele
     } else rotate((next.x - previous.x) * 0.007, (next.y - previous.y) * 0.007);
   }
 
+  function endPointer(event: PointerEvent<HTMLDivElement>) {
+    pointers.current.delete(event.pointerId);
+    const start = tap.current;
+    if (start?.id !== event.pointerId) return;
+    tap.current = null;
+    if (event.type !== "pointerup" || Math.hypot(event.clientX - start.x, event.clientY - start.y) > 5) return;
+    const bounds = event.currentTarget.getBoundingClientRect();
+    const x = (event.clientX - bounds.left) * event.currentTarget.clientWidth / bounds.width;
+    const y = (event.clientY - bounds.top) * event.currentTarget.clientHeight / bounds.height;
+    const hit = pickSite.current?.(x, y);
+    if (hit) selectLandingSite(hit);
+  }
+
   // Wheel handling stays inside the modal globe and leaves browser Ctrl+wheel zoom alone.
-  const viewport = useRef<HTMLDivElement>(null);
   useEffect(() => {
     const element = viewport.current;
     if (!element || status !== "ready") return;
@@ -160,9 +233,7 @@ export default function MarsExplorerWindow({ site, initialMode = "globe", onSele
         <div className={styles.space}>
           <div ref={viewport} className={styles.viewport} hidden={mode !== "globe"} role="group" aria-label="Expanded Mars globe" aria-describedby={hint}
             tabIndex={status === "ready" ? 0 : undefined} onPointerDown={pointerDown} onPointerMove={pointerMove}
-            onPointerUp={(event) => pointers.current.delete(event.pointerId)}
-            onPointerCancel={(event) => pointers.current.delete(event.pointerId)}
-            onLostPointerCapture={(event) => pointers.current.delete(event.pointerId)}
+            onPointerUp={endPointer} onPointerCancel={endPointer} onLostPointerCapture={endPointer}
             onKeyDown={(event) => {
               switch (event.key) {
                 case "ArrowLeft": rotate(-0.15, 0); break;
@@ -177,8 +248,9 @@ export default function MarsExplorerWindow({ site, initialMode = "globe", onSele
               event.preventDefault();
             }}>
             {status !== "failed" && <WindowBoundary onError={onError}>
-              <Scene site={site} sites={marsRoverSites} focusVersion={focusVersion} globe={globe} redraw={redraw}
-                onReady={onReady} onError={onError} view={camera} journey={journey.data} focusPoint={focusPoint} />
+              <Scene site={site} sites={marsRoverSites} focusVersion={focusVersion} globe={globe} redraw={redraw} cancelFocus={cancelFocus}
+                onReady={onReady} onError={onError} view={camera} journey={journey.data} focusPoint={focusPoint}
+                onProjectMarker={projectMarker} pickSite={pickSite} />
             </WindowBoundary>}
           </div>
           {mode === "globe" && status !== "ready" && <p className={styles.notice} role="status">{status === "loading" ? "Loading Mars…" : "The 3D globe is unavailable. You can still compare landing sites or open Journey."}</p>}
@@ -186,24 +258,26 @@ export default function MarsExplorerWindow({ site, initialMode = "globe", onSele
 
           <p id={hint} className={styles.hint} hidden={mode !== "globe"}>Drag to rotate &middot; Scroll or pinch to zoom</p>
         </div>
-        <aside className={styles.controls} aria-label="Mars explorer controls">
+        {mode === "globe" && infoOpen && (
+          <svg ref={leader} className={styles.leader} data-visible={visibleSite === site.id && status === "ready"} aria-hidden="true">
+            <line ref={leaderLine} />
+            <circle ref={leaderDot} r="3" fill={site.color} />
+          </svg>
+        )}
+        <aside className={styles.controls} aria-label="Mars explorer controls" onScroll={drawLeader}>
           {mode === "globe" && (
             <section ref={information} id={`${title}-site-info`} className={styles.infoCard} aria-label="Landing site information"
-              aria-live="polite" hidden={!infoOpen}>
-              <MarsLandingInfo site={site} />
+              aria-live="polite" hidden={!infoOpen} data-visible={calloutVisible} inert={!calloutVisible}>
+              <MarsLandingInfo site={site} reveal={infoOpen && calloutVisible} />
             </section>
           )}
           <section className={styles.sitePanel} aria-label="Landing sites">
             <button type="button" className={styles.panelToggle} aria-expanded={sitesOpen} aria-controls={`${title}-sites`}
               onClick={() => setSitesOpen((value) => !value)}>
-              Landing sites <span aria-hidden="true">{sitesOpen ? "?" : "+"}</span>
+              Landing sites <span aria-hidden="true">{sitesOpen ? "-" : "+"}</span>
             </button>
             <div id={`${title}-sites`} hidden={!sitesOpen}>
-              <MarsSitePicker selected={site.id} onSelect={(next) => {
-                onSelect(next);
-                findSite();
-                setInfoOpen(true);
-              }} />
+              <MarsSitePicker selected={site.id} onSelect={selectLandingSite} />
               {mode === "globe" && (
                 <div className={styles.infoToggle}>
                   <button type="button" className={styles.reset} aria-expanded={infoOpen} aria-controls={`${title}-site-info`}

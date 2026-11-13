@@ -1,7 +1,8 @@
 "use client";
 
 import dynamic from "next/dynamic";
-import { Component, useCallback, useEffect, useId, useRef, useState, type CSSProperties, type KeyboardEvent, type PointerEvent, type ReactNode } from "react";
+import TypedDescription from "../site/TypedDescription";
+import { Component, useCallback, useEffect, useId, useRef, useState, type KeyboardEvent, type PointerEvent, type ReactNode } from "react";
 import type { RoverModel, RoverPart } from "@/lib/rover-models";
 import type { PartProjection, RoverCameraControls } from "./RoverScene";
 import RoverPartsPicker from "./RoverPartsPicker";
@@ -224,17 +225,7 @@ export default function RoverViewer({ model }: { model: RoverModel }) {
           >
             <strong>{part.name}</strong>
             <p>
-              <span className={styles.visuallyHidden}>{part.description}</span>
-              <span key={part.id} aria-hidden="true">
-                {typedPart === part.id ? part.description : part.description.split(" ").map((word, index, words) => (
-                  <span key={index} className={styles.typedWord}>
-                    {Array.from(word, (letter, letterIndex) => (
-                      <span key={letterIndex} style={{ "--letter-delay": `${5 * (words.slice(0, index).join(" ").length + index + letterIndex)}ms` } as CSSProperties}>{letter}</span>
-                    ))}
-                    {index < words.length - 1 ? " " : ""}
-                  </span>
-                ))}
-              </span>{" "}
+              {typedPart === part.id ? part.description : <TypedDescription key={part.id} text={part.description} active={!!revealPart} />}{" "}
               <a href={part.source} target="_blank" rel="noreferrer">NASA source</a>
             </p>
           </div>

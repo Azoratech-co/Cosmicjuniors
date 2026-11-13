@@ -1,12 +1,14 @@
 "use client";
 
 import { Canvas, useFrame, useLoader, useThree } from "@react-three/fiber";
-import { Suspense, useEffect, useLayoutEffect, useMemo, type RefObject } from "react";
-import { DoubleSide, Quaternion, SRGBColorSpace, TextureLoader, Vector3, type Group, type PerspectiveCamera } from "three";
+import { Suspense, useEffect, useLayoutEffect, useMemo, useRef, type RefObject } from "react";
+import { DoubleSide, MathUtils, Quaternion, SRGBColorSpace, TextureLoader, Vector3, type Group, type PerspectiveCamera } from "three";
 import { landingView, marsSurfacePosition, type MarsRoverSite } from "@/lib/landing-sites";
 import { getRouteSnapshot, routeCoordinates, type JourneyData } from "@/lib/mars-journeys";
 
 export type MarsGlobeView = { zoom: number; fov: number; autoRotate: boolean };
+
+export type LandingMarkerProjection = { siteId: string; x: number; y: number };
 
 type Props = {
   site: MarsRoverSite;
@@ -19,9 +21,12 @@ type Props = {
   view?: MarsGlobeView;
   journey?: JourneyData;
   focusPoint?: { latitude: number; longitude: number };
+  cancelFocus: RefObject<(() => void) | null>;
+  onProjectMarker?: (point: LandingMarkerProjection | null) => void;
+  pickSite?: RefObject<((x: number, y: number) => MarsRoverSite | undefined) | null>;
 };
 
-function WindowCamera({ view, globe }: { view: MarsGlobeView; globe: RefObject<Group | null> }) {
+function WindowCamera({ view, globe, moving }: { view: MarsGlobeView; globe: RefObject<Group | null>; moving: RefObject<boolean> }) {
   const { camera, size, invalidate } = useThree();
   useLayoutEffect(() => {
     if (!size.width || !size.height) return;
@@ -37,7 +42,7 @@ function WindowCamera({ view, globe }: { view: MarsGlobeView; globe: RefObject<G
   }, [camera, size.width, size.height, view.fov, view.zoom, invalidate]);
   useEffect(() => { if (view.autoRotate) invalidate(); }, [view.autoRotate, invalidate]);
   useFrame((_, delta) => {
-    if (!view.autoRotate || !globe.current) return;
+    if (!view.autoRotate || !globe.current || moving.current) return;
     globe.current.rotation.y += Math.min(delta, 0.05) * 0.12;
     invalidate();
   });
@@ -99,17 +104,91 @@ function LandingMarker({ site, selected }: { site: MarsRoverSite; selected: bool
   );
 }
 
-function MarsSurface({ site, sites, focusVersion, globe, redraw, onReady, onError, journey, focusPoint }: Props) {
+function MarsSurface({
+  site, sites, focusVersion, globe, redraw, onReady, onError, journey, focusPoint,
+  cancelFocus, onProjectMarker, pickSite, moving,
+}: Props & { moving: RefObject<boolean> }) {
   const map = useLoader(TextureLoader, "/models/mars/viking-global.jpg");
-  const { invalidate, gl } = useThree();
+  const { invalidate, gl, camera, size } = useThree();
+  const initialFocus = useRef(true);
+  const transition = useRef({ fromPitch: 0, fromYaw: 0, pitch: 0, yaw: 0, elapsed: 0 });
+  const marker = useMemo(() => new Vector3(...marsSurfacePosition(site)).multiplyScalar(1.012), [site]);
+  const projected = useMemo(() => new Vector3(), []);
   map.colorSpace = SRGBColorSpace;
 
   useLayoutEffect(() => {
-    if (!globe.current) return;
+    const rotation = globe.current?.rotation;
+    if (!rotation) return;
     const { pitch, yaw } = landingView(focusPoint ?? site);
-    globe.current.rotation.set(pitch, yaw, 0, "XYZ");
+    const yawDelta = MathUtils.euclideanModulo(yaw - rotation.y + Math.PI, Math.PI * 2) - Math.PI;
+    const targetYaw = rotation.y + yawDelta;
+    const reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    moving.current = !initialFocus.current && !reducedMotion &&
+      (Math.abs(yawDelta) > 0.001 || Math.abs(pitch - rotation.x) > 0.001);
+    initialFocus.current = false;
+    if (moving.current) {
+      transition.current = { fromPitch: rotation.x, fromYaw: rotation.y, pitch, yaw: targetYaw, elapsed: 0 };
+      onProjectMarker?.(null);
+    } else {
+      rotation.set(pitch, targetYaw, 0, "XYZ");
+    }
     invalidate();
-  }, [site, focusPoint, focusVersion, globe, invalidate]);
+  }, [site, focusPoint, focusVersion, globe, invalidate, moving, onProjectMarker]);
+
+  useEffect(() => {
+    cancelFocus.current = () => { moving.current = false; };
+    return () => { cancelFocus.current = null; moving.current = false; };
+  }, [cancelFocus, moving]);
+
+  useEffect(() => {
+    if (!pickSite) return;
+    const point = new Vector3();
+    pickSite.current = (x, y) => {
+      const group = globe.current;
+      if (!group || moving.current || !size.width || !size.height) return;
+      group.updateWorldMatrix(true, false);
+      let closest = 16;
+      let hit: MarsRoverSite | undefined;
+      for (const entry of sites) {
+        point.set(...marsSurfacePosition(entry)).multiplyScalar(1.012).applyMatrix4(group.matrixWorld);
+        if (point.dot(camera.position) <= point.lengthSq()) continue;
+        point.project(camera);
+        const distance = Math.hypot((point.x + 1) * size.width / 2 - x, (1 - point.y) * size.height / 2 - y);
+        if (distance < closest) { closest = distance; hit = entry; }
+      }
+      return hit;
+    };
+    return () => { pickSite.current = null; };
+  }, [camera, globe, moving, pickSite, sites, size.height, size.width]);
+
+  useFrame((_, delta) => {
+    const group = globe.current;
+    if (!group) return;
+    if (moving.current) {
+      const turn = transition.current;
+      turn.elapsed += Math.min(delta, 0.05);
+      const progress = Math.min(turn.elapsed / 0.65, 1);
+      const eased = progress * progress * (3 - 2 * progress);
+      group.rotation.set(MathUtils.lerp(turn.fromPitch, turn.pitch, eased),
+        MathUtils.lerp(turn.fromYaw, turn.yaw, eased), 0, "XYZ");
+      moving.current = progress < 1;
+      if (moving.current) invalidate();
+    }
+    if (!onProjectMarker) return;
+    if (moving.current || !size.width || !size.height) {
+      onProjectMarker(null);
+      return;
+    }
+    group.updateWorldMatrix(true, false);
+    projected.copy(marker).applyMatrix4(group.matrixWorld);
+    // The line belongs to the surface marker only while it faces the camera.
+    const facing = projected.dot(camera.position) > projected.lengthSq();
+    projected.project(camera);
+    onProjectMarker(facing && Math.abs(projected.x) < 1 && Math.abs(projected.y) < 1 &&
+      projected.z > -1 && projected.z < 1
+      ? { siteId: site.id, x: (projected.x + 1) / 2, y: (1 - projected.y) / 2 }
+      : null);
+  });
 
   useEffect(() => {
     const canvas = gl.domElement;
@@ -136,13 +215,14 @@ function MarsSurface({ site, sites, focusVersion, globe, redraw, onReady, onErro
 }
 
 export default function MarsGlobeScene(props: Props) {
+  const moving = useRef(false);
   return (
     <Canvas aria-hidden="true" camera={{ position: [0, 0, 3.8], fov: 39 }}
       dpr={[1, 1.75]} frameloop="demand">
       <ambientLight intensity={0.85} />
       <directionalLight position={[-3, 4, 6]} intensity={2} />
-      {props.view && <WindowCamera view={props.view} globe={props.globe} />}
-      <Suspense fallback={null}><MarsSurface {...props} /></Suspense>
+      {props.view && <WindowCamera view={props.view} globe={props.globe} moving={moving} />}
+      <Suspense fallback={null}><MarsSurface {...props} moving={moving} /></Suspense>
     </Canvas>
   );
 }

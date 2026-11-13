@@ -87,3 +87,5 @@
 .journeySummary > strong { font-size: 13px; }
 .journeySummary > p { color: var(--muted); margin-block: 8px; }
 .globePanel > .findButton { margin: 0 6px 10px 0; }
+
+.landingInfo :is(.coordinates, .date, .note) { color: var(--landing-muted, var(--muted)); }

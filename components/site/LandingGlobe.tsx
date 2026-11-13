@@ -37,12 +37,14 @@ export default function MarsLandingGlobe({ site }: { site: MarsLandingSite }) {
   const instructions = useId();
   const globe = useRef<Group | null>(null);
   const redraw = useRef<(() => void) | null>(null);
+  const cancelFocus = useRef<(() => void) | null>(null);
   const drag = useRef<{ id: number; x: number; y: number } | null>(null);
   const onReady = useCallback(() => setStatus("ready"), []);
   const onError = useCallback(() => { drag.current = null; setStatus("failed"); }, []);
 
   function rotate(x: number, y: number) {
     if (!globe.current) return;
+    cancelFocus.current?.();
     globe.current.rotation.y += x;
     globe.current.rotation.x = Math.max(-1.45, Math.min(1.45, globe.current.rotation.x + y));
     redraw.current?.();
@@ -104,7 +106,7 @@ export default function MarsLandingGlobe({ site }: { site: MarsLandingSite }) {
               {status !== "failed" && (
                 <GlobeBoundary onError={onError}>
                   <Scene site={selected} sites={marsRoverSites} focusVersion={focusVersion} globe={globe}
-                    redraw={redraw} onReady={onReady} onError={onError} journey={journey.data} focusPoint={focusPoint} />
+                    redraw={redraw} cancelFocus={cancelFocus} onReady={onReady} onError={onError} journey={journey.data} focusPoint={focusPoint} />
                 </GlobeBoundary>
               )}
             </div>
