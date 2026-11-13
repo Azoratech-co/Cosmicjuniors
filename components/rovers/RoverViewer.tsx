@@ -50,6 +50,7 @@ export default function RoverViewer({ model }: { model: RoverModel }) {
     setStatus("fallback");
   }, []);
   const ready = status === "ready";
+  const kind = model.kind ?? "rover";
 
   useEffect(() => {
     const element = viewport.current;
@@ -158,7 +159,7 @@ export default function RoverViewer({ model }: { model: RoverModel }) {
     : (projection?.height ?? 0) + gap;
 
   return (
-    <section className={styles.viewer} data-guide={!!model.partsGuide} data-layout={layout} aria-label={`${model.name} rover viewer`}>
+    <section className={styles.viewer} data-guide={!!model.partsGuide} data-layout={layout} aria-label={`${model.name} ${kind} viewer`}>
       <div className={styles.stage}>
       <div className={styles.background} style={{ backgroundImage: `url(${model.background.image})` }} />
       <div
@@ -227,18 +228,19 @@ export default function RoverViewer({ model }: { model: RoverModel }) {
       </p>
       <div className={styles.footer}>
         <div className={styles.actions}>
-          <div className={styles.controls} role="group" aria-label="Rover view controls">
+          <div className={styles.controls} role="group" aria-label={kind === "lander" ? "Lander view controls" : "Rover view controls"}>
             <button type="button" aria-label="Zoom in" disabled={!ready} onClick={() => controls.current?.zoom(zoomIn)}>+</button>
             <button type="button" aria-label="Zoom out" disabled={!ready} onClick={() => controls.current?.zoom(1 / zoomIn)}>−</button>
             <button type="button" disabled={!ready} onClick={resetView}>Reset view</button>
           </div>
           <span className={styles.hint} role="status">
-            {status === "loading" && "Loading 3D rover…"}
+            {status === "loading" && `Loading 3D ${kind}…`}
             {status === "fallback" && "3D unavailable · showing a static preview"}
             {ready && !model.partsGuide && "Drag to rotate"}
           </span>
         </div>
         <div className={styles.credits}>
+          {model.modelNote && <span className={styles.hint}>{model.modelNote}</span>}
           <a href={model.modelCredit.url} target="_blank" rel="noreferrer">{model.modelCredit.label}</a>
           {model.modelCredit.license && (
             <a href={model.modelCredit.license.url} target="_blank" rel="noreferrer">{model.modelCredit.license.label}</a>
@@ -256,6 +258,7 @@ export default function RoverViewer({ model }: { model: RoverModel }) {
       {model.partsGuide && (
         <RoverPartsPicker
           guide={model.partsGuide}
+          kind={kind}
           selected={part?.id}
           onSelect={selectPart}
           highlight={highlight}

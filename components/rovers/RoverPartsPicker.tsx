@@ -6,6 +6,7 @@ import styles from "./RoverViewer.module.css";
 
 type Props = {
   guide: NonNullable<RoverModel["partsGuide"]>;
+  kind: "rover" | "lander";
   selected?: string;
   onSelect: (part: RoverPart) => void;
   highlight: boolean;
@@ -13,7 +14,7 @@ type Props = {
   highlightAvailable: boolean;
 };
 
-export default function RoverPartsPicker({ guide, selected, onSelect, highlight, onHighlight, highlightAvailable }: Props) {
+export default function RoverPartsPicker({ guide, kind, selected, onSelect, highlight, onHighlight, highlightAvailable }: Props) {
   const { diagram, parts } = guide;
   const heading = useId();
   const wheel = useRef<HTMLDivElement>(null);
@@ -76,7 +77,7 @@ export default function RoverPartsPicker({ guide, selected, onSelect, highlight,
 
   return (
     <aside className={styles.parts} aria-labelledby={heading}>
-      <h2 id={heading} className={styles.partsTitle}>Rover parts</h2>
+      <h2 id={heading} className={styles.partsTitle}>{kind === "lander" ? "Lander parts" : "Rover parts"}</h2>
       <div className={styles.diagram} style={{ aspectRatio: diagram.width / diagram.height }}>
         <div className={styles.diagramLines} style={{ maskImage: `url(${diagram.image})` }} aria-hidden="true" />
         {parts.map((part, index) => (
@@ -94,7 +95,7 @@ export default function RoverPartsPicker({ guide, selected, onSelect, highlight,
         ))}
       </div>
       <div className={styles.wheelFrame}>
-        <div className={styles.wheel} ref={wheel} onScroll={settle} role="group" aria-label="Scroll to choose a rover part">
+        <div className={styles.wheel} ref={wheel} onScroll={settle} role="group" aria-label={`Scroll to choose a ${kind} part`}>
           {parts.map((part, index) => (
             <button
               key={part.id}

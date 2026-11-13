@@ -1,4 +1,5 @@
 import { lunarRover } from "./lunar-rover";
+import { apolloLander, insightLander } from "./lander-models";
 
 type Point = readonly [number, number, number];
 
@@ -23,9 +24,11 @@ export type RoverPart = {
 
 export type RoverModel = {
   name: string;
+  kind?: "lander";
   model: string;
   poster: string;
   description: string;
+  modelNote?: string;
   view: { azimuth: number; polar: number };
   modelCredit: { label: string; url: string; license?: { label: string; url: string } };
   background: { image: string; credit: string; url: string };
@@ -152,6 +155,8 @@ const models: Partial<Record<string, RoverModel>> = {
     },
   },
   "lunar-rover": lunarRover,
+  insight: insightLander,
+  "tranquility-base": apolloLander,
 };
 
 export function getRoverModel(explorerId: string) {
