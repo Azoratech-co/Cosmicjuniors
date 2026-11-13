@@ -2,7 +2,7 @@
 
 import { Canvas, useLoader, useThree } from "@react-three/fiber";
 import { Suspense, useCallback, useEffect, useLayoutEffect, useMemo, useRef, type RefObject } from "react";
-import { Box3, BufferGeometry, EdgesGeometry, Float32BufferAttribute, MathUtils, Mesh, PMREMGenerator, Raycaster, Sphere, Spherical, Vector3, type Group, type PerspectiveCamera } from "three";
+import { Box3, BufferGeometry, type Object3D, EdgesGeometry, Float32BufferAttribute, MathUtils, Mesh, PMREMGenerator, Raycaster, Sphere, Spherical, Vector3, type Group, type PerspectiveCamera } from "three";
 import { GLTFLoader } from "three/addons/loaders/GLTFLoader.js";
 import { RoomEnvironment } from "three/addons/environments/RoomEnvironment.js";
 import type { RoverModel, RoverPart } from "@/lib/rover-models";
@@ -20,6 +20,16 @@ export type RoverCameraControls = {
 
 export type PartProjection = { x: number; y: number; width: number; height: number; zoom: number; visible: boolean };
 
+// A node counts as "named" by a prefix if it or any parent up to the model root starts with it.
+// (A 3D mesh made of several pieces loads as a group named after the node, with pieces named
+// after the mesh, so checking only the piece's own name would miss them.)
+function hasNamePrefix(node: Object3D, root: Object3D, prefix: string) {
+  for (let current: Object3D | null = node; current && current !== root; current = current.parent) {
+    if (current.name.startsWith(prefix)) return true;
+  }
+  return false;
+}
+
 function getPartGeometry(object: Group, definitions: readonly RoverPart[]) {
   const parts = new Map<RoverPart, number[]>();
   const triangle = [new Vector3(), new Vector3(), new Vector3()];
@@ -30,7 +40,7 @@ function getPartGeometry(object: Group, definitions: readonly RoverPart[]) {
     const material = node.material.name;
     const regions = definitions.flatMap((part) => part.highlight
       .filter((region) => (!region.materials || region.materials.includes(material)) &&
-        (!region.nodePrefix || node.name.startsWith(region.nodePrefix)))
+        (!region.nodePrefix || hasNamePrefix(node, object, region.nodePrefix)))
       .map((region) => ({ part, region })));
     if (!regions.length) return;
 
@@ -136,7 +146,7 @@ function RoverModelScene({ model, controls, onReady, onError, highlight, onProje
       const lens = camera as PerspectiveCamera;
       if (shiftNow.current > 0.0005) lens.setViewOffset(size.width, size.height, shiftNow.current * size.width, 0, size.width, size.height);
       else if (lens.view?.enabled) lens.clearViewOffset();
-      spherical.set(fitDistance * zoom, polar, azimuth);
+      spherical.set(fitDistance * zoom * (1 + shiftNow.current * 1.1), polar, azimuth);
       camera.position.copy(position.setFromSpherical(spherical).add(target));
       camera.lookAt(target);
       camera.updateMatrixWorld();

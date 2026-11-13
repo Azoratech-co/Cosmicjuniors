@@ -128,7 +128,12 @@ export const apolloLander: RoverModel = {
         diagram: [232, 124],
         target: [0, 1.69, 1.98],
         view: { azimuth: 0, polar: 79 },
-        highlight: [{ nodePrefix: "group31", bounds: { min: [-2.2, 0.82, -2.2], max: [2.2, 2.34, 2.2] } }],
+        highlight: [
+          // the gold-foil body, its frame, and the descent engine underneath
+          { nodePrefix: "pCylinder1" },
+          { nodePrefix: "group31", bounds: { min: [-2.2, 0.82, -2.2], max: [2.2, 2.34, 2.2] } },
+          { nodePrefix: "group13_p", bounds: { min: [-1.6, 0.35, -1.6], max: [1.6, 1.15, 1.6] } },
+        ],
       },
       {
         id: "ladder",
