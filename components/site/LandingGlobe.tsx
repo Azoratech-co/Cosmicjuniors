@@ -1,11 +1,13 @@
 "use client";
 
 import dynamic from "next/dynamic";
-import { Component, useCallback, useId, useMemo, useRef, useState, type ReactNode } from "react";
+import { Component, useCallback, useEffect, useId, useMemo, useRef, useState, type ReactNode } from "react";
 import type { Group } from "three";
 import { marsRoverSites, opportunityLanding, type MarsLandingSite, type MarsRoverSite } from "@/lib/landing-sites";
 import styles from "./LandingGlobe.module.css";
 import { detailedCoordinates, getJourneyDefinition, getRouteSnapshot, routeCoordinates, solRange } from "@/lib/mars-journeys";
+import type { LandingMarkerProjection } from "./LandingGlobeScene";
+import { positionMarsLeader } from "./positionMarsLeader";
 import MarsLandingInfo from "./MarsLandingInfo";
 import MarsSitePicker from "./MarsSitePicker";
 import { useMarsJourney } from "./useMarsJourney";
@@ -22,14 +24,18 @@ class GlobeBoundary extends Component<{ children: ReactNode; onError: () => void
 
 export default function MarsLandingGlobe({ site }: { site: MarsLandingSite }) {
   // Keep the existing page's site prop: no explorer page integration change needed.
-  const [selected, setSelected] = useState<MarsRoverSite>(() => marsRoverSites.find((entry) =>
-    entry.latitude === site.latitude && entry.longitude === site.longitude) ?? opportunityLanding);
+  const original = marsRoverSites.find((entry) =>
+    entry.latitude === site.latitude && entry.longitude === site.longitude) ?? opportunityLanding;
+  const [selected, setSelected] = useState(original);
+  const comparison = selected.id !== original.id ? selected : null;
+  const [revealedComparison, setRevealedComparison] = useState<string | null>(null);
   const [focusVersion, setFocusVersion] = useState(0);
   const [expanded, setExpanded] = useState(false);
   const [windowMode, setWindowMode] = useState<"globe" | "journey">("globe");
   const [focusLatest, setFocusLatest] = useState(false);
   const journey = useMarsJourney(selected.id);
-  const definition = getJourneyDefinition(selected.id);
+  const definition = getJourneyDefinition(original.id);
+  const originalSnapshot = getRouteSnapshot(original.id);
   const snapshot = getRouteSnapshot(selected.id);
   const focusPoint = useMemo(() => focusLatest && snapshot ? routeCoordinates(snapshot.last) : undefined, [focusLatest, snapshot]);
   const [status, setStatus] = useState<"loading" | "ready" | "failed">("loading");
@@ -38,9 +44,43 @@ export default function MarsLandingGlobe({ site }: { site: MarsLandingSite }) {
   const globe = useRef<Group | null>(null);
   const redraw = useRef<(() => void) | null>(null);
   const cancelFocus = useRef<(() => void) | null>(null);
+  const viewport = useRef<HTMLDivElement>(null);
+  const originalCard = useRef<HTMLElement>(null);
+  const comparisonCard = useRef<HTMLElement>(null);
+  const originalLeader = useRef<SVGSVGElement>(null);
+  const comparisonLeader = useRef<SVGSVGElement>(null);
+  const originalPoint = useRef<LandingMarkerProjection | null>(null);
+  const comparisonPoint = useRef<LandingMarkerProjection | null>(null);
   const drag = useRef<{ id: number; x: number; y: number } | null>(null);
   const onReady = useCallback(() => setStatus("ready"), []);
   const onError = useCallback(() => { drag.current = null; setStatus("failed"); }, []);
+
+  const drawLeaders = useCallback(() => {
+    positionMarsLeader(originalLeader.current, viewport.current, originalCard.current, originalPoint.current);
+    positionMarsLeader(comparisonLeader.current, viewport.current, comparisonCard.current, comparisonPoint.current);
+  }, []);
+  const projectOriginal = useCallback((point: LandingMarkerProjection | null) => {
+    originalPoint.current = point;
+    drawLeaders();
+  }, [drawLeaders]);
+  const projectComparison = useCallback((point: LandingMarkerProjection | null) => {
+    const previous = comparisonPoint.current?.siteId;
+    comparisonPoint.current = point;
+    if (point && point.siteId !== previous) setRevealedComparison(point.siteId);
+    drawLeaders();
+  }, [drawLeaders]);
+
+  useEffect(() => {
+    const observer = new ResizeObserver(drawLeaders);
+    for (const element of [viewport.current, originalCard.current, comparisonCard.current, originalLeader.current]) {
+      if (element) observer.observe(element);
+    }
+    window.addEventListener("scroll", drawLeaders, { passive: true });
+    return () => {
+      observer.disconnect();
+      window.removeEventListener("scroll", drawLeaders);
+    };
+  }, [comparison, drawLeaders]);
 
   function rotate(x: number, y: number) {
     if (!globe.current) return;
@@ -52,6 +92,7 @@ export default function MarsLandingGlobe({ site }: { site: MarsLandingSite }) {
 
   function selectSite(next: MarsRoverSite) {
     drag.current = null;
+    if (next.id !== selected.id) setRevealedComparison(null);
     setSelected(next);
     setFocusLatest(false);
     // Also re-center when the visitor picks the already selected rover after dragging.
@@ -75,7 +116,7 @@ export default function MarsLandingGlobe({ site }: { site: MarsLandingSite }) {
       <div className={styles.explorer}>
         <div className={styles.globePanel}>
           <div className={styles.globeStage}>
-            <div className={styles.globe} role="group" aria-label="Interactive Mars landing-site globe"
+            <div ref={viewport} className={styles.globe} role="group" aria-label="Interactive Mars landing-site globe"
               aria-describedby={instructions} tabIndex={status === "ready" ? 0 : undefined}
               onPointerDown={(event) => {
                 if (event.button !== 0 || !event.isPrimary || !globe.current) return;
@@ -106,7 +147,8 @@ export default function MarsLandingGlobe({ site }: { site: MarsLandingSite }) {
               {status !== "failed" && (
                 <GlobeBoundary onError={onError}>
                   <Scene site={selected} sites={marsRoverSites} focusVersion={focusVersion} globe={globe}
-                    redraw={redraw} cancelFocus={cancelFocus} onReady={onReady} onError={onError} journey={journey.data} focusPoint={focusPoint} />
+                    redraw={redraw} cancelFocus={cancelFocus} onReady={onReady} onError={onError} journey={journey.data} focusPoint={focusPoint}
+                    referenceSite={original} onProjectReference={projectOriginal} onProjectMarker={projectComparison} />
                 </GlobeBoundary>
               )}
             </div>
@@ -121,21 +163,43 @@ export default function MarsLandingGlobe({ site }: { site: MarsLandingSite }) {
             onClick={() => { setFocusLatest(true); setFocusVersion((value) => value + 1); }}>Find last mapped position</button>}
         </div>
 
+        {status === "ready" && (
+          <svg ref={originalLeader} className={styles.leader} data-visible="true" aria-hidden="true">
+            <line /><circle r="3" fill={original.color} />
+          </svg>
+        )}
+        {status === "ready" && comparison && (
+          <svg ref={comparisonLeader} className={styles.leader} data-visible="true" aria-hidden="true">
+            <line /><circle r="3" fill={comparison.color} />
+          </svg>
+        )}
         <div className={styles.details}>
           <p className={styles.eyebrow}>{selected.approximate ? "Earlier attempt · approximate site" : "Selected landing site"}</p>
           <h3><span className={styles.marker} data-approximate={selected.approximate}
             style={{ borderColor: selected.color, color: selected.color }} aria-hidden="true">●</span>{selected.rover}</h3>
+          <section ref={originalCard} className={styles.infoCard} data-visible="true" aria-label={`${original.rover} landing information`}>
+            <MarsLandingInfo site={original} />
+          </section>
           <details className={styles.comparison}>
             <summary>Compare different landing positions</summary>
             <MarsSitePicker selected={selected.id} onSelect={selectSite} />
             <p className={styles.note}>Dashed markers show approximate arrival sites for the two 1971 PrOP-M attempts.</p>
           </details>
-          <MarsLandingInfo site={selected} />
+          {comparison && (
+            <section key={comparison.id} ref={comparisonCard} className={styles.infoCard} data-visible="true"
+              aria-label={`${comparison.rover} comparison information`} aria-live="polite">
+              <h4>{comparison.rover}</h4>
+              <MarsLandingInfo site={comparison} reveal={status !== "ready" || revealedComparison === comparison.id} />
+              <button type="button" className={styles.findButton} onClick={() => { setWindowMode("journey"); setExpanded(true); }}>
+                Explore {comparison.rover} journey
+              </button>
+            </section>
+          )}
           <div className={styles.journeySummary}>
             <strong>{definition.endpointLabel} · {definition.endpointArea}</strong>
-            {snapshot && <p>{detailedCoordinates(snapshot.last)}<br />{solRange(snapshot.last)} · snapshot {snapshot.snapshotDate}</p>}
+            {originalSnapshot && <p>{detailedCoordinates(originalSnapshot.last)}<br />{solRange(originalSnapshot.last)} &middot; snapshot {originalSnapshot.snapshotDate}</p>}
             {definition.contact && <p>{definition.contact.label}: {definition.contact.date}</p>}
-            <button type="button" className={styles.findButton} onClick={() => { setWindowMode("journey"); setExpanded(true); }}>Explore {selected.rover} journey</button>
+            <button type="button" className={styles.findButton} onClick={() => { selectSite(original); setWindowMode("journey"); setExpanded(true); }}>Explore {original.rover} journey</button>
           </div>
         </div>
       </div>

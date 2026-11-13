@@ -6,8 +6,10 @@ import { Component, useCallback, useEffect, useId, useMemo, useRef, useState, ty
 import type { Group } from "three";
 import { marsRoverSites, type MarsRoverSite } from "@/lib/landing-sites";
 import styles from "./MarsExplorerWindow.module.css";
+import calloutStyles from "./LandingGlobe.module.css";
 import { getRouteSnapshot, routeCoordinates } from "@/lib/mars-journeys";
 import type { LandingMarkerProjection } from "./LandingGlobeScene";
+import { positionMarsLeader } from "./positionMarsLeader";
 import MarsLandingInfo from "./MarsLandingInfo";
 import MarsSitePicker from "./MarsSitePicker";
 import { useMarsJourney } from "./useMarsJourney";
@@ -44,8 +46,6 @@ export default function MarsExplorerWindow({ site, initialMode = "globe", onSele
   const information = useRef<HTMLElement>(null);
   const viewport = useRef<HTMLDivElement>(null);
   const leader = useRef<SVGSVGElement>(null);
-  const leaderLine = useRef<SVGLineElement>(null);
-  const leaderDot = useRef<SVGCircleElement>(null);
   const marker = useRef<LandingMarkerProjection | null>(null);
   const [visibleSite, setVisibleSite] = useState<string | null>(null);
   const [mode, setMode] = useState(initialMode);
@@ -59,31 +59,8 @@ export default function MarsExplorerWindow({ site, initialMode = "globe", onSele
   const onError = useCallback(() => { pointers.current.clear(); tap.current = null; setStatus("failed"); }, []);
 
   const drawLeader = useCallback(() => {
-    const line = leaderLine.current;
-    const dot = leaderDot.current;
-    const bounds = leader.current?.getBoundingClientRect();
-    const canvas = viewport.current?.getBoundingClientRect();
-    const card = information.current?.getBoundingClientRect();
-    const controls = information.current?.parentElement?.getBoundingClientRect();
-    const point = marker.current;
-    if (!line || !dot || !bounds?.width || !bounds.height || !canvas?.width || !card?.height || !controls) return;
-    const y = card.top + 24;
-    const connected = !!point && y >= controls.top && y < controls.bottom;
-    leader.current?.setAttribute("data-connected", String(connected));
-    if (!point || !connected) return;
-    const x = canvas.left + canvas.width * point.x;
-    const markerY = canvas.top + canvas.height * point.y;
-    const startX = `${(x - bounds.left) / bounds.width * 100}%`;
-    const startY = `${(markerY - bounds.top) / bounds.height * 100}%`;
-    const beside = card.left >= canvas.right - 1;
-    const endX = beside ? card.left : Math.min(card.right - 12, Math.max(card.left + 12, x));
-    const endY = beside ? y : Math.max(card.top, controls.top);
-    line.setAttribute("x1", startX);
-    line.setAttribute("y1", startY);
-    line.setAttribute("x2", `${(endX - bounds.left) / bounds.width * 100}%`);
-    line.setAttribute("y2", `${(endY - bounds.top) / bounds.height * 100}%`);
-    dot.setAttribute("cx", startX);
-    dot.setAttribute("cy", startY);
+    positionMarsLeader(leader.current, viewport.current, information.current, marker.current,
+      information.current?.parentElement);
   }, []);
 
   const projectMarker = useCallback((point: LandingMarkerProjection | null) => {
@@ -259,14 +236,14 @@ export default function MarsExplorerWindow({ site, initialMode = "globe", onSele
           <p id={hint} className={styles.hint} hidden={mode !== "globe"}>Drag to rotate &middot; Scroll or pinch to zoom</p>
         </div>
         {mode === "globe" && infoOpen && (
-          <svg ref={leader} className={styles.leader} data-visible={visibleSite === site.id && status === "ready"} aria-hidden="true">
-            <line ref={leaderLine} />
-            <circle ref={leaderDot} r="3" fill={site.color} />
+          <svg ref={leader} className={calloutStyles.leader} data-visible={visibleSite === site.id && status === "ready"} aria-hidden="true">
+            <line />
+            <circle r="3" fill={site.color} />
           </svg>
         )}
         <aside className={styles.controls} aria-label="Mars explorer controls" onScroll={drawLeader}>
           {mode === "globe" && (
-            <section ref={information} id={`${title}-site-info`} className={styles.infoCard} aria-label="Landing site information"
+            <section ref={information} id={`${title}-site-info`} className={calloutStyles.infoCard} aria-label="Landing site information"
               aria-live="polite" hidden={!infoOpen} data-visible={calloutVisible} inert={!calloutVisible}>
               <MarsLandingInfo site={site} reveal={infoOpen && calloutVisible} />
             </section>

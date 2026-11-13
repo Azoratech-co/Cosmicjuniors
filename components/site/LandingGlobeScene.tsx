@@ -22,6 +22,8 @@ type Props = {
   journey?: JourneyData;
   focusPoint?: { latitude: number; longitude: number };
   cancelFocus: RefObject<(() => void) | null>;
+  referenceSite?: MarsRoverSite;
+  onProjectReference?: (point: LandingMarkerProjection | null) => void;
   onProjectMarker?: (point: LandingMarkerProjection | null) => void;
   pickSite?: RefObject<((x: number, y: number) => MarsRoverSite | undefined) | null>;
 };
@@ -106,13 +108,14 @@ function LandingMarker({ site, selected }: { site: MarsRoverSite; selected: bool
 
 function MarsSurface({
   site, sites, focusVersion, globe, redraw, onReady, onError, journey, focusPoint,
-  cancelFocus, onProjectMarker, pickSite, moving,
+  cancelFocus, onProjectMarker, referenceSite, onProjectReference, pickSite, moving,
 }: Props & { moving: RefObject<boolean> }) {
   const map = useLoader(TextureLoader, "/models/mars/viking-global.jpg");
   const { invalidate, gl, camera, size } = useThree();
   const initialFocus = useRef(true);
   const transition = useRef({ fromPitch: 0, fromYaw: 0, pitch: 0, yaw: 0, elapsed: 0 });
   const marker = useMemo(() => new Vector3(...marsSurfacePosition(site)).multiplyScalar(1.012), [site]);
+  const reference = useMemo(() => referenceSite ? new Vector3(...marsSurfacePosition(referenceSite)).multiplyScalar(1.012) : null, [referenceSite]);
   const projected = useMemo(() => new Vector3(), []);
   map.colorSpace = SRGBColorSpace;
 
@@ -174,20 +177,21 @@ function MarsSurface({
       moving.current = progress < 1;
       if (moving.current) invalidate();
     }
-    if (!onProjectMarker) return;
-    if (moving.current || !size.width || !size.height) {
-      onProjectMarker(null);
-      return;
-    }
+    if (!onProjectMarker && !onProjectReference) return;
     group.updateWorldMatrix(true, false);
-    projected.copy(marker).applyMatrix4(group.matrixWorld);
-    // The line belongs to the surface marker only while it faces the camera.
-    const facing = projected.dot(camera.position) > projected.lengthSq();
-    projected.project(camera);
-    onProjectMarker(facing && Math.abs(projected.x) < 1 && Math.abs(projected.y) < 1 &&
-      projected.z > -1 && projected.z < 1
-      ? { siteId: site.id, x: (projected.x + 1) / 2, y: (1 - projected.y) / 2 }
-      : null);
+
+    const project = (position: Vector3, siteId: string): LandingMarkerProjection | null => {
+      if (!size.width || !size.height) return null;
+      projected.copy(position).applyMatrix4(group.matrixWorld);
+      // A hidden surface point must never have a leader drawn through Mars.
+      if (projected.dot(camera.position) <= projected.lengthSq()) return null;
+      projected.project(camera);
+      if (Math.abs(projected.x) >= 1 || Math.abs(projected.y) >= 1 || projected.z <= -1 || projected.z >= 1) return null;
+      return { siteId, x: (projected.x + 1) / 2, y: (1 - projected.y) / 2 };
+    };
+
+    if (onProjectMarker) onProjectMarker(moving.current ? null : project(marker, site.id));
+    if (onProjectReference && referenceSite && reference) onProjectReference(project(reference, referenceSite.id));
   });
 
   useEffect(() => {

@@ -110,34 +110,6 @@
 .hint { position: absolute; pointer-events: none; bottom: 16px; left: 22px; margin: 0; font-size: 12px; line-height: 1.7; color: #b8c4dd; text-shadow: 0 1px 5px #000; }
 .notice { position: absolute; inset: 0; margin: 0; display: grid; place-content: center; padding: 30px; text-align: center; color: #c2cce1; pointer-events: none; }
 .infoToggle { padding: 8px 12px 12px; }
-.infoCard {
-  --landing-muted: #dfcdb7;
-  margin-bottom: 10px;
-  padding: 14px;
-  border-radius: 8px;
-  background: rgb(32 21 15 / 94%);
-  color: #fff2e0;
-  font-size: 14px;
-  line-height: 1.5;
-  opacity: 0;
-  transform: translateY(4px);
-  transition: opacity 160ms ease, transform 160ms ease;
-}
-.infoCard[data-visible="true"] { opacity: 1; transform: none; }
-
-.leader {
-  position: absolute;
-  inset: 0;
-  width: 100%;
-  height: 100%;
-  z-index: 1;
-  pointer-events: none;
-  stroke: #fff1d1;
-  stroke-width: 1.5px;
-  opacity: 0;
-  transition: opacity 160ms ease;
-}
-.leader[data-visible="true"][data-connected="true"] { opacity: 1; }
 .dialog :is(button, a, input, .viewport):focus-visible { outline: 2px solid #c2b5ff; outline-offset: 3px; }
 .viewport:focus-visible { outline-offset: -4px; }
 @keyframes openWindow { from { opacity: 0; transform: translateY(24px) scale(0.94); } to { opacity: 1; transform: none; } }
@@ -153,7 +125,6 @@
   .hint { left: 8px; bottom: 8px; font-size: 11px; }
 }
 @media (prefers-reduced-motion: reduce) {
-  .infoCard, .leader { transition: none; }
   .dialog[open], .dialog[data-closing="true"], .dialog::backdrop, .dialog[data-closing="true"]::backdrop { animation: none; }
 }
 .viewport[hidden], .cameraPanel[hidden], .hint[hidden] { display: none; }
