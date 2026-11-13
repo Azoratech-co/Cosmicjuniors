@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { useCallback, useEffect, useRef, useState } from "react";
 import type { StoryScene } from "@/lib/story/types";
+import { TABS } from "@/components/NavTabs";
 import { disableStorySound, duckStorySound, enableStorySound, setStorySound } from "@/lib/storySound";
 
 // One continuous scroll through the story, like a picture book you scroll: a framed clip in the
@@ -42,6 +43,8 @@ export default function StoryScroll({ scenes, storyTitle, storySubtitle, chapter
   const [near, setNear] = useState(0);
   const [voice, setVoice] = useState(false);
   const [sound, setSound] = useState(false);
+  const [menu, setMenu] = useState(false);
+  const menuRef = useRef<HTMLDivElement>(null);
   const activeRef = useRef(0);
 
   const chapterNos = [...new Set(scenes.map((s) => s.chapter).filter((c) => c > 0))];
@@ -197,6 +200,20 @@ export default function StoryScroll({ scenes, storyTitle, storySubtitle, chapter
     a.play().catch(() => {});
   }, [active, voice, scenes, folder]);
 
+  // ---------- the way out: a menu of the site's other tabs ----------
+  useEffect(() => {
+    if (!menu) return;
+    const close = (e: Event) => {
+      if (e instanceof KeyboardEvent ? e.key === "Escape" : !menuRef.current?.contains(e.target as Node)) setMenu(false);
+    };
+    window.addEventListener("pointerdown", close);
+    window.addEventListener("keydown", close);
+    return () => {
+      window.removeEventListener("pointerdown", close);
+      window.removeEventListener("keydown", close);
+    };
+  }, [menu]);
+
   // ---------- sound effects: follow the scene on screen ----------
   useEffect(() => {
     const sc = scenes[active];
@@ -253,6 +270,23 @@ export default function StoryScroll({ scenes, storyTitle, storySubtitle, chapter
             sc.image && Math.abs(i - near) <= 2 ? (
               <div key={i} ref={(el) => { glows.current[i] = el; }} style={{ backgroundImage: `url(${sc.image})` }} />
             ) : null,
+          )}
+        </div>
+
+        <div className="ss-exit" ref={menuRef}>
+          <button type="button" className="ss-exit__btn" onClick={() => setMenu((m) => !m)} aria-expanded={menu} aria-haspopup="true">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d="M15 6l-6 6 6 6" /></svg>
+            Back
+          </button>
+          {menu && (
+            <nav className="ss-exit__menu" aria-label="Main">
+              {TABS.filter((t) => !t.href.startsWith("/story")).map((t) => (
+                <Link key={t.href} href={t.href} className="ss-exit__link">
+                  {t.icon}
+                  {t.label}
+                </Link>
+              ))}
+            </nav>
           )}
         </div>
 
