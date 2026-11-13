@@ -1,6 +1,8 @@
 import { lunarRover } from "./lunar-rover";
 import { apolloLander, insightLander } from "./lander-models";
 import { sojournerModel } from "./sojourner-model";
+import { phoenixModel } from "./phoenix-model";
+import { surveyorModel } from "./surveyor-model";
 
 type Point = readonly [number, number, number];
 
@@ -158,7 +160,9 @@ const models: Partial<Record<string, RoverModel>> = {
   sojourner: sojournerModel,
   "lunar-rover": lunarRover,
   insight: insightLander,
+  phoenix: phoenixModel,
   "tranquility-base": apolloLander,
+  "surveyor-3": surveyorModel,
 };
 
 export function getRoverModel(explorerId: string) {
