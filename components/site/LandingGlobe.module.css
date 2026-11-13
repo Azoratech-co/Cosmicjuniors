@@ -47,7 +47,25 @@
 }
 .findButton:disabled { opacity: 0.55; cursor: default; }
 .details { position: relative; z-index: 2; min-width: 0; padding: 20px 24px 20px 4px; }
-.details h3 { display: flex; align-items: center; gap: 10px; margin: 6px 0 14px; font-size: clamp(22px, 3vw, 28px); }
+.details h3 { display: flex; align-items: center; gap: 10px; margin: 0; font-size: clamp(22px, 3vw, 28px); }
+.siteTitle { display: flex; flex-wrap: wrap; align-items: center; gap: 4px 12px; margin: 6px 0 14px; }
+.locateButton {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  min-height: 32px;
+  padding: 0 8px;
+  border: 1px solid var(--line-strong);
+  border-radius: 6px;
+  background: transparent;
+  color: var(--text);
+  font: inherit;
+  font-size: 12px;
+  cursor: pointer;
+}
+.locateButton svg { width: 15px; height: 15px; }
+.locateButton:hover:not(:disabled) { border-color: var(--primary); }
+.locateButton:disabled { opacity: 0.55; cursor: default; }
 .details p, .landingInfo p { margin: 6px 0; }
 .landingInfo .place { font-weight: 700; }
 .coordinates { font-size: 13px; font-variant-numeric: tabular-nums; }
@@ -86,7 +104,6 @@
 .journeySummary { margin-top: 18px; padding-top: 16px; border-top: 1px solid var(--line-strong); font-size: 12px; line-height: 1.6; }
 .journeySummary > strong { font-size: 13px; }
 .journeySummary > p { color: var(--muted); margin-block: 8px; }
-.globePanel > .findButton { margin: 0 6px 10px 0; }
 
 .landingInfo :is(.coordinates, .date, .note) { color: var(--landing-muted, var(--muted)); }
 

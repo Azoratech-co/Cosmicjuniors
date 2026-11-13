@@ -1,11 +1,11 @@
 "use client";
 
 import dynamic from "next/dynamic";
-import { Component, useCallback, useEffect, useId, useMemo, useRef, useState, type ReactNode } from "react";
+import { Component, useCallback, useEffect, useId, useRef, useState, type ReactNode } from "react";
 import type { Group } from "three";
 import { marsRoverSites, opportunityLanding, type MarsLandingSite, type MarsRoverSite } from "@/lib/landing-sites";
 import styles from "./LandingGlobe.module.css";
-import { detailedCoordinates, getJourneyDefinition, getRouteSnapshot, routeCoordinates, solRange } from "@/lib/mars-journeys";
+import { detailedCoordinates, getJourneyDefinition, getRouteSnapshot, solRange } from "@/lib/mars-journeys";
 import type { LandingMarkerProjection } from "./LandingGlobeScene";
 import { positionMarsLeader } from "./positionMarsLeader";
 import MarsLandingInfo from "./MarsLandingInfo";
@@ -32,12 +32,9 @@ export default function MarsLandingGlobe({ site }: { site: MarsLandingSite }) {
   const [focusVersion, setFocusVersion] = useState(0);
   const [expanded, setExpanded] = useState(false);
   const [windowMode, setWindowMode] = useState<"globe" | "journey">("globe");
-  const [focusLatest, setFocusLatest] = useState(false);
   const journey = useMarsJourney(selected.id);
   const definition = getJourneyDefinition(original.id);
   const originalSnapshot = getRouteSnapshot(original.id);
-  const snapshot = getRouteSnapshot(selected.id);
-  const focusPoint = useMemo(() => focusLatest && snapshot ? routeCoordinates(snapshot.last) : undefined, [focusLatest, snapshot]);
   const [status, setStatus] = useState<"loading" | "ready" | "failed">("loading");
   const heading = useId();
   const instructions = useId();
@@ -94,7 +91,6 @@ export default function MarsLandingGlobe({ site }: { site: MarsLandingSite }) {
     drag.current = null;
     if (next.id !== selected.id) setRevealedComparison(null);
     setSelected(next);
-    setFocusLatest(false);
     // Also re-center when the visitor picks the already selected rover after dragging.
     setFocusVersion((version) => version + 1);
   }
@@ -147,7 +143,7 @@ export default function MarsLandingGlobe({ site }: { site: MarsLandingSite }) {
               {status !== "failed" && (
                 <GlobeBoundary onError={onError}>
                   <Scene site={selected} sites={marsRoverSites} focusVersion={focusVersion} globe={globe}
-                    redraw={redraw} cancelFocus={cancelFocus} onReady={onReady} onError={onError} journey={journey.data} focusPoint={focusPoint}
+                    redraw={redraw} cancelFocus={cancelFocus} onReady={onReady} onError={onError} journey={journey.data}
                     referenceSite={original} onProjectReference={projectOriginal} onProjectMarker={projectComparison} />
                 </GlobeBoundary>
               )}
@@ -157,10 +153,6 @@ export default function MarsLandingGlobe({ site }: { site: MarsLandingSite }) {
             </p>}
           </div>
           <p id={instructions} className={styles.hint}>Drag or use arrow keys to rotate Mars.</p>
-          <button type="button" className={styles.findButton} disabled={status !== "ready"}
-            onClick={() => selectSite(selected)}>Find {selected.rover}</button>
-          {snapshot && <button type="button" className={styles.findButton} disabled={status !== "ready"}
-            onClick={() => { setFocusLatest(true); setFocusVersion((value) => value + 1); }}>Find last mapped position</button>}
         </div>
 
         {status === "ready" && (
@@ -174,9 +166,20 @@ export default function MarsLandingGlobe({ site }: { site: MarsLandingSite }) {
           </svg>
         )}
         <div className={styles.details}>
-          <p className={styles.eyebrow}>{selected.approximate ? "Earlier attempt · approximate site" : "Selected landing site"}</p>
-          <h3><span className={styles.marker} data-approximate={selected.approximate}
-            style={{ borderColor: selected.color, color: selected.color }} aria-hidden="true">●</span>{selected.rover}</h3>
+          <p className={styles.eyebrow}>Landing site</p>
+          <div className={styles.siteTitle}>
+            <h3><span className={styles.marker} data-approximate={original.approximate}
+              style={{ borderColor: original.color, color: original.color }} aria-hidden="true">&#9679;</span>{original.rover}</h3>
+            <button type="button" className={styles.locateButton} disabled={status !== "ready"}
+              title={`Locate ${original.rover}'s landing site`} onClick={() => selectSite(original)}>
+              <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" strokeWidth="1.5" aria-hidden="true">
+                <circle cx="10" cy="10" r="5.5" />
+                <circle cx="10" cy="10" r="1.5" />
+                <path d="M10 2v3m0 10v3M2 10h3m10 0h3" />
+              </svg>
+              Locate it
+            </button>
+          </div>
           <section ref={originalCard} className={styles.infoCard} data-visible="true" aria-label={`${original.rover} landing information`}>
             <MarsLandingInfo site={original} />
           </section>
