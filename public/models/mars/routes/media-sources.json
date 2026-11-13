@@ -1,0 +1,32 @@
+[
+  {
+    "file": "sojourner-map.jpg",
+    "source": "https://assets.science.nasa.gov/content/dam/science/psd/photojournal/pia/pia01/pia01238/PIA01238.jpg",
+    "reference": "https://science.nasa.gov/photojournal/mars-pathfinder-rover-traverse-image/",
+    "credit": "NASA/JPL",
+    "snapshotDate": "2026-11-13",
+    "bytes": 610373,
+    "sha256": "01ef016d845a1332b4615d9c66597dd7b0b7981ba5a04d30b4796ba118fdeacc",
+    "preparation": "Unmodified original NASA/mission-team JPEG; no pixel coordinates inferred."
+  },
+  {
+    "file": "zhurong-tracks.jpg",
+    "source": "https://static.uahirise.org/images/2022/details/cut/ESP_073225_2055-cut-1.jpg",
+    "reference": "https://www.uahirise.org/ESP_073225_2055",
+    "credit": "NASA/JPL-Caltech/UArizona",
+    "snapshotDate": "2026-11-13",
+    "bytes": 366158,
+    "sha256": "0203759769264ce4d884706ac96bcd085e7079b9640e76387d1fdfadb14e09f0",
+    "preparation": "Unmodified original NASA/mission-team JPEG; no pixel coordinates inferred."
+  },
+  {
+    "file": "zhurong-last.jpg",
+    "source": "https://static.uahirise.org/images/2023/details/cut/ESP_077511_2055.jpg",
+    "reference": "https://hirise.lpl.arizona.edu/ESP_077511_2055",
+    "credit": "NASA/JPL-Caltech/UArizona",
+    "snapshotDate": "2026-11-13",
+    "bytes": 2004545,
+    "sha256": "9cbd3df9fc88e6b3a4ef2553ffd6d25ad8263e9e13e2eb34b46b597cccd0425f",
+    "preparation": "Unmodified original NASA/mission-team JPEG; no pixel coordinates inferred."
+  }
+]
