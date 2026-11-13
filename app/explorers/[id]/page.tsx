@@ -6,9 +6,14 @@ import SiteHeader from "@/components/site/SiteHeader";
 import SiteFooter from "@/components/site/SiteFooter";
 import Reveal from "@/components/site/Reveal";
 import RoverHero from "@/components/site/RoverHero";
+import MarsLandingGlobe from "@/components/site/MarsLandingGlobe";
+import OpportunityOrbit from "@/components/site/OpportunityOrbit";
+import { opportunityLanding } from "@/lib/mars-landing-sites";
+import RoverViewer from "@/components/rovers/RoverViewer";
 import BackLink from "@/components/site/BackLink";
 import { EXPLORERS, explorerFacts, explorerSources, getExplorer } from "@/lib/explorers";
 import { getTopic } from "@/lib/cosmo/knowledge";
+import { getRoverModel } from "@/lib/rover-models";
 
 type Props = { params: Promise<{ id: string }> };
 
@@ -28,6 +33,7 @@ export default async function ExplorerPage({ params }: Props) {
   const main = getTopic(e.main)!;
   const facts = explorerFacts(e);
   const sources = explorerSources(e);
+  const model = getRoverModel(e.id);
   const others = EXPLORERS.filter((x) => x.world === e.world && x.id !== e.id).slice(0, 3);
 
   return (
@@ -48,7 +54,9 @@ export default async function ExplorerPage({ params }: Props) {
         </div>
 
         <Reveal>
-          <RoverHero world={e.world} badge={e.badge} />
+          <RoverHero world={e.world} badge={e.badge}>
+            {model && <RoverViewer key={e.id} model={model} />}
+          </RoverHero>
         </Reveal>
 
         <Reveal className="info-card">
@@ -81,6 +89,9 @@ export default async function ExplorerPage({ params }: Props) {
             <span className="where-banner__status">{main.whereNow.status}</span>
           </Reveal>
         )}
+
+        {e.id === "opportunity" && <MarsLandingGlobe site={opportunityLanding} />}
+        {e.id === "opportunity" && <OpportunityOrbit />}
 
         <Reveal className="section-banner">
           <h2>{facts.length} amazing discoveries</h2>

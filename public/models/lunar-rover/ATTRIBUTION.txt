@@ -1,0 +1,15 @@
+Mondfahrzeug / Lunar Rover
+Deutsches Museum Digital, 3D model by VR-Dynamix
+Original: https://sketchfab.com/3d-models/mondfahrzeug-lunar-rover-acb3f8645a69493cb211a62b40d66aab
+License: Creative Commons Attribution-ShareAlike 4.0 International
+https://creativecommons.org/licenses/by-sa/4.0/
+
+The browser GLB was adapted from the credited Lunar Walk conversion by
+unpacking its mesh compression. The original geometry is preserved.
+https://github.com/hh-hang/lunar-walk/tree/23abfd1c5c02e706be63a475376f0332ee315085
+
+The adapted GLB, rendered poster, and rendered line diagram in this folder
+are distributed under CC BY-SA 4.0.
+
+The background is a separate NASA photograph, AS17-145-22162, cropped for the viewer.
+https://images.nasa.gov/details/as17-145-22162

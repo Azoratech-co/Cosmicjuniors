@@ -1,0 +1,65 @@
+.card {
+  margin-block: 16px 28px;
+  padding: clamp(16px, 4vw, 26px);
+  border: 1px solid var(--line-strong);
+  border-radius: var(--r-lg);
+  background: var(--surface);
+  color: var(--text);
+}
+.card h2 { margin: 0 0 5px; font-size: clamp(20px, 3vw, 28px); }
+.card p { margin: 0; }
+.viewport {
+  position: relative;
+  margin-block: 16px;
+  overflow: hidden;
+  border: 1px solid #292c41;
+  border-radius: 12px;
+  background: #05060c;
+}
+.map {
+  display: block;
+  width: 100%;
+  background: radial-gradient(ellipse at 54% 48%, #18172b, #05060c 66%);
+  cursor: grab;
+  touch-action: pan-y;
+  user-select: none;
+}
+.map:active { cursor: grabbing; }
+.map:focus-visible { outline: 2px solid var(--primary); outline-offset: -3px; }
+.map text { fill: #f3efff; font-size: 16px; font-weight: 600; paint-order: stroke; stroke: #080912; stroke-width: 4px; }
+.camera {
+  display: flex;
+  justify-content: flex-end;
+  gap: 5px;
+  padding: 0 10px 9px;
+}
+.camera button {
+  min-width: 38px;
+  min-height: 38px;
+  padding-inline: 8px;
+  border: 1px solid #35394d;
+  border-radius: 6px;
+  color: #f3efff;
+  background: #141524;
+  font: inherit;
+  font-size: 12px;
+  cursor: pointer;
+}
+.timeline label { display: grid; gap: 6px; font-weight: 700; }
+.timeline input { width: 100%; accent-color: var(--primary); }
+.timeline output { display: block; margin-block: 4px 10px; color: var(--muted); font-variant-numeric: tabular-nums; }
+.controls, .sources { display: flex; flex-wrap: wrap; gap: 8px; }
+.controls button {
+  min-height: 44px;
+  padding-inline: 12px;
+  border: 1px solid var(--line-strong);
+  border-radius: 8px;
+  color: inherit;
+  background: transparent;
+  font: inherit;
+  cursor: pointer;
+}
+.card .note { margin-top: 14px; color: var(--muted); font-size: 13px; }
+.sources { margin-top: 8px; font-size: 13px; }
+.sources a { color: inherit; text-decoration: underline; }
+.card :is(button, a, input):focus-visible { outline: 2px solid var(--primary); outline-offset: 2px; }
