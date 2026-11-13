@@ -388,8 +388,8 @@ html.ss-snap { scroll-snap-type: y proximity; }
   .ss-rail__end { display: none; }
   .ss-credit { display: none; }
   .ss-meta { justify-content: center; }
-  .ss-ask span { display: none; }
-  .ss-ask { width: 36px; padding: 0; }
+  .ss-ask span, .ss-btn > span { display: none; }
+  .ss-ask, .ss-btn { width: 36px; padding: 0; }
 }
 @media (prefers-reduced-motion: reduce) {
   .ss-card__hint, .ss-sky__stars { animation: none; }

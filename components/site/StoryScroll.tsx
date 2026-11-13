@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { useCallback, useEffect, useRef, useState } from "react";
 import type { StoryScene } from "@/lib/story/types";
+import { disableStorySound, duckStorySound, enableStorySound, setStorySound } from "@/lib/storySound";
 
 // One continuous scroll through the story, like a picture book you scroll: a framed clip in the
 // middle of a starry stage. Scrolling blends each clip into the next while the camera drifts
@@ -40,6 +41,7 @@ export default function StoryScroll({ scenes, storyTitle, storySubtitle, chapter
   const [active, setActive] = useState(0);
   const [near, setNear] = useState(0);
   const [voice, setVoice] = useState(false);
+  const [sound, setSound] = useState(false);
   const activeRef = useRef(0);
 
   const chapterNos = [...new Set(scenes.map((s) => s.chapter).filter((c) => c > 0))];
@@ -195,6 +197,41 @@ export default function StoryScroll({ scenes, storyTitle, storySubtitle, chapter
     a.play().catch(() => {});
   }, [active, voice, scenes, folder]);
 
+  // ---------- sound effects: follow the scene on screen ----------
+  useEffect(() => {
+    const sc = scenes[active];
+    setStorySound(sc?.sound ?? (sc?.card ? "card" : undefined));
+  }, [active, scenes]);
+  useEffect(() => {
+    duckStorySound(voice && !!scenes[active]?.audio);
+  }, [voice, active, scenes]);
+  useEffect(() => () => disableStorySound(), []);
+  const toggleSound = () => {
+    if (sound) disableStorySound();
+    else enableStorySound();
+    setSound(!sound);
+    try {
+      localStorage.setItem("cj-story-sound", sound ? "off" : "on");
+    } catch {}
+  };
+  // if sound was on last time, it comes back with the first tap or key press
+  useEffect(() => {
+    let want = false;
+    try {
+      want = localStorage.getItem("cj-story-sound") === "on";
+    } catch {}
+    if (!want) return;
+    const go = (e: Event) => {
+      if ((e.target as HTMLElement | null)?.closest?.(".ss-sound")) return; // the button handles itself
+      enableStorySound();
+      setSound(true);
+      off();
+    };
+    const off = () => ["pointerdown", "keydown", "touchend"].forEach((t) => window.removeEventListener(t, go));
+    ["pointerdown", "keydown", "touchend"].forEach((t) => window.addEventListener(t, go));
+    return off;
+  }, []);
+
   const cur = scenes[active];
   const onCard = !!cur.card;
   const sceneNo = scenes.slice(0, active + 1).filter((s) => !s.card).length;
@@ -340,13 +377,20 @@ export default function StoryScroll({ scenes, storyTitle, storySubtitle, chapter
         <div className={`ss-meta${onCard && active === 0 ? " is-hidden" : ""}`}>
           <span className="ss-credit">{cur.credit ?? ""}</span>
           <span className="ss-meta__end">
+            <button type="button" className={`ss-btn ss-sound${sound ? " is-on" : ""}`} onClick={toggleSound} aria-pressed={sound} title={sound ? "Turn sound off" : "Turn sound on"}>
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.9" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                <path d="M4 9v6h4l5 4V5L8 9z" />
+                {sound ? <path d="M16.5 8.5a5 5 0 0 1 0 7M19 6a8.5 8.5 0 0 1 0 12" /> : <path d="M17 9l5 6M22 9l-5 6" />}
+              </svg>
+              <span>Sound</span>
+            </button>
             {hasAudio && (
               <button type="button" className={`ss-btn${voice ? " is-on" : ""}`} onClick={() => setVoice((v) => !v)} aria-pressed={voice}>
                 <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.9" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
                   <path d="M4 9v6h4l5 4V5L8 9z" />
                   {voice ? <path d="M16.5 8.5a5 5 0 0 1 0 7M19 6a8.5 8.5 0 0 1 0 12" /> : <path d="M17 9l5 6M22 9l-5 6" />}
                 </svg>
-                Narration
+                <span>Narration</span>
               </button>
             )}
             {cur.ask && (

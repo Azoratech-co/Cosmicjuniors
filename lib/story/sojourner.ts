@@ -1,4 +1,5 @@
 import type { StoryScene } from "./types";
+import type { StorySoundPreset } from "@/lib/storySound";
 
 // The Sojourner story as one continuous scroll: a framed clip in the middle of a starry stage,
 // with the story's lines appearing over it. Every line comes from content/stories.json (already
@@ -11,6 +12,17 @@ import type { StoryScene } from "./types";
 const S = "/story/sojourner/";
 const NARRATION = false;
 
+// the sound under each scene, 1-27 (made in the browser, see lib/storySound.ts)
+const SOUNDS: StorySoundPreset[] = [
+  "cleanroom", "cleanroom", "launch", "space", "space",
+  "entry", "chute", "airbags", "bounce", "mars",
+  "mars", "radio", "rover",
+  "rover", "rover", "radio",
+  "mars", "rover", "mars",
+  "radio", "mars", "sunset", "sunset", "listening",
+  "space", "legacy", "night",
+];
+
 type Base = Omit<StoryScene, "chapter" | "image" | "video">;
 const clip = (n: number, chapter: number, scene: Base): StoryScene => {
   const nn = String(n).padStart(2, "0");
@@ -20,6 +32,7 @@ const clip = (n: number, chapter: number, scene: Base): StoryScene => {
     // scene 4 is a still painting (the clip's later frames were not clean enough)
     video: n === 4 ? undefined : `v${nn}.mp4`,
     zoom: n === 4 ? [1, 1.1] : [1, 1.035],
+    sound: SOUNDS[n - 1],
     audio: NARRATION ? `audio/${nn}.mp3` : undefined,
     ...scene,
   };

@@ -1,3 +1,5 @@
+import type { StorySoundPreset } from "@/lib/storySound";
+
 /** One step of the scrolling story. Chapter cards have `card`; scenes have a picture (or video) and a line of the story. */
 export interface StoryScene {
   chapter: number;
@@ -21,6 +23,8 @@ export interface StoryScene {
   stamp?: string;
   /** Narration for this scene (an audio file in the story folder), when the team has recorded it. */
   audio?: string;
+  /** Background sound and arrival sound for this scene (see lib/storySound.ts). */
+  sound?: StorySoundPreset;
   /** A question for Cosmo about this scene. */
   ask?: string;
 }
