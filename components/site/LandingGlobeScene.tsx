@@ -3,7 +3,7 @@
 import { Canvas, useFrame, useLoader, useThree } from "@react-three/fiber";
 import { Suspense, useEffect, useLayoutEffect, useMemo, type RefObject } from "react";
 import { DoubleSide, Quaternion, SRGBColorSpace, TextureLoader, Vector3, type Group, type PerspectiveCamera } from "three";
-import { landingView, marsSurfacePosition, type MarsRoverSite } from "@/lib/mars-landing-sites";
+import { landingView, marsSurfacePosition, type MarsRoverSite } from "@/lib/landing-sites";
 import { getRouteSnapshot, routeCoordinates, type JourneyData } from "@/lib/mars-journeys";
 
 export type MarsGlobeView = { zoom: number; fov: number; autoRotate: boolean };

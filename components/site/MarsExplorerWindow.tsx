@@ -4,12 +4,13 @@ import dynamic from "next/dynamic";
 import { createPortal } from "react-dom";
 import { Component, useCallback, useEffect, useId, useMemo, useRef, useState, type PointerEvent, type ReactNode } from "react";
 import type { Group } from "three";
-import { formatLandingCoordinates, marsRoverSites, type MarsRoverSite } from "@/lib/mars-landing-sites";
+import { formatLandingCoordinates, marsRoverSites, type MarsRoverSite } from "@/lib/landing-sites";
 import styles from "./MarsExplorerWindow.module.css";
 import { getRouteSnapshot, routeCoordinates } from "@/lib/mars-journeys";
+import MarsSitePicker from "./MarsSitePicker";
 import { useMarsJourney } from "./useMarsJourney";
 
-const Scene = dynamic(() => import("./MarsGlobeScene"), { ssr: false });
+const Scene = dynamic(() => import("./LandingGlobeScene"), { ssr: false });
 const JourneyPanel = dynamic(() => import("./MarsJourneyPanel"), { ssr: false });
 const initialCamera = { zoom: 1, fov: 39, autoRotate: false };
 
@@ -137,7 +138,7 @@ export default function MarsExplorerWindow({ site, initialMode = "globe", onSele
       <div className={styles.window}>
         <header className={styles.titlebar}>
           <span className={styles.planetIcon} aria-hidden="true" />
-          <div><h2 id={title}>Mars explorer</h2><p>A closer look at the Red Planet</p></div>
+          <h2 id={title}>Mars explorer</h2>
           <div className={styles.viewTabs} role="group" aria-label="Explorer view">
             <button type="button" aria-pressed={mode === "globe"} onClick={() => setMode("globe")}>Globe</button>
             <button type="button" aria-pressed={mode === "journey"} onClick={() => { setMode("journey"); setCamera((current) => ({ ...current, autoRotate: false })); }}>Journey</button>
@@ -171,10 +172,13 @@ export default function MarsExplorerWindow({ site, initialMode = "globe", onSele
                 onReady={onReady} onError={onError} view={camera} journey={journey.data} focusPoint={focusPoint} />
             </WindowBoundary>}
           </div>
-          {mode === "globe" && status !== "ready" && <p className={styles.notice} role="status">{status === "loading" ? "Loading Mars…" : "The 3D globe is unavailable. Landing sites and NASA references remain available in the page below."}</p>}
+          {mode === "globe" && status !== "ready" && <p className={styles.notice} role="status">{status === "loading" ? "Loading Mars…" : "The 3D globe is unavailable. You can still compare landing sites or open Journey."}</p>}
           {mode === "journey" && <JourneyPanel key={site.id} site={site} data={journey.data} loading={journey.loading} failed={journey.failed} retry={journey.retry} />}
 
-          <aside className={styles.cameraPanel} aria-label="Camera controls" hidden={mode !== "globe"}>
+          <p id={hint} className={styles.hint} hidden={mode !== "globe"}>Drag to rotate · Scroll or pinch to zoom<br /><span>○ Landing · ◆ Last mapped / latest published · Journey shows the route close up</span></p>
+        </div>
+        <aside className={styles.controls} aria-label="Mars explorer controls">
+          <section className={styles.cameraPanel} hidden={mode !== "globe"} aria-label="Camera controls">
             <button type="button" className={styles.panelToggle} aria-expanded={panelOpen} aria-controls={`${title}-camera`}
               onClick={() => setPanelOpen((value) => !value)}>
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" aria-hidden="true"><path d="M4 7h4l2-3h4l2 3h4v13H4Z" /><circle cx="12" cy="13" r="4" /></svg>
@@ -199,20 +203,16 @@ export default function MarsExplorerWindow({ site, initialMode = "globe", onSele
                 }}>Find last mapped position</button>}
               </fieldset>
             </div>
-          </aside>
-          <p id={hint} className={styles.hint} hidden={mode !== "globe"}>Drag to rotate · Scroll or pinch to zoom<br /><span>○ Landing · ◆ Last mapped / latest published · Journey shows the route close up</span></p>
-        </div>
-
-        <footer className={styles.footer}>
-          <label>Landing site
-            <select value={site.id} onChange={(event) => {
-              const next = marsRoverSites.find((entry) => entry.id === event.target.value);
-              if (next) { onSelect(next); findSite(); }
-            }}>{marsRoverSites.map((entry) => <option key={entry.id} value={entry.id}>{entry.rover}{entry.approximate ? " (approximate)" : ""}</option>)}</select>
-          </label>
-          <div className={styles.siteInfo}><span style={{ background: site.color }} aria-hidden="true" /><div><strong>{site.region}</strong><p>{formatLandingCoordinates(site, site.approximate)} · {site.approximate ? "Approximate arrival site" : "Landing site, not current position"}</p></div></div>
-          <button type="button" className={styles.find} disabled={status !== "ready"} onClick={() => { setMode("globe"); findSite(); }}>Find site</button>
-        </footer>
+          </section>
+          <div className={styles.sitePanel}>
+            <h3>Landing sites</h3>
+            <MarsSitePicker selected={site.id} onSelect={(next) => { onSelect(next); findSite(); }} />
+            <div className={styles.siteInfo} aria-live="polite">
+              <span style={{ background: site.color }} aria-hidden="true" />
+              <div><strong>{site.region}</strong><p>{formatLandingCoordinates(site, site.approximate)} &middot; {site.approximate ? "Approximate arrival site" : "Landing site"}</p></div>
+            </div>
+          </div>
+        </aside>
       </div>
     </dialog>, document.body,
   );

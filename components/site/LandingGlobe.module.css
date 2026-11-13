@@ -6,16 +6,29 @@
   color: var(--text);
   overflow: hidden;
 }
-.header { padding: 24px 24px 0; }
+.header { position: relative; padding: 24px 76px 0 24px; }
 .header h2 { margin: 4px 0 10px; font-size: clamp(22px, 3vw, 30px); }
 .header p { margin: 0 0 8px; }
 .eyebrow { color: var(--muted); font-size: 12px; font-weight: 700; letter-spacing: 0.05em; }
 .explorer { display: grid; grid-template-columns: minmax(0, 1.05fr) minmax(0, 1fr); align-items: center; }
 .globePanel { min-width: 0; padding: 0 20px 20px; }
 .globeStage { position: relative; }
-.expandButton { position: absolute; z-index: 2; top: 12px; left: 0; width: 44px; height: 44px; display: grid; place-items: center; color: var(--text); background: var(--surface); border: 1px solid var(--line-strong); border-radius: 10px; cursor: pointer; box-shadow: 0 4px 16px #0002; }
+.expandButton {
+  position: absolute;
+  top: 14px;
+  right: 14px;
+  width: 44px;
+  height: 44px;
+  display: grid;
+  place-items: center;
+  color: var(--text);
+  background: color-mix(in srgb, var(--primary) 8%, transparent);
+  border: 1px solid color-mix(in srgb, var(--line-strong) 65%, transparent);
+  border-radius: 50%;
+  cursor: pointer;
+}
 .expandButton:hover { border-color: var(--primary); color: var(--primary); }
-.expandButton svg { width: 21px; height: 21px; }
+.expandButton svg { width: 19px; height: 19px; }
 .globe { height: 320px; min-width: 0; border-radius: var(--r-lg); touch-action: pan-y; cursor: grab; }
 .globe:active { cursor: grabbing; }
 .hint, .note, .coordinates, .date { color: var(--muted); }
@@ -53,32 +66,10 @@
   line-height: 1;
 }
 .marker[data-approximate="true"] { border-style: dashed; font-size: 0; }
-.rosters { padding: 4px 24px 24px; }
-.rosters h3 { margin: 16px 0 10px; font-size: 15px; }
-.rosters > .note { margin: 0 0 12px; }
-.roverList { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; list-style: none; padding: 0; margin: 0; }
-.roverButton {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  width: 100%;
-  height: 100%;
-  min-height: 92px;
-  padding: 12px;
-  text-align: start;
-  border: 1px solid var(--line-strong);
-  border-radius: 10px;
-  color: var(--text);
-  background: transparent;
-  font: inherit;
-  cursor: pointer;
-}
-.roverButton:hover { background: color-mix(in srgb, var(--primary) 9%, var(--surface)); }
-.roverButton[aria-pressed="true"] { border-color: var(--primary); background: color-mix(in srgb, var(--primary) 14%, var(--surface)); }
-.roverText { display: grid; gap: 3px; min-width: 0; }
-.roverText strong { font-size: 14px; }
-.roverText > span { font-size: 12px; line-height: 1.4; }
-.selection { margin-inline-start: auto; color: var(--primary); }
+.comparison { margin-bottom: 16px; }
+.comparison summary { width: fit-content; padding: 8px 0; color: var(--text); font-size: 13px; cursor: pointer; }
+.comparison summary:focus-visible { outline: 2px solid var(--primary); outline-offset: 3px; }
+.comparison .note { font-size: 11px; }
 .sources { display: flex; flex-wrap: wrap; gap: 8px 14px; font-size: 12px; }
 .sources a { color: inherit; text-decoration: underline; text-underline-offset: 3px; }
 .footer { padding: 16px 24px; border-top: 1px solid var(--line-strong); }
@@ -86,14 +77,11 @@
 .notice { position: absolute; inset: 0; display: grid; place-content: center; padding: 24px; margin: 0; color: var(--muted); text-align: center; pointer-events: none; }
 .card :is(button, a, .globe):focus-visible { outline: 2px solid var(--primary); outline-offset: 3px; }
 @media (max-width: 640px) {
-  .header { padding: 18px 18px 0; }
+  .header { padding: 18px 64px 0 18px; }
   .explorer { grid-template-columns: minmax(0, 1fr); }
   .globePanel { padding: 0 18px 12px; }
   .globe { height: 280px; }
   .details { padding: 12px 18px 18px; }
-  .rosters { padding: 0 18px 18px; }
-  .roverList { grid-template-columns: minmax(0, 1fr); }
-  .roverButton { min-height: 88px; }
   .footer { padding: 16px 18px; }
 }
 .journeySummary { margin-top: 18px; padding-top: 16px; border-top: 1px solid var(--line-strong); font-size: 12px; line-height: 1.6; }

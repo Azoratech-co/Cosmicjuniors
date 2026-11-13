@@ -1,7 +1,7 @@
 import test from "node:test";
 import assert from "node:assert/strict";
 import { Euler, Vector3 } from "three";
-import { formatLandingCoordinates, landingView, marsRoverSites, marsSurfacePosition, opportunityLanding } from "../lib/mars-landing-sites.ts";
+import { formatLandingCoordinates, landingView, marsRoverSites, marsSurfacePosition, opportunityLanding } from "../lib/landing-sites.ts";
 
 const near = (actual, expected) => assert.ok(Math.abs(actual - expected) < 1e-10, `${actual} != ${expected}`);
 

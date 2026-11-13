@@ -3,12 +3,13 @@
 import dynamic from "next/dynamic";
 import { Component, useCallback, useId, useMemo, useRef, useState, type ReactNode } from "react";
 import type { Group } from "three";
-import { formatLandingCoordinates, marsRoverSites, opportunityLanding, type MarsLandingSite, type MarsRoverSite } from "@/lib/mars-landing-sites";
-import styles from "./MarsLandingGlobe.module.css";
+import { formatLandingCoordinates, marsRoverSites, opportunityLanding, type MarsLandingSite, type MarsRoverSite } from "@/lib/landing-sites";
+import styles from "./LandingGlobe.module.css";
 import { detailedCoordinates, getJourneyDefinition, getRouteSnapshot, routeCoordinates, solRange } from "@/lib/mars-journeys";
+import MarsSitePicker from "./MarsSitePicker";
 import { useMarsJourney } from "./useMarsJourney";
 
-const Scene = dynamic(() => import("./MarsGlobeScene"), { ssr: false });
+const Scene = dynamic(() => import("./LandingGlobeScene"), { ssr: false });
 const ExplorerWindow = dynamic(() => import("./MarsExplorerWindow"), { ssr: false });
 const dateFormat = new Intl.DateTimeFormat("en", { dateStyle: "medium", timeZone: "UTC" });
 
@@ -55,31 +56,15 @@ export default function MarsLandingGlobe({ site }: { site: MarsLandingSite }) {
     setFocusVersion((version) => version + 1);
   }
 
-  function renderList(entries: readonly MarsRoverSite[], label: string) {
-    return (
-      <ul className={styles.roverList} aria-label={label}>
-        {entries.map((entry) => (
-          <li key={entry.id}>
-            <button type="button" className={styles.roverButton} aria-pressed={selected.id === entry.id}
-              onClick={() => selectSite(entry)}>
-              <span className={styles.marker} data-approximate={entry.approximate}
-                style={{ borderColor: entry.color, color: entry.color }} aria-hidden="true">●</span>
-              <span className={styles.roverText}>
-                <strong>{entry.rover}</strong>
-                <span>{entry.region} · {entry.arrivalDate.slice(0, 4)}</span>
-                <span className={styles.coordinates}>{formatLandingCoordinates(entry, entry.approximate)}</span>
-              </span>
-              <span className={styles.selection} aria-hidden="true">{selected.id === entry.id ? "✓" : ">"}</span>
-            </button>
-          </li>
-        ))}
-      </ul>
-    );
-  }
-
   return (
     <section className={styles.card} aria-labelledby={heading}>
       <header className={styles.header}>
+        <button type="button" className={styles.expandButton} aria-label="Expand Mars explorer" title="Expand Mars explorer"
+          aria-haspopup="dialog" onClick={() => { setWindowMode("globe"); setExpanded(true); }}>
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" aria-hidden="true">
+            <path d="M9 4H4v5m11 11h5v-5M4 4l6 6m10 10-6-6M15 4h5v5M9 20H4v-5m16-11-6 6M4 20l6-6" />
+          </svg>
+        </button>
         <p className={styles.eyebrow}>Explore the Red Planet</p>
         <h2 id={heading}>Where the Mars rovers landed</h2>
         <p>Six rovers explored Mars. Two earlier rovers were sent there but never got to drive.</p>
@@ -89,12 +74,6 @@ export default function MarsLandingGlobe({ site }: { site: MarsLandingSite }) {
       <div className={styles.explorer}>
         <div className={styles.globePanel}>
           <div className={styles.globeStage}>
-            <button type="button" className={styles.expandButton} aria-label="Expand Mars explorer" title="Expand Mars explorer"
-              aria-haspopup="dialog" onClick={() => { setWindowMode("globe"); setExpanded(true); }}>
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" aria-hidden="true">
-                <path d="M9 4H4v5m11 11h5v-5M4 4l6 6m10 10-6-6M15 4h5v5M9 20H4v-5m16-11-6 6M4 20l6-6" />
-              </svg>
-            </button>
             <div className={styles.globe} role="group" aria-label="Interactive Mars landing-site globe"
               aria-describedby={instructions} tabIndex={status === "ready" ? 0 : undefined}
               onPointerDown={(event) => {
@@ -131,10 +110,10 @@ export default function MarsLandingGlobe({ site }: { site: MarsLandingSite }) {
               )}
             </div>
             {status !== "ready" && <p className={styles.notice} role="status">
-              {status === "loading" ? "Loading Mars…" : "The 3D globe is unavailable. You can still explore every rover and its coordinates below."}
+              {status === "loading" ? "Loading Mars…" : "The 3D globe is unavailable. You can still compare rover landing coordinates."}
             </p>}
           </div>
-          <p id={instructions} className={styles.hint}>Drag or use arrow keys to rotate. Choose a rover below to see its site. Sites on the far side appear as you turn Mars.</p>
+          <p id={instructions} className={styles.hint}>Drag or use arrow keys to rotate. Choose a rover in the landing-site comparison to see its site. Sites on the far side appear as you turn Mars.</p>
           <button type="button" className={styles.findButton} disabled={status !== "ready"}
             onClick={() => selectSite(selected)}>Find {selected.rover}</button>
           {snapshot && <button type="button" className={styles.findButton} disabled={status !== "ready"}
@@ -142,10 +121,15 @@ export default function MarsLandingGlobe({ site }: { site: MarsLandingSite }) {
           <p className={styles.hint}>○ Landing area · ◆ Last mapped / latest published position. Routes and nearby points overlap at planet scale; open Journey to inspect them.</p>
         </div>
 
-        <div className={styles.details} aria-live="polite" aria-atomic="true">
+        <div className={styles.details}>
           <p className={styles.eyebrow}>{selected.approximate ? "Earlier attempt · approximate site" : "Selected landing site"}</p>
           <h3><span className={styles.marker} data-approximate={selected.approximate}
             style={{ borderColor: selected.color, color: selected.color }} aria-hidden="true">●</span>{selected.rover}</h3>
+          <details className={styles.comparison}>
+            <summary>Compare different landing positions</summary>
+            <MarsSitePicker selected={selected.id} onSelect={selectSite} />
+            <p className={styles.note}>Dashed markers show approximate arrival sites for the two 1971 PrOP-M attempts.</p>
+          </details>
           <p className={styles.place}>{selected.name}</p>
           <p>{selected.region}</p>
           <p className={styles.coordinates}>{formatLandingCoordinates(selected, selected.approximate)}</p>
@@ -167,13 +151,6 @@ export default function MarsLandingGlobe({ site }: { site: MarsLandingSite }) {
         </div>
       </div>
 
-      <div className={styles.rosters}>
-        <h3>Rovers that explored Mars</h3>
-        {renderList(marsRoverSites.filter((entry) => entry.outcome === "explored"), "Choose a rover landing site")}
-        <h3>Earlier attempts · 1971</h3>
-        <p className={styles.note}>Both carried a PrOP-M mini-rover. Dashed markers show the approximate lander arrival sites, not confirmed rover positions.</p>
-        {renderList(marsRoverSites.filter((entry) => entry.outcome === "not-deployed"), "Choose an earlier rover attempt")}
-      </div>
       <footer className={styles.footer}>
         <p>Coordinates use north/south latitude and east longitude. Markers are enlarged so you can see them.</p>
         <div className={styles.sources}>

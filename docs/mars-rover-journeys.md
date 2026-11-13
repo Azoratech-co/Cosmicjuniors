@@ -15,7 +15,7 @@ Snapshot retrieved: **2026-11-13**. This update extends the Mars landing-site gl
 | Mars 2 PrOP-M | No deployed rover traverse | Approximate lander arrival area retained | The rover never deployed or drove. |
 | Mars 3 PrOP-M | No deployed rover traverse | Approximate lander arrival area retained | The rover never deployed or drove. |
 
-Coordinates use east-positive longitude and north-positive latitude. Extra decimal places retain source values; they do **not** establish equivalent positional accuracy. The UI rounds display coordinates to five decimal places. Existing history-based landing coordinates remain in `lib/mars-landing-sites.ts`; route-localized origins are not silently substituted for them.
+Coordinates use east-positive longitude and north-positive latitude. Extra decimal places retain source values; they do **not** establish equivalent positional accuracy. The UI rounds display coordinates to five decimal places. Existing history-based landing coordinates remain in `lib/landing-sites.ts`; route-localized origins are not silently substituted for them.
 
 The four numerical routes contain **32,005 localization records and 88,229 route vertices**. Repeated stationary entries remain available through the slider, record number and Previous/Next controls. These records are not a log of every wheel movement. Curiosity retains 68 separate segments and Perseverance 20; source gaps are not bridged. All records are available in the bundled downloadable JSON, not just the named visits.
 

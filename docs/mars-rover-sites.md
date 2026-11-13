@@ -80,7 +80,7 @@ show the dataset; NASA links are for visitors to check facts.
 
 ## Rendering and integration
 
-`lib/mars-landing-sites.ts` holds mission data and pure coordinate helpers.
+`lib/landing-sites.ts` holds mission data and pure coordinate helpers.
 Longitudes are east-positive in [0, 360); negative western longitudes are
 normalized for display. The globe keeps the existing texture mapping:
 

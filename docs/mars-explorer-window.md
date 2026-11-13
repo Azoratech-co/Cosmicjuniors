@@ -23,8 +23,8 @@ failure, leaving the original inline globe available after closing.
 
 ## Files and integration
 
-- `components/site/MarsLandingGlobe.tsx`: lazy modal integration and expand icon.
-- `components/site/MarsLandingGlobe.module.css`: scoped expand-button styles.
+- `components/site/LandingGlobe.tsx`: lazy modal integration and expand icon.
+- `components/site/LandingGlobe.module.css`: scoped expand-button styles.
 - `components/site/MarsExplorerWindow.tsx`: native dialog, camera panel, inputs,
   selection synchronization, and lifecycle.
 - `components/site/MarsExplorerWindow.module.css`: opaque window/backdrop,

@@ -2,7 +2,7 @@
 
 import { useId, useMemo, useState } from "react";
 import { closestStopIndex, detailedCoordinates, getJourneyDefinition, getRouteSnapshot, regionalPoint, solRange, type JourneyData, type SurfacePoint } from "@/lib/mars-journeys";
-import type { MarsRoverSite as Site } from "@/lib/mars-landing-sites";
+import type { MarsRoverSite as Site } from "@/lib/landing-sites";
 import styles from "./MarsJourneyPanel.module.css";
 
 type Props = { site: Site; data?: JourneyData; loading: boolean; failed: boolean; retry: () => void };

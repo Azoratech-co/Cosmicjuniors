@@ -1,0 +1,53 @@
+.frame {
+  --row-height: 66px;
+  position: relative;
+  min-width: 0;
+}
+
+.frame::before {
+  position: absolute;
+  inset: calc(50% - var(--row-height) / 2) 2px auto;
+  height: var(--row-height);
+  content: "";
+  border-block: 1px solid currentColor;
+  border-radius: 7px;
+  opacity: 0.25;
+  pointer-events: none;
+}
+
+.wheel {
+  position: relative;
+  height: calc(var(--row-height) * 3);
+  padding-block: var(--row-height);
+  box-sizing: border-box;
+  overflow-y: auto;
+  overscroll-behavior-y: contain;
+  scroll-snap-type: y mandatory;
+  scrollbar-width: thin;
+  mask-image: linear-gradient(transparent, #000 17%, #000 83%, transparent);
+}
+
+.row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+  height: var(--row-height);
+  padding: 5px 10px;
+  border: 0;
+  background: transparent;
+  color: inherit;
+  opacity: 0.75;
+  font: inherit;
+  text-align: start;
+  cursor: pointer;
+  scroll-snap-align: center;
+}
+
+.row:is(:hover, [aria-pressed="true"], :focus-visible) { opacity: 1; }
+.row[aria-pressed="true"] { background: color-mix(in srgb, currentColor 8%, transparent); }
+.row:focus-visible { outline: 2px solid currentColor; outline-offset: -3px; }
+.marker { flex: 0 0 12px; height: 12px; border: 2px solid; border-radius: 50%; }
+.marker[data-approximate="true"] { border-style: dashed; }
+.name { display: grid; gap: 2px; font-size: 13px; line-height: 1.25; }
+.name small { font-size: 11px; }
