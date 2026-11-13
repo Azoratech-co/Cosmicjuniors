@@ -40,7 +40,7 @@ function RegionalRoute({ site, data }: { site: Site; data: JourneyData }) {
       <div className={styles.mapColumn}>
         <div className={styles.mapHeading}><h3>{site.rover} · recorded route</h3><span>{data.snapshotDate} snapshot</span></div>
         <svg className={styles.map} viewBox="0 0 1000 700" role="img" aria-labelledby={title}>
-          <title id={title}>{site.rover} regional traverse, north up. Ring: first mapped position. Diamond: last published position. White dot: selected record.</title>
+          <title id={title}>{site.rover} regional traverse, north up. Ring: first mapped position. Diamond: last published position. Gold crosshair: selected record.</title>
           <defs><pattern id={`${title}-grid`} width="50" height="50" patternUnits="userSpaceOnUse"><path d="M50 0H0V50" fill="none" stroke="#263348" strokeWidth="1" /></pattern></defs>
           <rect width="1000" height="700" fill="#0b1321" />
           <rect width="1000" height="700" fill={`url(#${title}-grid)`} />
@@ -53,12 +53,17 @@ function RegionalRoute({ site, data }: { site: Site; data: JourneyData }) {
           })}
           <circle cx={start[0]} cy={start[1]} r="9" fill="#0b1321" stroke="#f3f7ff" strokeWidth="3" />
           <path d={`M${end[0]} ${end[1] - 10}l10 10-10 10-10-10Z`} fill={site.color} stroke="white" strokeWidth="2" />
-          <circle cx={cursor[0]} cy={cursor[1]} r="5" fill="white" stroke="#0b1321" strokeWidth="2" />
+          <g transform={`translate(${cursor[0]} ${cursor[1]})`} aria-hidden="true">
+            <circle r="20" fill="#0b1321" fillOpacity=".8" />
+            <circle r="17" fill="none" stroke="#ffdb79" strokeWidth="3" />
+            <path d="M-25 0h12m26 0h12M0-25v12m0 26v12" stroke="#ffdb79" strokeWidth="3" />
+            <circle r="5" fill="#ffdb79" stroke="#0b1321" strokeWidth="2" />
+          </g>
           <path d="M940 85V40m-8 12 8-12 8 12" stroke="#c5d2ec" strokeWidth="2" fill="none" /><text x="940" y="30" textAnchor="middle" fill="#c5d2ec" fontSize="16">N</text>
           <path d={`M55 625v9h${plot.scaleMeters * plot.scale}v-9`} stroke="white" strokeWidth="2" fill="none" />
           <text x="55" y="657" fill="#b8c6e0" fontSize="14">{plot.scaleMeters >= 1000 ? `${plot.scaleMeters / 1000} km` : `${plot.scaleMeters} m`}</text>
         </svg>
-        <p className={styles.legend}>○ Start of mapped traverse <span style={{ color: site.color }}>◆ {definition.endpointLabel}</span> ● Selected record</p>
+        <p className={styles.legend}>○ Start of mapped traverse <span style={{ color: site.color }}>◆ {definition.endpointLabel}</span> <span className={styles.cursorKey}>&#8853; Selected record</span></p>
         <p className={styles.note}>North-up route diagram, not a terrain photograph. Separate source segments remain separate. A rover route is too small to inspect at whole-planet scale.</p>
         <div className={styles.recordBox}>
           <label>Recorded position <span>{index + 1} / {data.stops.length.toLocaleString("en")}</span>
@@ -110,6 +115,7 @@ export default function MarsJourneyPanel({ site, data, loading, failed, retry }:
     {data ? <RegionalRoute key={site.id} site={site} data={data} /> : <>
       <div className={styles.mapColumn}>
         <div className={styles.mapHeading}><h3>{site.rover} · journey evidence</h3></div>
+        {site.id === "zhurong" && <p className={styles.note}>HiRISE photographs show Zhurong&apos;s wheel tracks. The available sources lack the waypoint data needed for an interactive route map.</p>}
         {loading && <p role="status">Loading recorded route…</p>}
         {failed && <div role="status"><p>The route snapshot is unavailable. NASA references and endpoint information remain available.</p><button type="button" onClick={retry}>Retry route</button></div>}
         {definition.images?.map((image) => <figure className={styles.figure} key={image.file}>

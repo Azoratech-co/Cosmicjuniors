@@ -4,6 +4,7 @@
 .mapHeading h3 { margin: 0; font-size: 18px; }
 .mapHeading > span { color: #a4b5d0; font-size: 11px; }
 .map { width: 100%; display: block; border: 1px solid #303b52; border-radius: 12px; }
+.cursorKey { color: #ffdb79; font-weight: 700; }
 .note { font-size: 12px; line-height: 1.65; color: #a4b5d0; }
 .legend { display: flex; flex-wrap: wrap; gap: 8px 16px; font-size: 12px; color: #c0cde4; }
 .sidebar { min-width: 0; padding: 22px; border-left: 1px solid #2c3549; background: #111827; }

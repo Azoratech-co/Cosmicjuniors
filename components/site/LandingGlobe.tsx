@@ -68,7 +68,6 @@ export default function MarsLandingGlobe({ site }: { site: MarsLandingSite }) {
         <p className={styles.eyebrow}>Explore the Red Planet</p>
         <h2 id={heading}>Where the Mars rovers landed</h2>
         <p>Six rovers explored Mars. Two earlier rovers were sent there but never got to drive.</p>
-        <p className={styles.note}>These markers show landing or arrival sites, not where the rovers are today.</p>
       </header>
 
       <div className={styles.explorer}>
@@ -113,12 +112,11 @@ export default function MarsLandingGlobe({ site }: { site: MarsLandingSite }) {
               {status === "loading" ? "Loading Mars…" : "The 3D globe is unavailable. You can still compare rover landing coordinates."}
             </p>}
           </div>
-          <p id={instructions} className={styles.hint}>Drag or use arrow keys to rotate. Choose a rover in the landing-site comparison to see its site. Sites on the far side appear as you turn Mars.</p>
+          <p id={instructions} className={styles.hint}>Drag or use arrow keys to rotate Mars.</p>
           <button type="button" className={styles.findButton} disabled={status !== "ready"}
             onClick={() => selectSite(selected)}>Find {selected.rover}</button>
           {snapshot && <button type="button" className={styles.findButton} disabled={status !== "ready"}
             onClick={() => { setFocusLatest(true); setFocusVersion((value) => value + 1); }}>Find last mapped position</button>}
-          <p className={styles.hint}>○ Landing area · ◆ Last mapped / latest published position. Routes and nearby points overlap at planet scale; open Journey to inspect them.</p>
         </div>
 
         <div className={styles.details}>
@@ -145,14 +143,12 @@ export default function MarsLandingGlobe({ site }: { site: MarsLandingSite }) {
             <strong>{definition.endpointLabel} · {definition.endpointArea}</strong>
             {snapshot && <p>{detailedCoordinates(snapshot.last)}<br />{solRange(snapshot.last)} · snapshot {snapshot.snapshotDate}</p>}
             {definition.contact && <p>{definition.contact.label}: {definition.contact.date}</p>}
-            <p>{definition.endpointNote}</p>
             <button type="button" className={styles.findButton} onClick={() => { setWindowMode("journey"); setExpanded(true); }}>Explore {selected.rover} journey</button>
           </div>
         </div>
       </div>
 
       <footer className={styles.footer}>
-        <p>Coordinates use north/south latitude and east longitude. Markers are enlarged so you can see them.</p>
         <div className={styles.sources}>
           <a href="https://www.giss.nasa.gov/tools/mars24/help/landers.html" target="_blank" rel="noopener noreferrer">NASA Mars24 · landing locations</a>
           <a href="https://trek.nasa.gov/tiles/apidoc/trekAPI.html?body=mars" target="_blank" rel="noopener noreferrer">NASA Mars Trek imagery</a>

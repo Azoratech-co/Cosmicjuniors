@@ -24,7 +24,8 @@
   overscroll-behavior-y: contain;
   scroll-snap-type: y mandatory;
   scrollbar-width: thin;
-  mask-image: linear-gradient(transparent, #000 17%, #000 83%, transparent);
+  scrollbar-color: #7f89a8 transparent;
+  mask-image: linear-gradient(transparent, #000 5%, #000 95%, transparent);
 }
 
 .row {
@@ -37,7 +38,7 @@
   border: 0;
   background: transparent;
   color: inherit;
-  opacity: 0.75;
+  opacity: 0.87;
   font: inherit;
   text-align: start;
   cursor: pointer;

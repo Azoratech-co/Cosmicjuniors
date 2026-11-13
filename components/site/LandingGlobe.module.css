@@ -73,7 +73,6 @@
 .sources { display: flex; flex-wrap: wrap; gap: 8px 14px; font-size: 12px; }
 .sources a { color: inherit; text-decoration: underline; text-underline-offset: 3px; }
 .footer { padding: 16px 24px; border-top: 1px solid var(--line-strong); }
-.footer p { margin: 0 0 10px; font-size: 12px; line-height: 1.5; color: var(--muted); }
 .notice { position: absolute; inset: 0; display: grid; place-content: center; padding: 24px; margin: 0; color: var(--muted); text-align: center; pointer-events: none; }
 .card :is(button, a, .globe):focus-visible { outline: 2px solid var(--primary); outline-offset: 3px; }
 @media (max-width: 640px) {

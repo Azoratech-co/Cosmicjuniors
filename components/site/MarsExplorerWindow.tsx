@@ -34,6 +34,8 @@ export default function MarsExplorerWindow({ site, initialMode = "globe", onSele
   const [camera, setCamera] = useState(initialCamera);
   const [focusVersion, setFocusVersion] = useState(0);
   const [panelOpen, setPanelOpen] = useState(true);
+  const [sitesOpen, setSitesOpen] = useState(true);
+  const [infoOpen, setInfoOpen] = useState(false);
   const [mode, setMode] = useState(initialMode);
   const [focusLatest, setFocusLatest] = useState(false);
   const snapshot = getRouteSnapshot(site.id);
@@ -175,7 +177,16 @@ export default function MarsExplorerWindow({ site, initialMode = "globe", onSele
           {mode === "globe" && status !== "ready" && <p className={styles.notice} role="status">{status === "loading" ? "Loading Mars…" : "The 3D globe is unavailable. You can still compare landing sites or open Journey."}</p>}
           {mode === "journey" && <JourneyPanel key={site.id} site={site} data={journey.data} loading={journey.loading} failed={journey.failed} retry={journey.retry} />}
 
-          <p id={hint} className={styles.hint} hidden={mode !== "globe"}>Drag to rotate · Scroll or pinch to zoom<br /><span>○ Landing · ◆ Last mapped / latest published · Journey shows the route close up</span></p>
+          <p id={hint} className={styles.hint} hidden={mode !== "globe"}>Drag to rotate &middot; Scroll or pinch to zoom</p>
+          {mode === "globe" && infoOpen && (
+            <section id={`${title}-site-info`} className={styles.infoCard} aria-label="Landing site information" aria-live="polite">
+              <p className={styles.siteLabel}>{site.rover} &middot; {site.approximate ? "Approximate arrival site" : "Landing site"}</p>
+              <h3>{site.name}</h3>
+              <p>{site.region} &middot; {formatLandingCoordinates(site, site.approximate)}</p>
+              <p>{site.summary}</p>
+              <a href={site.source} target="_blank" rel="noopener noreferrer">NASA mission reference</a>
+            </section>
+          )}
         </div>
         <aside className={styles.controls} aria-label="Mars explorer controls">
           <section className={styles.cameraPanel} hidden={mode !== "globe"} aria-label="Camera controls">
@@ -204,14 +215,24 @@ export default function MarsExplorerWindow({ site, initialMode = "globe", onSele
               </fieldset>
             </div>
           </section>
-          <div className={styles.sitePanel}>
-            <h3>Landing sites</h3>
-            <MarsSitePicker selected={site.id} onSelect={(next) => { onSelect(next); findSite(); }} />
-            <div className={styles.siteInfo} aria-live="polite">
-              <span style={{ background: site.color }} aria-hidden="true" />
-              <div><strong>{site.region}</strong><p>{formatLandingCoordinates(site, site.approximate)} &middot; {site.approximate ? "Approximate arrival site" : "Landing site"}</p></div>
+          <section className={styles.sitePanel} aria-label="Landing sites">
+            <button type="button" className={styles.panelToggle} aria-expanded={sitesOpen} aria-controls={`${title}-sites`}
+              onClick={() => setSitesOpen((value) => !value)}>
+              Landing sites <span aria-hidden="true">{sitesOpen ? "?" : "+"}</span>
+            </button>
+            <div id={`${title}-sites`} hidden={!sitesOpen}>
+              <MarsSitePicker selected={site.id} onSelect={(next) => { onSelect(next); findSite(); }} />
+              <div className={styles.siteInfo}>
+                <span className={styles.siteLabel}>{site.approximate ? "Approximate arrival site" : "Landing site"}</span>
+                <strong>{site.name}</strong>
+                <p>{formatLandingCoordinates(site, site.approximate)}</p>
+                {mode === "globe" && <button type="button" className={styles.reset} aria-expanded={infoOpen}
+                  onClick={() => setInfoOpen((value) => !value)}>
+                  {infoOpen ? "Hide site information" : "Show site information"}
+                </button>}
+              </div>
             </div>
-          </div>
+          </section>
         </aside>
       </div>
     </dialog>, document.body,
