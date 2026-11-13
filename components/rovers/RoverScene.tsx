@@ -2,7 +2,7 @@
 
 import { Canvas, useLoader, useThree } from "@react-three/fiber";
 import { Suspense, useCallback, useEffect, useLayoutEffect, useMemo, useRef, type RefObject } from "react";
-import { Box3, BufferGeometry, EdgesGeometry, Float32BufferAttribute, MathUtils, Mesh, PMREMGenerator, Raycaster, Sphere, Spherical, Vector3, type Group } from "three";
+import { Box3, BufferGeometry, EdgesGeometry, Float32BufferAttribute, MathUtils, Mesh, PMREMGenerator, Raycaster, Sphere, Spherical, Vector3, type Group, type PerspectiveCamera } from "three";
 import { GLTFLoader } from "three/addons/loaders/GLTFLoader.js";
 import { RoomEnvironment } from "three/addons/environments/RoomEnvironment.js";
 import type { RoverModel, RoverPart } from "@/lib/rover-models";
@@ -13,6 +13,8 @@ export type RoverCameraControls = {
   rotate: (horizontal: number, vertical: number) => void;
   zoom: (factor: number) => void;
   focus: (part: RoverPart) => void;
+  /** Deselect the part (no highlight, no label) without moving the camera. */
+  clear: () => void;
   reset: () => void;
 };
 
@@ -70,11 +72,12 @@ type Props = {
   onReady: () => void;
   onError: () => void;
   highlight: boolean;
-  centered: boolean;
+  /** How far to slide the rover to the left, as a share of the canvas width (0 = centered). */
+  shift: number;
   onProject: (projection: PartProjection) => void;
 };
 
-function RoverModelScene({ model, controls, onReady, onError, highlight, onProject, centered }: Props) {
+function RoverModelScene({ model, controls, onReady, onError, highlight, onProject, shift }: Props) {
   const gltf = useLoader(GLTFLoader, model.model);
   const { camera, size, invalidate, gl, scene } = useThree();
   const { object, center, radius } = useMemo(() => {
@@ -90,7 +93,8 @@ function RoverModelScene({ model, controls, onReady, onError, highlight, onProje
   const initialPolar = MathUtils.degToRad(model.view.polar);
   const orbit = useRef({ azimuth: initialAzimuth, polar: initialPolar, zoom: 1, target: center });
   const selected = useRef<RoverPart | null>(null);
-  const previousLayout = useRef(centered);
+  const shiftNow = useRef(shift);
+  const redraw = useRef<((moving?: boolean) => void) | null>(null);
   const highlightGroups = useRef(new Map<string, Group>());
   const partGeometries = useMemo(() => getPartGeometry(object, model.partsGuide?.parts ?? []),
     [model.partsGuide, object]);
@@ -128,6 +132,10 @@ function RoverModelScene({ model, controls, onReady, onError, highlight, onProje
 
     function updateCamera(moving = false) {
       const { azimuth, polar, zoom, target } = orbit.current;
+      // slide the picture sideways (the rover moves left to make room for the label)
+      const lens = camera as PerspectiveCamera;
+      if (shiftNow.current > 0.0005) lens.setViewOffset(size.width, size.height, shiftNow.current * size.width, 0, size.width, size.height);
+      else if (lens.view?.enabled) lens.clearViewOffset();
       spherical.set(fitDistance * zoom, polar, azimuth);
       camera.position.copy(position.setFromSpherical(spherical).add(target));
       camera.lookAt(target);
@@ -194,8 +202,12 @@ function RoverModelScene({ model, controls, onReady, onError, highlight, onProje
       focus(part) {
         selected.current = part;
         updateHighlight(part, highlightEnabled.current);
-        const target = centered ? center : new Vector3(...part.target).lerp(center, 0.68);
-        turnTo(MathUtils.degToRad(part.view.azimuth), MathUtils.degToRad(part.view.polar), target);
+        turnTo(MathUtils.degToRad(part.view.azimuth), MathUtils.degToRad(part.view.polar), center);
+      },
+      clear() {
+        selected.current = null;
+        updateHighlight(null, false);
+        updateCamera();
       },
       reset() {
         selected.current = null;
@@ -203,18 +215,31 @@ function RoverModelScene({ model, controls, onReady, onError, highlight, onProje
         turnTo(initialAzimuth, initialPolar, center);
       },
     };
-    if (previousLayout.current !== centered) {
-      previousLayout.current = centered;
-      orbit.current.target = !centered && selected.current
-        ? new Vector3(...selected.current.target).lerp(center, 0.68)
-        : center;
-    }
+    redraw.current = updateCamera;
     updateCamera();
     return () => {
       cancelAnimationFrame(frame);
       controls.current = null;
+      redraw.current = null;
     };
-  }, [camera, center, centered, controls, initialAzimuth, initialPolar, invalidate, object, onProject, radius, size, updateHighlight]);
+  }, [camera, center, controls, initialAzimuth, initialPolar, invalidate, object, onProject, radius, size, updateHighlight]);
+
+  // glide the rover sideways when a part is picked or cleared
+  useEffect(() => {
+    let frame = 0;
+    const from = shiftNow.current;
+    const duration = window.matchMedia("(prefers-reduced-motion: reduce)").matches ? 0 : 560;
+    const started = performance.now();
+    const step = (now: number) => {
+      const progress = duration ? MathUtils.clamp((now - started) / duration, 0, 1) : 1;
+      const eased = progress * progress * (3 - 2 * progress);
+      shiftNow.current = from + (shift - from) * eased;
+      redraw.current?.(progress < 1);
+      if (progress < 1) frame = requestAnimationFrame(step);
+    };
+    step(started);
+    return () => cancelAnimationFrame(frame);
+  }, [shift]);
 
   useEffect(() => {
     const canvas = gl.domElement;

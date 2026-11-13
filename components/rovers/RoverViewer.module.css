@@ -49,44 +49,6 @@
   inset: 0;
 }
 
-.viewer[data-guide="true"] .canvasArea {
-  inset-inline: 23%;
-}
-
-.layoutSwitch {
-  position: absolute;
-  top: 12px;
-  right: 12px;
-  z-index: 3;
-  display: flex;
-  gap: 3px;
-  padding: 3px;
-  border-radius: 7px;
-  background: var(--surface);
-}
-
-.layoutSwitch button {
-  border: 0;
-  border-radius: 5px;
-  padding: 5px 8px;
-  color: var(--text);
-  background: transparent;
-  font: inherit;
-  font-size: 11px;
-  cursor: pointer;
-}
-
-.layoutSwitch button[aria-pressed="true"] {
-  background: var(--primary);
-  color: white;
-}
-
-@media (min-width: 641px) {
-  .viewer[data-guide="true"][data-layout="v1"] .canvasArea {
-    inset: 0 39% 0 0;
-  }
-}
-
 @media (min-width: 641px) and (max-width: 1050px) {
   .viewer[data-guide="true"] .canvasArea {
     inset-inline: 0;

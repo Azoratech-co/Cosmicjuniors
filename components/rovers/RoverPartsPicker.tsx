@@ -8,12 +8,14 @@ type Props = {
   guide: NonNullable<RoverModel["partsGuide"]>;
   selected?: string;
   onSelect: (part: RoverPart) => void;
+  /** Called when the selected part is clicked again. */
+  onClear: () => void;
   highlight: boolean;
   onHighlight: () => void;
   highlightAvailable: boolean;
 };
 
-export default function RoverPartsPicker({ guide, selected, onSelect, highlight, onHighlight, highlightAvailable }: Props) {
+export default function RoverPartsPicker({ guide, selected, onSelect, onClear, highlight, onHighlight, highlightAvailable }: Props) {
   const { diagram, parts } = guide;
   const heading = useId();
   const wheel = useRef<HTMLDivElement>(null);
@@ -65,6 +67,12 @@ export default function RoverPartsPicker({ guide, selected, onSelect, highlight,
     }, 140);
   }
 
+  // a click on the part that is already selected turns it off
+  function toggle(part: RoverPart) {
+    if (selected === part.id) onClear();
+    else select(part);
+  }
+
   function moveSelection(event: KeyboardEvent<HTMLButtonElement>, index: number) {
     if (event.key !== "ArrowUp" && event.key !== "ArrowDown") return;
     event.preventDefault();
@@ -86,7 +94,7 @@ export default function RoverPartsPicker({ guide, selected, onSelect, highlight,
             className={styles.diagramNumber}
             aria-label={`${index + 1}. ${part.name}`}
             aria-pressed={selected === part.id}
-            onClick={() => select(part)}
+            onClick={() => toggle(part)}
             style={{ left: `${part.diagram[0] / diagram.width * 100}%`, top: `${part.diagram[1] / diagram.height * 100}%` }}
           >
             {index + 1}
@@ -105,7 +113,7 @@ export default function RoverPartsPicker({ guide, selected, onSelect, highlight,
               }}
               className={styles.wheelRow}
               aria-pressed={selected === part.id}
-              onClick={() => select(part)}
+              onClick={() => toggle(part)}
               onKeyDown={(event) => moveSelection(event, index)}
             >
               {part.name}

@@ -30,7 +30,7 @@ export default function RoverViewer({ model }: { model: RoverModel }) {
   const [status, setStatus] = useState<"loading" | "ready" | "fallback">("loading");
   const [part, setPart] = useState<RoverPart | null>(null);
   const [highlight, setHighlight] = useState(true);
-  const [layout, setLayout] = useState<"v1" | "v2">("v2");
+  const [stage, setStage] = useState({ width: 0, height: 0 });
   const [projection, setProjection] = useState<PartProjection | null>(null);
   const onProject = useCallback((next: PartProjection) => {
     setProjection((previous) => !next.visible && previous && !previous.visible ? previous :
@@ -53,6 +53,16 @@ export default function RoverViewer({ model }: { model: RoverModel }) {
 
   useEffect(() => {
     const element = viewport.current;
+    if (!element) return;
+    const measure = () => setStage({ width: element.clientWidth, height: element.clientHeight });
+    measure();
+    const observer = new ResizeObserver(measure);
+    observer.observe(element);
+    return () => observer.disconnect();
+  }, []);
+
+  useEffect(() => {
+    const element = viewport.current;
     if (!element || !ready) return;
 
     function zoomWithWheel(event: WheelEvent) {
@@ -72,6 +82,13 @@ export default function RoverViewer({ model }: { model: RoverModel }) {
     pendingPart.current = next;
     setPart(next);
     controls.current?.focus(next);
+  }
+
+  // picking the same part again turns it off: no highlight, no label, rover back to the middle
+  function clearPart() {
+    pendingPart.current = null;
+    setPart(null);
+    controls.current?.clear();
   }
 
   function resetView() {
@@ -143,22 +160,22 @@ export default function RoverViewer({ model }: { model: RoverModel }) {
     const timer = window.setTimeout(() => setTypedPart(revealPart.id), revealPart.description.length * 5 + 30);
     return () => window.clearTimeout(timer);
   }, [revealPart]);
-  const stageWidth = viewport.current?.clientWidth ?? 0;
-  const stageHeight = viewport.current?.clientHeight ?? 0;
-  const sideBySide = !!projection && stageWidth - projection.width > (layout === "v1" ? 100 : 240);
-  const showLeft = layout === "v2" && sideBySide && projection.x < projection.width / 2;
-  const gap = Math.min(30, Math.max(13, 19 * (projection?.zoom ?? 1)));
-  const canvasLeft = layout === "v2" && projection ? (stageWidth - projection.width) / 2 : 0;
-  const anchorX = (projection?.x ?? 0) + canvasLeft;
-  const sideSpace = layout === "v1" ? stageWidth - (projection?.width ?? 0) : canvasLeft;
-  const popupWidth = sideBySide ? Math.min(215, sideSpace - gap - 8) : Math.min(340, stageWidth - 20);
-  const left = sideBySide ? (showLeft ? canvasLeft - gap - popupWidth : canvasLeft + projection.width + gap) : (stageWidth - popupWidth) / 2;
+  const stageWidth = stage.width;
+  const stageHeight = stage.height;
+  // wide screens: the rover slides left and the label sits on the right; narrow screens: label below
+  const wide = stageWidth >= 460;
+  const sideBySide = wide && !!projection;
+  const shift = part && wide && status === "ready" ? 0.22 : 0;
+  const gap = 24;
+  const anchorX = projection?.x ?? 0;
+  const popupWidth = sideBySide ? Math.min(320, stageWidth * 0.44 - gap - 12) : Math.min(340, stageWidth - 20);
+  const left = sideBySide ? stageWidth * 0.56 : (stageWidth - popupWidth) / 2;
   const popupY = sideBySide
-    ? Math.max(56, Math.min(stageHeight - 150, projection.y - 30))
-    : (projection?.height ?? 0) + gap;
+    ? Math.max(16, Math.min(stageHeight - 170, (projection?.y ?? 0) - 40))
+    : (projection?.height ?? 0) + 13;
 
   return (
-    <section className={styles.viewer} data-guide={!!model.partsGuide} data-layout={layout} aria-label={`${model.name} rover viewer`}>
+    <section className={styles.viewer} data-guide={!!model.partsGuide} aria-label={`${model.name} rover viewer`}>
       <div className={styles.stage}>
       <div className={styles.background} style={{ backgroundImage: `url(${model.background.image})` }} />
       <div
@@ -184,13 +201,13 @@ export default function RoverViewer({ model }: { model: RoverModel }) {
         {status !== "fallback" && (
           <SceneBoundary onError={onError}>
             <div className={styles.canvasArea}>
-              <RoverScene model={model} controls={controls} onReady={onReady} onError={onError} highlight={highlight} onProject={onProject} centered={layout === "v2"} />
+              <RoverScene model={model} controls={controls} onReady={onReady} onError={onError} highlight={highlight} onProject={onProject} shift={shift} />
             </div>
           </SceneBoundary>
         )}
         {part && projection && (
           <svg className={styles.leader} data-visible={!!anchor} aria-hidden="true">
-            <line x1={anchorX} y1={projection.y} x2={sideBySide ? (showLeft ? left + popupWidth : left) : Math.max(left + 5, Math.min(left + popupWidth - 5, anchorX))} y2={popupY + (sideBySide ? 20 : 0)} />
+            <line x1={anchorX} y1={projection.y} x2={sideBySide ? left : Math.max(left + 5, Math.min(left + popupWidth - 5, anchorX))} y2={popupY + (sideBySide ? 20 : 0)} />
             <circle cx={anchorX} cy={projection.y} r="4" />
           </svg>
         )}
@@ -248,16 +265,11 @@ export default function RoverViewer({ model }: { model: RoverModel }) {
       </div>
       </div>
       {model.partsGuide && (
-        <div className={styles.layoutSwitch} role="group" aria-label="Compare viewer layouts">
-          <button type="button" aria-pressed={layout === "v1"} onClick={() => setLayout("v1")}>V1</button>
-          <button type="button" aria-pressed={layout === "v2"} onClick={() => setLayout("v2")}>V2</button>
-        </div>
-      )}
-      {model.partsGuide && (
         <RoverPartsPicker
           guide={model.partsGuide}
           selected={part?.id}
           onSelect={selectPart}
+          onClear={clearPart}
           highlight={highlight}
           onHighlight={() => setHighlight((enabled) => !enabled)}
           highlightAvailable={ready}
