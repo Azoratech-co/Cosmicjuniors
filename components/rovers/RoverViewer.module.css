@@ -183,14 +183,6 @@
 }
 
 .leader[data-visible="true"] { opacity: 1; }
-.typedWord { display: inline-block; white-space: pre; }
-.typedWord > span { display: inline-block; visibility: hidden; }
-.partInfo[data-visible="true"] .typedWord > span {
-  animation: showLetter 1ms var(--letter-delay) step-end forwards;
-}
-
-@keyframes showLetter { to { visibility: visible; } }
-
 .highlight {
   padding: 6px 9px;
   border: 1px solid var(--line-strong);
@@ -353,5 +345,4 @@
 
 @media (prefers-reduced-motion: reduce) {
   .partInfo, .leader { transition: none; }
-  .partInfo[data-visible="true"] .typedWord > span { animation: none; visibility: visible; }
 }

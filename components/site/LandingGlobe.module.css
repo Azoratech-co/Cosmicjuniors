@@ -1,58 +1,148 @@
 .card {
-  display: grid;
-  grid-template-columns: minmax(0, 0.9fr) minmax(0, 1.1fr);
-  align-items: center;
   margin-block: 16px 28px;
   border: 1px solid var(--line-strong);
   border-radius: var(--r-lg);
   background: var(--surface);
   color: var(--text);
+  overflow: hidden;
 }
-
-.copy { padding: 24px; }
-.copy h2 { margin: 0 0 12px; font-size: clamp(20px, 3vw, 28px); }
-.copy p { margin: 0 0 5px; }
-.coordinates { color: var(--muted); font-size: 14px; }
-.ring {
-  display: inline-block;
-  width: 12px;
-  height: 12px;
-  margin-inline-end: 7px;
-  border: 2px solid;
+.header { position: relative; padding: 24px 76px 0 24px; }
+.header h2 { margin: 4px 0 10px; font-size: clamp(22px, 3vw, 30px); }
+.header p { margin: 0 0 8px; }
+.eyebrow { color: var(--muted); font-size: 12px; font-weight: 700; letter-spacing: 0.05em; }
+.explorer { position: relative; isolation: isolate; display: grid; grid-template-columns: minmax(0, 1.05fr) minmax(0, 1fr); align-items: start; }
+.globePanel { min-width: 0; padding: 0 20px 20px; }
+.globeStage { position: relative; }
+.expandButton {
+  position: absolute;
+  top: 14px;
+  right: 14px;
+  width: 44px;
+  height: 44px;
+  display: grid;
+  place-items: center;
+  color: var(--text);
+  background: color-mix(in srgb, var(--primary) 8%, transparent);
+  border: 1px solid color-mix(in srgb, var(--line-strong) 65%, transparent);
   border-radius: 50%;
-}
-.copy button {
-  margin-block: 13px;
-  min-height: 44px;
-  padding-inline: 12px;
-  border: 1px solid var(--line-strong);
-  border-radius: 8px;
-  color: inherit;
-  background: transparent;
-  font: inherit;
   cursor: pointer;
 }
-.sites { list-style: none; margin: 4px 0 14px; padding: 0; display: grid; gap: 8px; }
-.sites button { display: flex; align-items: center; gap: 10px; width: 100%; margin: 0; text-align: start; }
-.sites button[aria-pressed="true"] { border-color: var(--primary); background: color-mix(in srgb, var(--primary) 14%, transparent); }
-.siteText { display: flex; flex-direction: column; line-height: 1.3; }
-.sites small { color: var(--muted); font-size: 12px; }
-.sites .ring { margin: 0; flex: none; }
-.sources { display: flex; flex-wrap: wrap; gap: 6px 12px; font-size: 12px; }
-.sources a { color: inherit; text-decoration: underline; }
-.globe {
-  height: 300px;
-  min-width: 0;
-  border-radius: var(--r-lg);
-  touch-action: pan-y;
-  cursor: grab;
-}
+.expandButton:hover { border-color: var(--primary); color: var(--primary); }
+.expandButton svg { width: 19px; height: 19px; }
+.globe { height: 320px; min-width: 0; border-radius: var(--r-lg); touch-action: pan-y; cursor: grab; }
 .globe:active { cursor: grabbing; }
-.notice { padding: 24px; }
-.card :is(button, a, .globe):focus-visible { outline: 2px solid var(--primary); outline-offset: 2px; }
-
-@media (max-width: 640px) {
-  .card { grid-template-columns: minmax(0, 1fr); }
-  .copy { padding: 18px 18px 0; }
-  .globe { height: 260px; }
+.hint, .note, .coordinates, .date { color: var(--muted); }
+.hint { margin: 0 0 12px; font-size: 12px; line-height: 1.5; }
+.note { font-size: 13px; line-height: 1.5; }
+.findButton {
+  min-height: 44px;
+  padding: 8px 14px;
+  border: 1px solid var(--line-strong);
+  border-radius: 8px;
+  color: var(--text);
+  background: var(--surface);
+  font: inherit;
+  font-size: 14px;
+  cursor: pointer;
 }
+.findButton:disabled { opacity: 0.55; cursor: default; }
+.details { position: relative; z-index: 2; min-width: 0; padding: 20px 24px 20px 4px; }
+.details h3 { display: flex; align-items: center; gap: 10px; margin: 0; font-size: clamp(22px, 3vw, 28px); }
+.siteTitle { display: flex; flex-wrap: wrap; align-items: center; gap: 4px 12px; margin: 6px 0 14px; }
+.locateButton {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  min-height: 32px;
+  padding: 0 8px;
+  border: 1px solid var(--line-strong);
+  border-radius: 6px;
+  background: transparent;
+  color: var(--text);
+  font: inherit;
+  font-size: 12px;
+  cursor: pointer;
+}
+.locateButton svg { width: 15px; height: 15px; }
+.locateButton:hover:not(:disabled) { border-color: var(--primary); }
+.locateButton:disabled { opacity: 0.55; cursor: default; }
+.details p, .landingInfo p { margin: 6px 0; }
+.landingInfo .place { font-weight: 700; }
+.coordinates { font-size: 13px; font-variant-numeric: tabular-nums; }
+.date { font-size: 12px; line-height: 1.6; }
+.landingInfo .summary { margin-block: 16px; font-size: 14px; line-height: 1.6; }
+.marker {
+  display: inline-flex;
+  flex: 0 0 auto;
+  align-items: center;
+  justify-content: center;
+  width: 19px;
+  height: 19px;
+  border: 2px solid;
+  border-radius: 50%;
+  font-size: 8px;
+  line-height: 1;
+}
+.marker[data-approximate="true"] { border-style: dashed; font-size: 0; }
+.comparison { margin-bottom: 16px; }
+.comparison summary { width: fit-content; padding: 8px 0; color: var(--text); font-size: 13px; cursor: pointer; }
+.comparison summary:focus-visible { outline: 2px solid var(--primary); outline-offset: 3px; }
+.comparison .note { font-size: 11px; }
+.sources { display: flex; flex-wrap: wrap; gap: 8px 14px; font-size: 12px; }
+.sources a { color: inherit; text-decoration: underline; text-underline-offset: 3px; }
+.footer { padding: 16px 24px; border-top: 1px solid var(--line-strong); }
+.notice { position: absolute; inset: 0; display: grid; place-content: center; padding: 24px; margin: 0; color: var(--muted); text-align: center; pointer-events: none; }
+.card :is(button, a, .globe):focus-visible { outline: 2px solid var(--primary); outline-offset: 3px; }
+@media (max-width: 640px) {
+  .header { padding: 18px 64px 0 18px; }
+  .explorer { grid-template-columns: minmax(0, 1fr); }
+  .globePanel { padding: 0 18px 12px; }
+  .globe { height: 280px; }
+  .details { padding: 12px 18px 18px; }
+  .footer { padding: 16px 18px; }
+  /* stacked layout: the info sits under the globe, so a pointer line would cross the text */
+  .leader { display: none; }
+}
+.journeySummary { margin-top: 18px; padding-top: 16px; border-top: 1px solid var(--line-strong); font-size: 12px; line-height: 1.6; }
+.journeySummary > strong { font-size: 13px; }
+.journeySummary > p { color: var(--muted); margin-block: 8px; }
+
+.landingInfo :is(.coordinates, .date, .note) { color: var(--landing-muted, var(--muted)); }
+
+.infoCard {
+  --landing-muted: #dfcdb7;
+  margin-bottom: 10px;
+  padding: 14px;
+  border-radius: 8px;
+  background: rgb(32 21 15 / 94%);
+  color: #fff2e0;
+  font-size: 14px;
+  line-height: 1.5;
+  opacity: 0;
+  transform: translateY(4px);
+  transition: opacity 160ms ease, transform 160ms ease;
+}
+.infoCard[data-visible="true"] { opacity: 1; transform: none; }
+
+.leader {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 1;
+  pointer-events: none;
+  stroke: #fff1d1;
+  stroke-width: 1.5px;
+  opacity: 0;
+  transition: opacity 160ms ease;
+}
+.leader[data-visible="true"][data-connected="true"] { opacity: 1; }
+
+.comparisonCard { position: relative; z-index: 2; }
+.infoCard h4 { margin: 0 0 6px; font-size: 15px; }
+
+@media (prefers-reduced-motion: reduce) {
+  .infoCard, .leader { transition: none; }
+}
+
+.infoCard .findButton { margin-top: 12px; background: transparent; color: inherit; }

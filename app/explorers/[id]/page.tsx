@@ -6,9 +6,11 @@ import SiteHeader from "@/components/site/SiteHeader";
 import SiteFooter from "@/components/site/SiteFooter";
 import Reveal from "@/components/site/Reveal";
 import RoverHero from "@/components/site/RoverHero";
-import LandingGlobe from "@/components/site/LandingGlobe";
+import MarsLandingGlobe from "@/components/site/LandingGlobe";
 import OpportunityOrbit from "@/components/site/OpportunityOrbit";
-import { LANDING_GLOBES } from "@/lib/landing-sites";
+import { marsRoverSites } from "@/lib/landing-sites";
+import MissionLandingGlobe from "@/components/site/MissionLandingGlobe";
+import { LANDING_GLOBES } from "@/lib/mission-landing-sites";
 import RoverViewer from "@/components/rovers/RoverViewer";
 import BackLink from "@/components/site/BackLink";
 import { EXPLORERS, explorerFacts, explorerSources, getExplorer } from "@/lib/explorers";
@@ -34,6 +36,7 @@ export default async function ExplorerPage({ params }: Props) {
   const facts = explorerFacts(e);
   const sources = explorerSources(e);
   const model = getRoverModel(e.id);
+  const roverSite = marsRoverSites.find((site) => site.id === e.id);
   const others = EXPLORERS.filter((x) => x.world === e.world && x.id !== e.id).slice(0, 3);
 
   return (
@@ -90,7 +93,7 @@ export default async function ExplorerPage({ params }: Props) {
           </Reveal>
         )}
 
-        {LANDING_GLOBES[e.id] && <LandingGlobe data={LANDING_GLOBES[e.id]!} />}
+        {roverSite ? <MarsLandingGlobe key={e.id} site={roverSite} /> : LANDING_GLOBES[e.id] && <MissionLandingGlobe key={e.id} data={LANDING_GLOBES[e.id]!} />}
         {e.id === "opportunity" && <OpportunityOrbit />}
 
         <Reveal className="section-banner">
