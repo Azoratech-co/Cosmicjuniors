@@ -5,9 +5,9 @@ import Explorer from "@/components/Explorer";
 
 export const metadata: Metadata = {
   title: "Mission Games · Cosmic Juniors",
-  description: "Three Mars mission games: rebuild Sojourner, launch and fly real NASA missions to Mars, and land at five real landing sites.",
-  openGraph: { title: "Mission Games · Cosmic Juniors", description: "Three Mars mission games: rebuild Sojourner, launch and fly real NASA missions to Mars, and land at five real landing sites.", url: "/games", siteName: "Cosmic Juniors", type: "website" },
-  twitter: { card: "summary_large_image", title: "Mission Games · Cosmic Juniors", description: "Three Mars mission games: rebuild Sojourner, launch and fly real NASA missions to Mars, and land at five real landing sites." },
+  description: "Rebuild Sojourner, fly NASA missions to Mars, and try the Mars Landing and Pathfinder simulators.",
+  openGraph: { title: "Mission Games · Cosmic Juniors", description: "Rebuild Sojourner, fly NASA missions to Mars, and try the Mars Landing and Pathfinder simulators.", url: "/games", siteName: "Cosmic Juniors", type: "website" },
+  twitter: { card: "summary_large_image", title: "Mission Games · Cosmic Juniors", description: "Rebuild Sojourner, fly NASA missions to Mars, and try the Mars Landing and Pathfinder simulators." },
 };
 
 const GAMES = [
@@ -40,6 +40,16 @@ const GAMES = [
     levelName: "Hard",
     img: "https://images-assets.nasa.gov/image/PIA24428/PIA24428~small.jpg",
     alt: "Perseverance being lowered to the surface of Mars by the sky crane, photographed from the descent stage",
+  },
+  {
+    href: "/games/pathfinder-landing",
+    tag: "Mission 04 ? Simulator",
+    title: "Pathfinder Landing",
+    text: "Fly from deep space and guide Pathfinder to Ares Vallis with parachute, retrorockets, and airbags.",
+    level: 3,
+    levelName: "Hard",
+    img: "/story/sojourner/landed.jpg",
+    alt: "NASA photograph of Sojourner stowed on a Mars Pathfinder lander petal",
   },
 ];
 

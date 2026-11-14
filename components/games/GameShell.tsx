@@ -30,19 +30,21 @@ export default function GameShell({
   tagline,
   backHref = "/games",
   backLabel = "All games",
+  showPlanet = true,
   children,
 }: {
   title: string;
   tagline?: string;
   backHref?: string;
   backLabel?: string;
+  showPlanet?: boolean;
   children: React.ReactNode;
 }) {
   useNoSelect();
   return (
     <div className="game-page">
       <Starfield />
-      <div className="mars-glow" aria-hidden="true" />
+      {showPlanet && <div className="mars-glow" aria-hidden="true" />}
       <SiteHeader />
       <div className="game-head">
         {backHref !== "/" && (
