@@ -1,0 +1,81 @@
+{
+  "schemaVersion": 1,
+  "world": "moon",
+  "snapshotDate": "2026-11-14",
+  "credit": "NASA's Scientific Visualization Studio / LRO LROC and LOLA teams",
+  "reference": "https://svs.gsfc.nasa.gov/4720/",
+  "elevationReference": "https://svs.gsfc.nasa.gov/4720/",
+  "referenceRadiusMeters": 1737400.0,
+  "extent": [
+    -180,
+    -90,
+    180,
+    90
+  ],
+  "pixelRegistration": "cell centers; north row first; east-positive longitude",
+  "shape": {
+    "file": "shape-512.f32",
+    "width": 512,
+    "height": 256,
+    "encoding": "little-endian float32 meters relative to referenceRadiusMeters"
+  },
+  "normals": "Object-space RGB maps in the same X/Y/Z axes as the globe. Slopes use the measured radius and angular pixel spacing. Physical relief scale 1. No synthetic detail or height exaggeration.",
+  "method": "2025 sRGB color map converted to 8-bit sRGB WebP. LOLA unsigned half-meter heights decoded as value*0.5-10000 meters relative to 1737400 meters. Polar color is lower-resolution laser albedo fill; this is a visualization, not a scientific albedo product.",
+  "files": [
+    {
+      "file": "color-2048.webp",
+      "bytes": 518540,
+      "sha256": "99d9a563470b027600335a652c45f45dc62a77c94c036f23ce52ee8c4a3ab333",
+      "width": 2048,
+      "height": 1024
+    },
+    {
+      "file": "color-4096.webp",
+      "bytes": 2039996,
+      "sha256": "5eb01ab714005c96794c7b3e767195cdbf8bf39f04ccf6405d3e213e4f150ca7",
+      "width": 4096,
+      "height": 2048
+    },
+    {
+      "file": "color-8192.webp",
+      "bytes": 7830254,
+      "sha256": "2897cd401708ea7bd128707b26da7ff78457ea146f1fefae332128b85e33364e",
+      "width": 8192,
+      "height": 4096
+    },
+    {
+      "file": "normals-2048.webp",
+      "bytes": 2262248,
+      "sha256": "56fab28fb3bb1640edfee31437e0c94762818958e28384e1dea8b8befc12c989",
+      "width": 2048,
+      "height": 1024
+    },
+    {
+      "file": "normals-4096.webp",
+      "bytes": 8922850,
+      "sha256": "ea09165c5d7915566f58b59ecc11b54049bbf2c954a145fe30735f9eadbd2a04",
+      "width": 4096,
+      "height": 2048
+    },
+    {
+      "file": "shape-512.f32",
+      "bytes": 524288,
+      "sha256": "cc5b1cb574e38faaffa145571ca29f412ae6ca78df8e736f67b210196ef244ed",
+      "width": 512,
+      "height": 256
+    }
+  ],
+  "sources": [
+    {
+      "url": "https://svs.gsfc.nasa.gov/vis/a000000/a004700/a004720/lroc_color_16bit_srgb_8k.tif",
+      "bytes": 243289792,
+      "sha256": "db7808e878b6a55eb409bb231eab8deb477f84b5c9d7396d76ff73e5d54992d9"
+    },
+    {
+      "url": "https://svs.gsfc.nasa.gov/vis/a000000/a004700/a004720/ldem_16_uint.tif",
+      "bytes": 33201026,
+      "sha256": "45a2b32d56e81ed30db07fead8abc842b249b6511219d9ca2c53f81bc2dc5d62"
+    }
+  ],
+  "tiles": []
+}

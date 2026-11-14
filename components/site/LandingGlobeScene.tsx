@@ -1,12 +1,15 @@
 "use client";
 
-import { Canvas, useFrame, useLoader, useThree } from "@react-three/fiber";
+import { Canvas, useFrame, useThree } from "@react-three/fiber";
 import { Suspense, useEffect, useLayoutEffect, useMemo, useRef, type RefObject } from "react";
-import { DoubleSide, MathUtils, Quaternion, SRGBColorSpace, TextureLoader, Vector3, type Group, type PerspectiveCamera } from "three";
+import { DoubleSide, MathUtils, Quaternion, Vector3, type Group, type PerspectiveCamera } from "three";
 import { landingView, marsSurfacePosition, type MarsRoverSite } from "@/lib/landing-sites";
 import { getRouteSnapshot, routeCoordinates, type JourneyData } from "@/lib/mars-journeys";
 
-export type MarsGlobeView = { zoom: number; fov: number; autoRotate: boolean };
+import { GlobeLighting, GlobeSurface, SurfaceMarkerSize } from "./GlobeSurface";
+import type { GlobeView, SurfaceStatus } from "@/lib/globe-surface";
+
+export type MarsGlobeView = GlobeView;
 
 export type LandingMarkerProjection = { siteId: string; x: number; y: number };
 
@@ -26,6 +29,9 @@ type Props = {
   onProjectReference?: (point: LandingMarkerProjection | null) => void;
   onProjectMarker?: (point: LandingMarkerProjection | null) => void;
   pickSite?: RefObject<((x: number, y: number) => MarsRoverSite | undefined) | null>;
+  detailEnabled?: boolean;
+  detailAttempt?: number;
+  onDetailStatus?: (status: SurfaceStatus) => void;
 };
 
 function WindowCamera({ view, globe, moving }: { view: MarsGlobeView; globe: RefObject<Group | null>; moving: RefObject<boolean> }) {
@@ -69,22 +75,25 @@ function JourneyTrack({ data, color }: { data: JourneyData; color: string }) {
   </lineSegments>;
 }
 
-function EndpointMarker({ site }: { site: MarsRoverSite }) {
+function EndpointMarker({ site, detailed }: { site: MarsRoverSite; detailed: boolean }) {
   const snapshot = getRouteSnapshot(site.id);
   if (!snapshot) return null;
   const normal = new Vector3(...marsSurfacePosition(routeCoordinates(snapshot.last)));
   const orientation = new Quaternion().setFromUnitVectors(new Vector3(0, 0, 1), normal);
-  return <mesh name={`last-position-${site.id}`} position={normal.multiplyScalar(1.019)} quaternion={orientation}>
+  return <group name={`last-position-${site.id}`} position={normal.multiplyScalar(1.019)} quaternion={orientation}>
+    <SurfaceMarkerSize enabled={detailed} radius={0.018} pixels={7}><mesh>
     <circleGeometry args={[0.018, 4]} />
     <meshBasicMaterial color={site.color} side={DoubleSide} toneMapped={false} />
-  </mesh>;
+    </mesh></SurfaceMarkerSize>
+  </group>;
 }
 
-function LandingMarker({ site, selected }: { site: MarsRoverSite; selected: boolean }) {
+function LandingMarker({ site, selected, detailed }: { site: MarsRoverSite; selected: boolean; detailed: boolean }) {
   const normal = new Vector3(...marsSurfacePosition(site));
   const orientation = new Quaternion().setFromUnitVectors(new Vector3(0, 0, 1), normal);
   return (
     <group name={`landing-marker-${site.id}`} position={normal.multiplyScalar(1.012)} quaternion={orientation}>
+      <SurfaceMarkerSize enabled={detailed} radius={0.081} pixels={selected ? 18 : 14}>
       {site.approximate ? Array.from({ length: 8 }, (_, index) => (
         <mesh key={index}>
           <ringGeometry args={[0.04, 0.056, 6, 1, index * Math.PI / 4, Math.PI / 6]} />
@@ -102,6 +111,7 @@ function LandingMarker({ site, selected }: { site: MarsRoverSite; selected: bool
         <ringGeometry args={[0.072, 0.081, 48]} />
         <meshBasicMaterial color="white" side={DoubleSide} toneMapped={false} />
       </mesh>}
+      </SurfaceMarkerSize>
     </group>
   );
 }
@@ -109,15 +119,14 @@ function LandingMarker({ site, selected }: { site: MarsRoverSite; selected: bool
 function MarsSurface({
   site, sites, focusVersion, globe, redraw, onReady, onError, journey, focusPoint,
   cancelFocus, onProjectMarker, referenceSite, onProjectReference, pickSite, moving,
+  view, detailEnabled, detailAttempt, onDetailStatus,
 }: Props & { moving: RefObject<boolean> }) {
-  const map = useLoader(TextureLoader, "/models/mars/viking-global.jpg");
   const { invalidate, gl, camera, size } = useThree();
   const initialFocus = useRef(true);
   const transition = useRef({ fromPitch: 0, fromYaw: 0, pitch: 0, yaw: 0, elapsed: 0 });
   const marker = useMemo(() => new Vector3(...marsSurfacePosition(site)).multiplyScalar(1.012), [site]);
   const reference = useMemo(() => referenceSite ? new Vector3(...marsSurfacePosition(referenceSite)).multiplyScalar(1.012) : null, [referenceSite]);
   const projected = useMemo(() => new Vector3(), []);
-  map.colorSpace = SRGBColorSpace;
 
   useLayoutEffect(() => {
     const rotation = globe.current?.rotation;
@@ -207,12 +216,10 @@ function MarsSurface({
 
   return (
     <group ref={globe}>
-      <mesh>
-        <sphereGeometry args={[1, 64, 40]} />
-        <meshStandardMaterial map={map} roughness={1} />
-      </mesh>
-      {sites.map((entry) => <LandingMarker key={entry.id} site={entry} selected={entry.id === site.id} />)}
-      {sites.map((entry) => <EndpointMarker key={entry.id} site={entry} />)}
+      <GlobeSurface world="mars" image="/models/mars/viking-global.jpg" detailed={!!view && detailEnabled !== false}
+        relief={view?.relief} attempt={detailAttempt} onDetailStatus={onDetailStatus} />
+      {sites.map((entry) => <LandingMarker key={entry.id} site={entry} selected={entry.id === site.id} detailed={!!view} />)}
+      {sites.map((entry) => <EndpointMarker key={entry.id} site={entry} detailed={!!view} />)}
       {journey && <JourneyTrack data={journey} color={site.color} />}
     </group>
   );
@@ -221,10 +228,9 @@ function MarsSurface({
 export default function MarsGlobeScene(props: Props) {
   const moving = useRef(false);
   return (
-    <Canvas aria-hidden="true" camera={{ position: [0, 0, 3.8], fov: 39 }}
+    <Canvas aria-hidden="true" camera={{ position: [0, 0, 3.8], fov: 39 }} resize={{ offsetSize: true }}
       dpr={[1, 1.75]} frameloop="demand">
-      <ambientLight intensity={0.85} />
-      <directionalLight position={[-3, 4, 6]} intensity={2} />
+      <GlobeLighting view={props.view} />
       {props.view && <WindowCamera view={props.view} globe={props.globe} moving={moving} />}
       <Suspense fallback={null}><MarsSurface {...props} moving={moving} /></Suspense>
     </Canvas>

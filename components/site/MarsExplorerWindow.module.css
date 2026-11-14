@@ -128,6 +128,10 @@
   .dialog[open], .dialog[data-closing="true"], .dialog::backdrop, .dialog[data-closing="true"]::backdrop { animation: none; }
 }
 .viewport[hidden], .cameraPanel[hidden], .hint[hidden] { display: none; }
+.surfaceCredits { position: absolute; left: 8px; bottom: 42px; z-index: 1; display: flex; flex-wrap: wrap; align-items: center; gap: 7px 10px; max-width: calc(100% - 16px); padding: 8px 10px; border-radius: 8px; background: #0b1321e8; color: #aebdd6; font-size: 11px; }
+.surfaceCredits a { color: #c9bbff; text-underline-offset: 3px; }
+.surfaceCredits button { min-height: 32px; border: 1px solid #455471; border-radius: 6px; color: #e4eaff; background: #1e2b42; font: inherit; cursor: pointer; }
+.surfaceCredits[hidden] { display: none; }
 .viewTabs { display: flex; gap: 3px; margin-inline: auto 16px; padding: 3px; border: 1px solid #34415a; border-radius: 10px; background: #0b1321; }
 .viewTabs button { min-height: 38px; min-width: 76px; padding: 7px 13px; border: 0; border-radius: 7px; color: #aebdd6; background: transparent; font: inherit; font-size: 12px; cursor: pointer; }
 .viewTabs button[aria-pressed="true"] { color: #fff; background: #383051; }

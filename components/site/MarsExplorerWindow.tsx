@@ -13,10 +13,11 @@ import { positionMarsLeader } from "./positionMarsLeader";
 import MarsLandingInfo from "./MarsLandingInfo";
 import MarsSitePicker from "./MarsSitePicker";
 import { useMarsJourney } from "./useMarsJourney";
+import { initialGlobeView, surfaceReferences, type SurfaceStatus } from "@/lib/globe-surface";
 
 const Scene = dynamic(() => import("./LandingGlobeScene"), { ssr: false });
 const JourneyPanel = dynamic(() => import("./MarsJourneyPanel"), { ssr: false });
-const initialCamera = { zoom: 1, fov: 39, autoRotate: false };
+const initialCamera = initialGlobeView;
 
 class WindowBoundary extends Component<{ children: ReactNode; onError: () => void }, { failed: boolean }> {
   state = { failed: false };
@@ -39,6 +40,9 @@ export default function MarsExplorerWindow({ site, initialMode = "globe", onSele
   const [closing, setClosing] = useState(false);
   const [status, setStatus] = useState<"loading" | "ready" | "failed">("loading");
   const [camera, setCamera] = useState(initialCamera);
+  const [surfaceStatus, setSurfaceStatus] = useState<SurfaceStatus>("loading");
+  const [detailAttempt, setDetailAttempt] = useState(0);
+  const onDetailStatus = useCallback((value: SurfaceStatus) => setSurfaceStatus(value), []);
   const [focusVersion, setFocusVersion] = useState(0);
   const [panelOpen, setPanelOpen] = useState(false);
   const [sitesOpen, setSitesOpen] = useState(true);
@@ -112,7 +116,7 @@ export default function MarsExplorerWindow({ site, initialMode = "globe", onSele
   }
 
   function zoom(factor: number) {
-    setCamera((current) => ({ ...current, zoom: Math.max(0.7, Math.min(1.7, current.zoom * factor)) }));
+    setCamera((current) => ({ ...current, zoom: Math.max(0.7, Math.min(2.6, current.zoom * factor)) }));
   }
 
   function rotate(x: number, y: number) {
@@ -227,12 +231,19 @@ export default function MarsExplorerWindow({ site, initialMode = "globe", onSele
             {status !== "failed" && <WindowBoundary onError={onError}>
               <Scene site={site} sites={marsRoverSites} focusVersion={focusVersion} globe={globe} redraw={redraw} cancelFocus={cancelFocus}
                 onReady={onReady} onError={onError} view={camera} journey={journey.data} focusPoint={focusPoint}
-                onProjectMarker={projectMarker} pickSite={pickSite} />
+                onProjectMarker={projectMarker} pickSite={pickSite} detailEnabled={mode === "globe"}
+                detailAttempt={detailAttempt} onDetailStatus={onDetailStatus} />
             </WindowBoundary>}
           </div>
           {mode === "globe" && status !== "ready" && <p className={styles.notice} role="status">{status === "loading" ? "Loading Mars…" : "The 3D globe is unavailable. You can still compare landing sites or open Journey."}</p>}
           {mode === "journey" && <JourneyPanel key={site.id} site={site} data={journey.data} loading={journey.loading} failed={journey.failed} retry={journey.retry} />}
 
+          <div className={styles.surfaceCredits} hidden={mode !== "globe"}>
+            <span role="status">{surfaceStatus === "ready" ? "Detailed NASA surface" : surfaceStatus === "failed" ? "Standard surface" : "Loading surface detail…"}</span>
+            {surfaceStatus === "failed" && <button type="button" onClick={() => setDetailAttempt((value) => value + 1)}>Retry detail</button>}
+            <a href={surfaceReferences.mars.color} target="_blank" rel="noopener noreferrer">NASA imagery</a>
+            <a href={surfaceReferences.mars.elevation} target="_blank" rel="noopener noreferrer">Terrain source</a>
+          </div>
           <p id={hint} className={styles.hint} hidden={mode !== "globe"}>Drag to rotate &middot; Scroll or pinch to zoom</p>
         </div>
         {mode === "globe" && infoOpen && (
@@ -275,12 +286,18 @@ export default function MarsExplorerWindow({ site, initialMode = "globe", onSele
               <fieldset disabled={status !== "ready"}>
                 <legend>Adjust your view</legend>
                 <label>Zoom <output>{Math.round(camera.zoom * 100)}%</output>
-                  <input aria-label="Camera zoom" type="range" min="0.7" max="1.7" step="0.01" value={camera.zoom}
+                  <input aria-label="Camera zoom" type="range" min="0.7" max="2.6" step="0.01" value={camera.zoom}
                     onChange={(event) => setCamera((current) => ({ ...current, zoom: Number(event.target.value) }))} />
                 </label>
                 <label>Field of view <output>{camera.fov}°</output>
                   <input aria-label="Camera field of view" type="range" min="30" max="70" step="1" value={camera.fov}
                     onChange={(event) => setCamera((current) => ({ ...current, fov: Number(event.target.value) }))} />
+                </label>
+                <label className={styles.switch}><span>Surface relief</span><input type="checkbox" checked={camera.relief}
+                  onChange={(event) => setCamera((current) => ({ ...current, relief: event.target.checked }))} /></label>
+                <label>Light direction <output>{camera.lightAngle}°</output>
+                  <input aria-label="Light direction" type="range" min="-120" max="120" step="1" value={camera.lightAngle}
+                    onChange={(event) => setCamera((current) => ({ ...current, lightAngle: Number(event.target.value) }))} />
                 </label>
                 <label className={styles.switch}><span>Slow rotation</span><input type="checkbox" checked={camera.autoRotate}
                   onChange={(event) => setCamera((current) => ({ ...current, autoRotate: event.target.checked }))} /></label>
