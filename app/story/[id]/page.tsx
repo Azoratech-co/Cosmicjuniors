@@ -38,6 +38,7 @@ export default async function StoryPage({ params }: Props) {
       <SiteHeader />
       <StoryScroll scenes={scenes} storyTitle={name} storySubtitle={sub?.trim() ?? ""} chapters={chapters} folder={`/story/${id}/`} />
       <div className="ss-after">
+        {id === "sojourner" && <Link className="btn-purple cta" href="/games/story-quiz">Take the story quiz · 10 questions</Link>}
         <Link className="btn-purple cta" href={`/story/${id}/text`}>Read the full story</Link>
         <Link className="btn-ghost cta" href="/chat?mode=story">Ask Cosmo about the story</Link>
         <Link className="btn-ghost cta" href="/story/spirit">Next: Spirit&apos;s story</Link>

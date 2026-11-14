@@ -5,9 +5,9 @@ import Explorer from "@/components/Explorer";
 
 export const metadata: Metadata = {
   title: "Mission Games · Cosmic Juniors",
-  description: "Rebuild Sojourner, fly NASA missions to Mars, and land Mars Pathfinder in 3D.",
-  openGraph: { title: "Mission Games · Cosmic Juniors", description: "Rebuild Sojourner, fly NASA missions to Mars, and land Mars Pathfinder in 3D.", url: "/games", siteName: "Cosmic Juniors", type: "website" },
-  twitter: { card: "summary_large_image", title: "Mission Games · Cosmic Juniors", description: "Rebuild Sojourner, fly NASA missions to Mars, and land Mars Pathfinder in 3D." },
+  description: "Rebuild Sojourner, fly NASA missions to Mars, land Mars Pathfinder in 3D, and test your story knowledge.",
+  openGraph: { title: "Mission Games · Cosmic Juniors", description: "Rebuild Sojourner, fly NASA missions to Mars, land Mars Pathfinder in 3D, and test your story knowledge.", url: "/games", siteName: "Cosmic Juniors", type: "website" },
+  twitter: { card: "summary_large_image", title: "Mission Games · Cosmic Juniors", description: "Rebuild Sojourner, fly NASA missions to Mars, land Mars Pathfinder in 3D, and test your story knowledge." },
 };
 
 const GAMES = [
@@ -40,6 +40,16 @@ const GAMES = [
     levelName: "Hard",
     img: "/story/sojourner/landed.jpg",
     alt: "NASA photograph of the Mars Pathfinder lander on Mars, with Sojourner folded on its petal",
+  },
+  {
+    href: "/games/story-quiz",
+    tag: "Mission 04 · Story quiz",
+    title: "Sojourner Story Quiz",
+    text: "Read the adventure, then test what you remember. Ten questions, four choices, all from the story.",
+    level: 1,
+    levelName: "All readers",
+    img: "/story/sojourner/landed.jpg",
+    alt: "NASA photograph of Pathfinder with Sojourner on its petal on Mars",
   },
 ];
 

@@ -138,6 +138,11 @@ export default function StoryReader({ story, signVideos, nextStory }: { story: S
       <div className="story-end">
         <p>{story.status === "complete" ? "The end." : "The team is still writing this story. Come back soon!"}</p>
         <div className="cta-row">
+          {story.id === "sojourner" && (
+            <Link className="btn-purple cta" href="/games/story-quiz">
+              Take the story quiz · 10 questions
+            </Link>
+          )}
           {nextStory && (
             <Link className="btn-purple cta" href={`/story/${nextStory.id}`}>
               Next story: {nextStory.title}

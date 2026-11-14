@@ -1,0 +1,160 @@
+.page :global(.game-page) {
+  /* Clip horizontal decoration without creating a scroll container that
+     would prevent the exit toolbar from sticking to the viewport. */
+  overflow-x: clip;
+}
+
+.quiz {
+  width: min(100%, 820px);
+  margin: 0 auto;
+  color: var(--text);
+}
+
+.toolbar {
+  position: sticky;
+  top: 8px;
+  z-index: 7;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 16px;
+  padding: 8px 10px 8px 18px;
+  border: 1px solid var(--line-strong);
+  border-radius: var(--r-md);
+  background: var(--surface);
+  box-shadow: var(--shadow-1);
+}
+
+.eyebrow {
+  color: var(--fact-ink);
+  font-family: var(--ff-data), sans-serif;
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: .08em;
+  text-transform: uppercase;
+}
+
+.exit, .secondary, .primary {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  min-height: 44px;
+  border-radius: var(--r-sm);
+  font-size: 14px;
+  font-weight: 600;
+  text-decoration: none;
+}
+
+.exit {
+  flex-shrink: 0;
+  padding: 8px 14px;
+  border: 1px solid var(--line-strong);
+  color: var(--text);
+}
+
+.exit > span { font-size: 23px; line-height: 1; }
+.exit:hover, .secondary:hover { background: var(--surface-2); }
+
+.card {
+  padding: clamp(20px, 4vw, 38px);
+  border: 1px solid var(--line-strong);
+  border-radius: var(--r-lg);
+  background: var(--surface);
+  box-shadow: var(--shadow-2);
+}
+
+.progressLabels {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  color: var(--muted);
+  font-size: 13px;
+}
+
+.progressLabels strong { color: var(--text); }
+.progress { display: flex; gap: 6px; margin: 12px 0 32px; }
+.progress > span { flex: 1; height: 5px; border-radius: 3px; background: var(--surface-2); }
+.progress > span[data-state="answered"] { background: var(--fact); }
+.progress > span[data-state="current"] { background: var(--primary); }
+.questionHead { margin-bottom: 26px; }
+.title { margin: 12px 0; font-size: clamp(23px, 3.5vw, 30px); line-height: 1.3; letter-spacing: -.02em; text-wrap: balance; }
+.title:focus { outline: none; }
+.title:focus-visible { outline: 2px solid var(--focus); outline-offset: 6px; }
+.hint { color: var(--muted); font-size: 14px; line-height: 1.6; }
+
+.choices { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+.choice {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  width: 100%;
+  min-height: 96px;
+  padding: 18px;
+  border: 1px solid var(--line-strong);
+  border-radius: var(--r-md);
+  background: var(--surface-2);
+  color: var(--text);
+  text-align: left;
+  line-height: 1.5;
+  transition: border-color .15s, background .15s;
+}
+
+.choice[aria-disabled="false"]:hover { border-color: var(--fact); background: color-mix(in srgb, var(--fact) 8%, var(--surface-2)); }
+.choice[aria-disabled="true"] { cursor: default; }
+.letter { display: grid; place-items: center; flex-shrink: 0; width: 34px; height: 34px; border: 1px solid currentColor; border-radius: 9px; font-size: 13px; font-weight: 600; }
+.choiceCopy { flex: 1; }
+.choiceStatus { display: block; margin-top: 4px; font-size: 12px; font-weight: 700; }
+.choice > svg { flex-shrink: 0; }
+
+/* Explicit green/red fills stay readable in all six site themes. Icons and
+   text communicate the result independently of the color. */
+.choice[data-state="correct"] { background: #14532d; border-color: #4ade80; color: #f0fdf4; }
+.choice[data-state="wrong"] { background: #7f1d1d; border-color: #f87171; color: #fff1f2; }
+.feedback { margin-top: 24px; }
+.feedbackContent { display: flex; align-items: flex-start; gap: 12px; padding: 18px; border: 1px solid var(--line); border-radius: var(--r-sm); background: var(--bg); font-size: 14px; line-height: 1.7; }
+.feedbackContent > span { flex-shrink: 0; margin-top: 2px; }
+.feedbackTitle { margin-bottom: 4px; font-weight: 700; color: var(--text); }
+.feedbackContent p + p { color: var(--muted); }
+.feedbackContent a, .reviewList a { display: inline-block; margin-top: 8px; color: var(--fact-ink); text-underline-offset: 4px; }
+.goodIcon { color: var(--good); }
+.wrongIcon { color: #f87171; }
+.bottom { display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 16px; margin-top: 26px; padding-top: 22px; border-top: 1px solid var(--line); }
+.bottom > p { color: var(--muted); font-size: 13px; }
+.primary { padding: 12px 22px; background: var(--primary); color: var(--on-primary); }
+.primary:not(:disabled):hover { background: var(--primary-hover); }
+.primary:disabled { opacity: .45; cursor: not-allowed; }
+.secondary { padding: 12px 22px; border: 1px solid var(--line-strong); color: var(--text); }
+.footnote { margin-top: 22px; text-align: center; color: var(--muted); font-size: 12px; line-height: 1.9; }
+.footnote a { text-underline-offset: 3px; }
+
+.result { padding: 8px 0 20px; text-align: center; }
+.resultIcon { display: grid; place-items: center; width: 64px; height: 64px; margin: 0 auto 24px; border: 1px solid color-mix(in srgb, var(--star) 40%, transparent); border-radius: 50%; background: color-mix(in srgb, var(--star) 10%, transparent); color: var(--star); font-size: 32px; }
+.score { color: var(--fact-ink); font-size: 76px; font-weight: 700; line-height: 1.3; letter-spacing: -.05em; }
+.score > span { color: var(--muted); font-size: 30px; font-weight: 400; letter-spacing: 0; }
+.resultMessage { max-width: 440px; margin: 12px auto 26px; color: var(--muted); line-height: 1.7; }
+.resultActions { display: flex; flex-wrap: wrap; justify-content: center; gap: 12px; }
+.review { margin-top: 20px; padding-top: 20px; border-top: 1px solid var(--line); }
+.review > summary { padding: 10px 0; cursor: pointer; font-weight: 600; }
+.reviewList { list-style: none; margin: 0; padding: 0; }
+.reviewList > li { padding: 22px 0; border-bottom: 1px solid var(--line); font-size: 14px; line-height: 1.7; }
+.reviewList > li:last-child { border-bottom: 0; }
+.reviewList > li > p:not(:first-child) { margin-top: 8px; color: var(--muted); }
+.reviewQuestion { display: flex; gap: 10px; font-weight: 600; }
+.reviewQuestion > span:first-child { flex-shrink: 0; margin-top: 2px; }
+
+@media (max-width: 600px) {
+  .toolbar { padding-left: 12px; }
+  .toolbar .eyebrow { max-width: 130px; font-size: 10px; line-height: 1.6; }
+  .exit { gap: 8px; padding: 8px 12px; }
+  .choices { grid-template-columns: 1fr; gap: 10px; }
+  .choice { min-height: 76px; padding: 14px; font-size: 14px; }
+  .progress { gap: 4px; margin-bottom: 26px; }
+  .bottom { align-items: stretch; flex-direction: column-reverse; text-align: center; }
+  .feedbackContent { padding: 14px; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .choice { transition: none; }
+}
