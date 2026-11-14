@@ -5,9 +5,9 @@ import Explorer from "@/components/Explorer";
 
 export const metadata: Metadata = {
   title: "Mission Games · Cosmic Juniors",
-  description: "Rebuild Sojourner, fly NASA missions to Mars, and try the Mars Landing and Pathfinder simulators.",
-  openGraph: { title: "Mission Games · Cosmic Juniors", description: "Rebuild Sojourner, fly NASA missions to Mars, and try the Mars Landing and Pathfinder simulators.", url: "/games", siteName: "Cosmic Juniors", type: "website" },
-  twitter: { card: "summary_large_image", title: "Mission Games · Cosmic Juniors", description: "Rebuild Sojourner, fly NASA missions to Mars, and try the Mars Landing and Pathfinder simulators." },
+  description: "Rebuild Sojourner, fly NASA missions to Mars, and land Mars Pathfinder in 3D.",
+  openGraph: { title: "Mission Games · Cosmic Juniors", description: "Rebuild Sojourner, fly NASA missions to Mars, and land Mars Pathfinder in 3D.", url: "/games", siteName: "Cosmic Juniors", type: "website" },
+  twitter: { card: "summary_large_image", title: "Mission Games · Cosmic Juniors", description: "Rebuild Sojourner, fly NASA missions to Mars, and land Mars Pathfinder in 3D." },
 };
 
 const GAMES = [
@@ -33,23 +33,13 @@ const GAMES = [
   },
   {
     href: "/games/landing",
-    tag: "Mission 03 · Skill",
-    title: "Mars Landing",
-    text: "Heat shield, parachute, airbags, engines or sky crane: land like the real missions did.",
-    level: 3,
-    levelName: "Hard",
-    img: "https://images-assets.nasa.gov/image/PIA24428/PIA24428~small.jpg",
-    alt: "Perseverance being lowered to the surface of Mars by the sky crane, photographed from the descent stage",
-  },
-  {
-    href: "/games/pathfinder-landing",
-    tag: "Mission 04 · Simulator",
-    title: "Pathfinder Landing",
-    text: "Fly from deep space and guide Pathfinder to Ares Vallis with parachute, retrorockets, and airbags.",
+    tag: "Mission 03 · Simulator",
+    title: "Mars Pathfinder Landing",
+    text: "Fly the real 1997 landing in 3D: atmospheric entry, parachute, airbags, retrorockets and bounces.",
     level: 3,
     levelName: "Hard",
     img: "/story/sojourner/landed.jpg",
-    alt: "NASA photograph of Sojourner stowed on a Mars Pathfinder lander petal",
+    alt: "NASA photograph of the Mars Pathfinder lander on Mars, with Sojourner folded on its petal",
   },
 ];
 

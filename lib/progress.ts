@@ -36,7 +36,7 @@ export function getProgress() {
     { id: "puzzle", name: "Rover rebuilder", hint: "Finish the Sojourner Puzzle", earned: (puzzle.solved ?? 0) > 0 },
     { id: "mars", name: "Reached Mars", hint: "Finish a Journey to Mars chapter", earned: (journey.unlocked ?? 0) >= 1 },
     { id: "facts", name: "Data collector", hint: "Catch 5 science data signals in Journey to Mars", earned: facts >= 5 },
-    { id: "landing", name: "Safe landing", hint: "Complete a Mars Landing mission", earned: landed >= 1 },
+    { id: "landing", name: "Safe landing", hint: "Land Mars Pathfinder safely", earned: landed >= 1 },
     { id: "stars", name: "Star captain", hint: "Collect 50 stars", earned: stars >= 50 },
   ];
   return { stars, level, into, toNext: STARS_PER_LEVEL - into, badges };

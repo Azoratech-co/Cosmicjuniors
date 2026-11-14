@@ -12,7 +12,7 @@ export interface Mission {
   photo: { src: string; credit: string; alt: string };
   /** Facts collected in Journey to Mars (science data). */
   facts: string[];
-  /** What the science task reveals in Mars Landing. */
+  /** What the science task revealed in the old Mars Landing game. */
   discovery: string;
   /** Where the hardware rests now: the "Abandoned but not Forgotten" ending. */
   epilogue: string;

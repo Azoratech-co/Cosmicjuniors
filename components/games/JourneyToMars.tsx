@@ -479,7 +479,7 @@ export default function JourneyToMars() {
             {result.perfect ? " · No hits!" : ""}
           </p>
           <p className="t-body-sm">
-            Now land it: <Link href="/games/landing">play Mars Landing</Link>.
+            Now land it: <Link href="/games/landing">play Mars Pathfinder Landing</Link>.
           </p>
         </WinPanel>
       )}
