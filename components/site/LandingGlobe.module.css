@@ -136,6 +136,7 @@
 }
 .leader[data-visible="true"][data-connected="true"] { opacity: 1; }
 
+.comparisonCard { position: relative; z-index: 2; }
 .infoCard h4 { margin: 0 0 6px; font-size: 15px; }
 
 @media (prefers-reduced-motion: reduce) {

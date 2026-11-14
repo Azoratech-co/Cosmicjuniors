@@ -58,8 +58,9 @@ export default function MarsSitePicker({ selected, onSelect }: Props) {
             }}>
             <span className={styles.marker} data-approximate={site.approximate} style={{ color: site.color }} aria-hidden="true" />
             <span className={styles.name}>
-              <strong>{site.rover}</strong>
-              <small>{site.region} · {site.arrivalDate.slice(0, 4)}</small>
+              <span className={styles.rowTitle}>
+                <strong>{site.rover}</strong> &middot; {site.region}
+              </span>
               <small>{formatLandingCoordinates(site, site.approximate)}</small>
             </span>
           </button>

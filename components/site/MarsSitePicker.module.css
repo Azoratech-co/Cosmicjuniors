@@ -1,5 +1,5 @@
 .frame {
-  --row-height: 66px;
+  --row-height: 54px;
   position: relative;
   min-width: 0;
 }
@@ -51,4 +51,5 @@
 .marker { flex: 0 0 12px; height: 12px; border: 2px solid; border-radius: 50%; }
 .marker[data-approximate="true"] { border-style: dashed; }
 .name { display: grid; gap: 2px; font-size: 13px; line-height: 1.25; }
+.rowTitle { font-size: 12px; }
 .name small { font-size: 11px; }

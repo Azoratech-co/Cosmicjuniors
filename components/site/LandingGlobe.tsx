@@ -41,6 +41,7 @@ export default function MarsLandingGlobe({ site }: { site: MarsLandingSite }) {
   const globe = useRef<Group | null>(null);
   const redraw = useRef<(() => void) | null>(null);
   const cancelFocus = useRef<(() => void) | null>(null);
+  const explorer = useRef<HTMLDivElement>(null);
   const viewport = useRef<HTMLDivElement>(null);
   const originalCard = useRef<HTMLElement>(null);
   const comparisonCard = useRef<HTMLElement>(null);
@@ -69,7 +70,7 @@ export default function MarsLandingGlobe({ site }: { site: MarsLandingSite }) {
 
   useEffect(() => {
     const observer = new ResizeObserver(drawLeaders);
-    for (const element of [viewport.current, originalCard.current, comparisonCard.current, originalLeader.current]) {
+    for (const element of [explorer.current, viewport.current, originalCard.current, comparisonCard.current]) {
       if (element) observer.observe(element);
     }
     window.addEventListener("scroll", drawLeaders, { passive: true });
@@ -104,12 +105,11 @@ export default function MarsLandingGlobe({ site }: { site: MarsLandingSite }) {
             <path d="M9 4H4v5m11 11h5v-5M4 4l6 6m10 10-6-6M15 4h5v5M9 20H4v-5m16-11-6 6M4 20l6-6" />
           </svg>
         </button>
-        <p className={styles.eyebrow}>Explore the Red Planet</p>
         <h2 id={heading}>Where the Mars rovers landed</h2>
         <p>Six rovers explored Mars. Two earlier rovers were sent there but never got to drive.</p>
       </header>
 
-      <div className={styles.explorer}>
+      <div ref={explorer} className={styles.explorer}>
         <div className={styles.globePanel}>
           <div className={styles.globeStage}>
             <div ref={viewport} className={styles.globe} role="group" aria-label="Interactive Mars landing-site globe"
@@ -153,6 +153,16 @@ export default function MarsLandingGlobe({ site }: { site: MarsLandingSite }) {
             </p>}
           </div>
           <p id={instructions} className={styles.hint}>Drag or use arrow keys to rotate Mars.</p>
+          {comparison && (
+            <section key={comparison.id} ref={comparisonCard} className={`${styles.infoCard} ${styles.comparisonCard}`} data-visible="true"
+              aria-label={`${comparison.rover} comparison information`} aria-live="polite">
+              <h4>{comparison.rover}</h4>
+              <MarsLandingInfo site={comparison} reveal={status !== "ready" || revealedComparison === comparison.id} />
+              <button type="button" className={styles.findButton} onClick={() => { setWindowMode("journey"); setExpanded(true); }}>
+                Explore {comparison.rover} journey
+              </button>
+            </section>
+          )}
         </div>
 
         {status === "ready" && (
@@ -188,16 +198,6 @@ export default function MarsLandingGlobe({ site }: { site: MarsLandingSite }) {
             <MarsSitePicker selected={selected.id} onSelect={selectSite} />
             <p className={styles.note}>Dashed markers show approximate arrival sites for the two 1971 PrOP-M attempts.</p>
           </details>
-          {comparison && (
-            <section key={comparison.id} ref={comparisonCard} className={styles.infoCard} data-visible="true"
-              aria-label={`${comparison.rover} comparison information`} aria-live="polite">
-              <h4>{comparison.rover}</h4>
-              <MarsLandingInfo site={comparison} reveal={status !== "ready" || revealedComparison === comparison.id} />
-              <button type="button" className={styles.findButton} onClick={() => { setWindowMode("journey"); setExpanded(true); }}>
-                Explore {comparison.rover} journey
-              </button>
-            </section>
-          )}
           <div className={styles.journeySummary}>
             <strong>{definition.endpointLabel} · {definition.endpointArea}</strong>
             {originalSnapshot && <p>{detailedCoordinates(originalSnapshot.last)}<br />{solRange(originalSnapshot.last)} &middot; snapshot {originalSnapshot.snapshotDate}</p>}

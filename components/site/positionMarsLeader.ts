@@ -8,22 +8,25 @@ export function positionMarsLeader(svg: SVGSVGElement | null, viewport: HTMLElem
   const canvas = viewport?.getBoundingClientRect();
   const card = panel?.getBoundingClientRect();
   const controls = clip?.getBoundingClientRect() ?? bounds;
-  if (!line || !dot || !bounds?.width || !bounds.height || !canvas?.width || !card?.height || !controls) return;
+  if (!svg || !line || !dot || !bounds?.width || !bounds.height || !canvas?.width || !card?.height || !controls) return;
   const y = card.top + 24;
   const connected = !!point && y >= controls.top && y < controls.bottom;
   svg?.setAttribute("data-connected", String(connected));
   if (!point || !connected) return;
   const x = canvas.left + canvas.width * point.x;
   const markerY = canvas.top + canvas.height * point.y;
-  const startX = `${(x - bounds.left) / bounds.width * 100}%`;
-  const startY = `${(markerY - bounds.top) / bounds.height * 100}%`;
+  // A percentage endpoint would move when a disclosure changes the SVG height.
+  const localX = (value: number) => String((value - bounds.left) * svg.clientWidth / bounds.width);
+  const localY = (value: number) => String((value - bounds.top) * svg.clientHeight / bounds.height);
+  const startX = localX(x);
+  const startY = localY(markerY);
   const beside = card.left >= canvas.right - 1;
   const endX = beside ? card.left : Math.min(card.right - 12, Math.max(card.left + 12, x));
   const endY = beside ? y : Math.max(card.top, controls.top);
   line.setAttribute("x1", startX);
   line.setAttribute("y1", startY);
-  line.setAttribute("x2", `${(endX - bounds.left) / bounds.width * 100}%`);
-  line.setAttribute("y2", `${(endY - bounds.top) / bounds.height * 100}%`);
+  line.setAttribute("x2", localX(endX));
+  line.setAttribute("y2", localY(endY));
   dot.setAttribute("cx", startX);
   dot.setAttribute("cy", startY);
 }
