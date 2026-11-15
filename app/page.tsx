@@ -6,6 +6,7 @@ import SiteHeader from "@/components/site/SiteHeader";
 import SiteFooter from "@/components/site/SiteFooter";
 import Reveal from "@/components/site/Reveal";
 import ChatCardArt from "@/components/site/ChatCardArt";
+import VideoCover from "@/components/site/VideoCover";
 import { ABOUT_US, GROUP_VIDEOS } from "@/lib/home";
 
 export const metadata: Metadata = {
@@ -66,6 +67,8 @@ const MISSIONS: { n: string; title: string; text: string; cta: string; href: str
     text: "Listen to the Cosmic Juniors podcast.",
     cta: "Open podcast",
     href: "/podcast",
+    img: "/home/podcast-card.webp",
+    alt: "Painted night sky with stars and lavender clouds above Mars",
   },
   {
     n: "07",
@@ -122,7 +125,9 @@ export default function HomePage() {
           <p className="home-sub">Cosmic Juniors</p>
           {GROUP_VIDEOS.map((v) => (
             <div key={v.title} className="video-card">
-              {v.youtubeId ? (
+              {v.youtubeId && v.cover ? (
+                <VideoCover youtubeId={v.youtubeId} title={v.title} cover={v.cover} />
+              ) : v.youtubeId ? (
                 <iframe
                   src={`https://www.youtube-nocookie.com/embed/${v.youtubeId}`}
                   title={v.title}

@@ -1,8 +1,8 @@
 // Homepage content the team can edit.
 
-/** YouTube video ids for the two group videos. Leave empty until the videos are uploaded. */
-export const GROUP_VIDEOS: { title: string; youtubeId: string }[] = [
-  { title: "Video 01 — Sojourner", youtubeId: "Mnco84l18qs" },
+/** YouTube video ids for the two group videos. Leave empty until the videos are uploaded. `cover` is the picture shown before play. */
+export const GROUP_VIDEOS: { title: string; youtubeId: string; cover?: string }[] = [
+  { title: "Video 01 — Sojourner", youtubeId: "Mnco84l18qs", cover: "/home/video-cover.webp" },
   { title: "Video 02 — Mars Rovers", youtubeId: "" },
 ];
 
@@ -12,3 +12,6 @@ export const ABOUT_US =
 
 /** YouTube video id for the podcast episode shown on /podcast. */
 export const PODCAST_YOUTUBE_ID = "vHGVErnfwQw";
+
+/** Picture shown on the podcast card and before the podcast plays. */
+export const PODCAST_COVER = "/home/podcast-card.webp";
