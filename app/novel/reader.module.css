@@ -179,7 +179,7 @@
 .reader::-webkit-scrollbar { display: none; }
 
 .prose {
-  max-width: 620px;
+  max-width: 820px;
   margin: 0 auto;
   padding: clamp(52px, 10vh, 78px) clamp(27px, 8vw, 60px) var(--end-padding);
   font-family: Georgia, serif;

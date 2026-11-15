@@ -73,6 +73,8 @@ const MISSIONS: { n: string; title: string; text: string; cta: string; href: str
     text: "Read the Cosmic Juniors novel at your own pace.",
     cta: "Open novel",
     href: "/novel",
+    img: "/figma/home-novel.webp",
+    alt: "Painting of Mars Pathfinder and Sojourner on Mars under a starry night sky",
   },
 ];
 
