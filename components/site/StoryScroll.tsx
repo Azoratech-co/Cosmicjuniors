@@ -4,6 +4,7 @@ import Link from "next/link";
 import { type ReactNode, useCallback, useEffect, useRef, useState } from "react";
 import type { StoryActivity, StoryScene } from "@/lib/story/types";
 import { TABS } from "@/components/NavTabs";
+import dynamic from "next/dynamic";
 import { disableStorySound, duckStorySound, enableStorySound, setStorySound } from "@/lib/storySound";
 
 // One continuous scroll through the story, like a picture book you scroll: a framed clip in the
@@ -21,6 +22,8 @@ interface Props {
   folder: string;
   activities?: Partial<Record<StoryActivity, ReactNode>>;
 }
+
+const StoryMars = dynamic(() => import("./StoryMars"), { ssr: false });
 
 const clamp = (v: number, a = 0, b = 1) => Math.max(a, Math.min(b, v));
 const smooth = (v: number) => {
@@ -98,7 +101,10 @@ export default function StoryScroll({ scenes, storyTitle, storySubtitle, chapter
         // camera: from when the scene starts fading in until it has faded out
         const lp = clamp((p - i + (1 - FADE_FROM)) / (2 - FADE_FROM));
         const m = moving.current[i];
-        if (m && !still) {
+        if (m && sc.model) {
+          // a 3D scene moves its own camera from this progress
+          m.dataset.lp = String(lp);
+        } else if (m && !still) {
           if (sc.fit === "pan") {
             const from = sc.panFrom ?? 0;
             const t = from + (1 - from) * lp;
@@ -366,7 +372,11 @@ export default function StoryScroll({ scenes, storyTitle, storySubtitle, chapter
                         // eslint-disable-next-line @next/next/no-img-element
                         <img className="ss-pic__blur" src={sc.image} alt="" aria-hidden="true" />
                       )}
-                      {sc.video && load ? (
+                      {sc.model && load ? (
+                        <div ref={(el) => { moving.current[i] = el; }} className="ss-pic__main ss-pic__model">
+                          <StoryMars poster={sc.image} label={sc.credit} />
+                        </div>
+                      ) : sc.video && load ? (
                         <video
                           ref={(el) => { videos.current[i] = el; moving.current[i] = el; }}
                           className="ss-pic__main"

@@ -65,7 +65,8 @@ export const SOJOURNER_SCENES: StoryScene[] = [
     text: "Within moments, the blue sky gave way to the deep, endless blackness of space, and Earth became a blue sphere wrapped in white clouds.",
   }),
   clip(5, 1, {
-    credit: AI + "Mars in color, from Viking orbiter images · NASA/JPL",
+    model: "mars",
+    credit: "3D Mars made from the Viking colour mosaic · NASA/JPL/USGS",
     text: "For nearly seven months the spacecraft travelled through space. As months passed, Mars grew closer.",
     ask: "How long did it take Pathfinder to fly to Mars?",
   }),
