@@ -24,6 +24,7 @@ interface Props {
 }
 
 const StoryMars = dynamic(() => import("./StoryMars"), { ssr: false });
+const StorySojourner = dynamic(() => import("./StorySojourner"), { ssr: false });
 
 const clamp = (v: number, a = 0, b = 1) => Math.max(a, Math.min(b, v));
 const smooth = (v: number) => {
@@ -190,7 +191,7 @@ export default function StoryScroll({ scenes, storyTitle, storySubtitle, chapter
     const onKey = (e: KeyboardEvent) => {
       if (e.defaultPrevented || e.altKey || e.ctrlKey || e.metaKey) return;
       const target = e.target;
-      if (target instanceof Element && target.closest(".ss-activity, .ss-mars, input, textarea, select")) return;
+      if (target instanceof Element && target.closest(".ss-activity, .ss-model, input, textarea, select")) return;
       const r = wrap.current?.getBoundingClientRect();
       if (!r || r.top > 1 || r.bottom < r.height / (last + 1) - 1) return; // only while the stage fills the screen
       const next = e.key === "ArrowDown" || e.key === "ArrowRight" || e.key === "PageDown";
@@ -374,7 +375,7 @@ export default function StoryScroll({ scenes, storyTitle, storySubtitle, chapter
                       )}
                       {sc.model && load ? (
                         <div ref={(el) => { moving.current[i] = el; }} className="ss-pic__main ss-pic__model">
-                          <StoryMars poster={sc.image} label={sc.credit} />
+                          {sc.model === "sojourner" ? <StorySojourner label={sc.credit} /> : <StoryMars poster={sc.image} label={sc.credit} />}
                         </div>
                       ) : sc.video && load ? (
                         <video

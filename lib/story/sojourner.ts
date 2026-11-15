@@ -118,7 +118,8 @@ export const SOJOURNER_SCENES: StoryScene[] = [
 
   { chapter: 4, card: true },
   clip(14, 4, {
-    credit: AI + "Sojourner on Mars · Cosmic Juniors illustration and NASA/JPL",
+    model: "sojourner",
+    credit: "3D Sojourner built by the team from NASA/JPL measurements · Ares Vallis panorama: NASA/JPL",
     text: "Sojourner stood only about thirty centimetres tall and weighed about 10.6 kilograms.",
     ask: "How big was Sojourner?",
   }),

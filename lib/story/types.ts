@@ -30,7 +30,7 @@ export interface StoryScene {
   /** Background sound and arrival sound for this scene (see lib/storySound.ts). */
   sound?: StorySoundPreset;
   /** A live 3D model shown instead of the clip (the clip's picture stays as its poster). */
-  model?: "mars";
+  model?: "mars" | "sojourner";
   /** A question for Cosmo about this scene. */
   ask?: string;
 }

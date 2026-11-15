@@ -340,6 +340,14 @@ html.ss-snap { scroll-snap-type: y proximity; }
 .ss-mars__card dd { margin: 0; color: #fff; }
 .ss-mars__card a { color: var(--sky, #8ec5ff); font-weight: 600; }
 .ss-mars__close { position: absolute; top: 8px; right: 8px; width: 32px; height: 32px; border-radius: 50%; border: 1px solid rgba(255, 255, 255, 0.2); background: transparent; color: #fff; font-size: 20px; line-height: 1; cursor: pointer; }
+.ss-rover__bg { position: absolute; inset: -20px; background-size: cover; background-position: center 60%; filter: blur(3px) brightness(0.55) saturate(1.1); }
+.ss-rover__poster { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: contain; }
+.ss-rover__view { position: absolute; inset: 0; cursor: grab; touch-action: pan-y; user-select: none; -webkit-user-select: none; }
+.ss-rover__view:active { cursor: grabbing; }
+.ss-rover__view:focus-visible { outline: 2px solid var(--sky, #8ec5ff); outline-offset: -4px; }
+.ss-rover__zoom { position: absolute; left: 16px; bottom: 120px; z-index: 2; display: flex; gap: 6px; }
+.ss-rover__zoom button { min-width: 36px; height: 34px; padding: 0 10px; border-radius: 10px; border: 1px solid rgba(255, 255, 255, 0.2); background: rgba(6, 9, 22, 0.8); color: #fff; font: inherit; font-size: 13px; font-weight: 600; cursor: pointer; }
+.ss-rover__zoom button:focus-visible { outline: 2px solid var(--sky, #8ec5ff); outline-offset: 2px; }
 @keyframes ss-mars-in { from { opacity: 0; transform: translateX(16px); } }
 @media (prefers-reduced-motion: reduce) { .ss-mars__card { animation: none; } }
 @media (max-width: 700px) {
@@ -355,6 +363,8 @@ html.ss-snap { scroll-snap-type: y proximity; }
   .ss-mars__sites { flex-wrap: nowrap; justify-content: flex-start; overflow-x: auto; padding-bottom: 2px; scrollbar-width: none; }
   .ss-mars__site { flex: none; }
   .ss-mars__card { max-height: 100%; }
+  .ss-rover__zoom { display: none; }
+  .ss-rover .ss-mars__panel { max-height: 46%; }
 }
 .ss-mars__poster, .ss-mars__canvas { position: absolute; inset: 0; width: 100%; height: 100%; display: block; object-fit: cover; transition: opacity .8s ease; }
 .ss-pic--pan .ss-pic__main { width: auto; max-width: none; height: 100%; inset: 0 auto 0 0; object-fit: cover; }

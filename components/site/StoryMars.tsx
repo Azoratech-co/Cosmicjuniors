@@ -265,7 +265,7 @@ export default function StoryMars({ poster, label }: { poster?: string; label?: 
   return (
     <div
       ref={box}
-      className="ss-mars"
+      className="ss-mars ss-model"
       data-open={site ? "true" : "false"}
       data-site={selected ?? ""}
       role="group"
