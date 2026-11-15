@@ -1,18 +1,43 @@
-# Cosmic Juniors · Ask Cosmo 🚀
+# Cosmic Juniors 🚀
 
-**Cosmo** is the AI guide of Cosmic Juniors, built in Beirut for the **2026 NASA Space Apps Challenge**
+**Cosmic Juniors** is a kids' website built in Beirut for the **2026 NASA Space Apps Challenge**,
 **"Abandoned but not Forgotten: Storytelling about NASA's Discarded Equipment on the Moon and Mars."**
 
-Cosmo tells school-age explorers the stories of the machines NASA left behind: Sojourner and the
-Pathfinder lander, the Viking landers, Spirit, Opportunity, InSight, Ingenuity, the Apollo lunar rovers
-and the laser mirrors still used on the Moon. Every answer is based on **verified facts from NASA** and
-shows a **source card** with the NASA page and a real NASA photo.
+It tells school-age explorers the stories of the machines NASA left behind, starting with **Sojourner**,
+the first rover to drive on Mars. Kids can scroll through the story, read it as a comic or a novel, watch
+it in sign language, explore the rovers and landers on 3D globes, play mission games, and ask **Cosmo**,
+an AI guide whose answers are based on **verified facts from NASA**.
 
 - **Live site:** https://cosmic-juniors.vercel.app
-- **Repository:** https://github.com/Azoratech-co/Cosmicjuniors (every push deploys to Vercel automatically)
+- **Repository:** https://github.com/Azoratech-co/Cosmicjuniors (every push to `main` deploys to Vercel automatically)
 - **Vercel project:** https://vercel.com/azoratech-team/cosmic-juniors
-- **Design (Figma):** https://www.figma.com/design/xlAc0KK9rGCb5eSgOFLlaP (page **v4 · Cosmo (pro)**)
-- **Stack:** Next.js (App Router) + TypeScript on Vercel, Groq for the language model
+- **Design (Figma):** https://www.figma.com/design/xlAc0KK9rGCb5eSgOFLlaP
+- **Stack:** Next.js (App Router) + TypeScript + React Three Fiber on Vercel, Groq for the language model
+
+## What's on the site
+
+| Page | Address | What it does |
+| --- | --- | --- |
+| Home | `/` | Mission cards for every section, the team videos and About us. |
+| Storyline | `/story/sojourner` | *Sojourner: The Journey Through the Stars* as a scrolling story with real NASA photos, live 3D models, sound, sign language videos and a ten-question quiz at the end. |
+| Full text | `/story/sojourner/text`, `/story/spirit/text` | The stories as text with NASA photos and read-aloud. Sojourner is complete (10 chapters); Spirit is in progress (4 chapters). |
+| Comic Book | `/story/sojourner/comic` | Sojourner's journey in eight illustrated comic pages. |
+| Novel | `/novel` | The Sojourner novel in a book-style reader with pinned chapter navigation and read-aloud. |
+| Wiki | `/explorers` | Sojourner, Spirit, Opportunity, InSight, Phoenix, the Lunar Roving Vehicle, Surveyor 3 and the Apollo 11 site, each with a 3D model. Detailed Mars and Moon globes show landing sites, and a Journey view shows recorded rover routes. |
+| Ask Cosmo | `/chat` | The AI chatbot. Every answer shows a source card with the NASA page and a real NASA photo. Voice input is supported. |
+| Games | `/games` | Sojourner Puzzle, Journey to Mars, Mars Pathfinder Landing (3D) and Dust Storm Entry. |
+| Podcast | `/podcast` | The Cosmic Juniors podcast episode. |
+| Designs | `/designs` | The six live themes side by side: Cosmic (default), Ink & Sand, Juniors, Beige, Mission control and Original. |
+
+**Sign language:** the scrolling Sojourner story has ASL videos for its narrated scenes, in
+`public/sign/sojourner/`, played in a panel that follows the scene being read.
+
+**Videos:** the 2-minute team video is on the home page and the podcast is on `/podcast`. Both show our
+own cover picture and load YouTube only when play is pressed. To change a video or cover, edit
+`lib/home.ts`.
+
+**Stars and levels:** kids earn stars by asking Cosmo questions and winning games. Progress is saved in
+the browser only; there are no accounts.
 
 ## Run it locally
 
@@ -24,24 +49,37 @@ npm run build                # production build (what Vercel runs)
 npm run lint                 # type check
 ```
 
-Without a key the app still works: it answers straight from the NASA notes.
+Without a key the app still works: Cosmo answers straight from the NASA notes.
 
 ## How the project is split
 
 ```
 app/
-  page.tsx                → the chat page
-  layout.tsx              → fonts: Space Grotesk (headings) + Inter (text)
-  globals.css             → all styles; tokens match the Figma variables
+  page.tsx                → home: mission cards, team videos, About us
+  story/                  → scrolling story, full text and the Sojourner comic
+  novel/                  → the novel reader (manuscripts.json holds the text)
+  explorers/              → the Wiki: list page and one page per rover or lander
+  chat/                   → Ask Cosmo
+  games/                  → puzzle, dodge (Journey to Mars), landing, dust-storm-landing
+  podcast/, designs/      → podcast page and the theme gallery
   api/chat/route.ts       → POST /api/chat: origin check, rate limit, input validation
-components/               → UI pieces, one per Figma component
-  ChatApp.tsx             → state: messages, stars, calling the API
-  ChatParts.tsx           → header, messages, NASA source card, chips, welcome screen
-  Composer.tsx            → text box + mic (voice input) + send
-  Sidebar.tsx             → desktop sidebar: new conversation, recent, Explorer level
-  Cosmo.tsx, Starfield.tsx → mascot and background
+  site.css, themes.css, globals.css → styles; each theme sets its own colours and fonts
+components/
+  ChatApp.tsx, ChatParts.tsx, Composer.tsx, Sidebar.tsx → the chat screen
+  NavTabs.tsx, ThemePicker.tsx, Starfield.tsx           → navigation, theme switch, background
+  site/                   → story reader, sign language panel, quiz, globes, journey panels, video cover
+  games/                  → the four games
+  rovers/                 → the 3D rover viewer and parts picker
+content/
+  stories.json            → the team's stories, as readers see them
 lib/
-  types.ts                → the API contract (shared by UI and API)
+  home.ts                 → home page content the team can edit: video ids, covers, About us
+  storyline.ts, story/    → story chapters and the scrolling story's scenes
+  explorers.ts            → the Wiki entries
+  landing-sites.ts, mars-journeys.ts, mission-flights.ts → globe data
+  themes.ts               → the six designs
+  stars.ts, progress.ts   → stars, levels and badges
+  types.ts                → the chat API contract (shared by UI and API)
   cosmo/                  → 🧠 COSMO'S BRAIN (server only)
     knowledge.ts          →   verified NASA facts, source links and photos  ← add topics here
     prompt.ts             →   personality, challenge focus and rules
@@ -51,9 +89,13 @@ lib/
     config.ts / groq.ts   →   models, limits, tiny Groq client
   mockBrain.ts            → answers from the NASA notes when the AI is unavailable
   rateLimit.ts            → per-visitor request limit
+public/
+  story/, sign/, models/  → story pictures and comic pages, ASL videos, 3D models and globe surfaces
+scripts/                  → builds the 3D models and prepares globe and journey data
+docs/                     → notes on the globes, rover sites and journeys, the story quiz and the design brief
 ```
 
-## Where the facts come from
+## Where Cosmo's facts come from
 
 `lib/cosmo/knowledge.ts` holds facts copied from these NASA pages (checked Oct–Nov 2026). For each
 question, the matching notes are given to the model, which may only use numbers, dates and names from
@@ -98,8 +140,8 @@ code and never sent to the browser. On Vercel it is set in Project → Settings 
    pages in `knowledge.ts`.
 6. **Fail safe:** if anything breaks, Cosmo answers from the NASA notes. Kids' messages are never logged.
 
-**Groq free tier:** about 8,000 tokens a minute per model (roughly 5 questions a minute). Cosmo uses
-`gpt-oss-120b` and switches to `gpt-oss-20b` when the first is busy.
+**Groq free tier:** about 8,000 tokens a minute per model (roughly 5 questions a minute). Cosmo tries
+`gpt-oss-120b` first and moves down the backup list in `lib/cosmo/config.ts` when a model is busy.
 
 ## The chat API contract
 
