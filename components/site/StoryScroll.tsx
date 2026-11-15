@@ -190,7 +190,7 @@ export default function StoryScroll({ scenes, storyTitle, storySubtitle, chapter
     const onKey = (e: KeyboardEvent) => {
       if (e.defaultPrevented || e.altKey || e.ctrlKey || e.metaKey) return;
       const target = e.target;
-      if (target instanceof Element && target.closest(".ss-activity, input, textarea, select")) return;
+      if (target instanceof Element && target.closest(".ss-activity, .ss-mars, input, textarea, select")) return;
       const r = wrap.current?.getBoundingClientRect();
       if (!r || r.top > 1 || r.bottom < r.height / (last + 1) - 1) return; // only while the stage fills the screen
       const next = e.key === "ArrowDown" || e.key === "ArrowRight" || e.key === "PageDown";

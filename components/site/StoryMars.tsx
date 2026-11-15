@@ -1,16 +1,29 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useId, useRef, useState } from "react";
 
 // A live 3D Mars for the story's cruise scene: the planet turns slowly while Mars Pathfinder,
 // spinning on its cruise stage, flies toward it. Scrolling through the scene brings Mars closer.
 // The story's scroll loop writes the scene's progress (0-1) into the parent's data-lp.
+// Like the wiki globes, visitors can turn Mars by dragging or with the arrow keys (Home resets).
 // Texture: NASA/USGS Viking colour mosaic (public/models/mars/surface).
 
 export default function StoryMars({ poster, label }: { poster?: string; label?: string }) {
   const box = useRef<HTMLDivElement>(null);
   const canvas = useRef<HTMLCanvasElement>(null);
   const [ready, setReady] = useState(false);
+  const [failed, setFailed] = useState(false);
+  const hint = useId();
+  // the visitor's own turn of the planet, added on top of its slow spin
+  const view = useRef({ yaw: 0, pitch: 0, idle: 0 });
+  const drag = useRef<{ id: number; x: number; y: number } | null>(null);
+
+  function rotate(x: number, y: number) {
+    const v = view.current;
+    v.yaw += x;
+    v.pitch = Math.max(-1.2, Math.min(1.2, v.pitch + y));
+    v.idle = 0;
+  }
 
   useEffect(() => {
     let disposed = false;
@@ -24,6 +37,7 @@ export default function StoryMars({ poster, label }: { poster?: string; label?: 
       try {
         renderer = new THREE.WebGLRenderer({ canvas: el, antialias: true, alpha: false, powerPreference: "high-performance" });
       } catch {
+        setFailed(true);
         return; // no WebGL: the painting stays
       }
       renderer.setPixelRatio(Math.min(window.devicePixelRatio, 1.75));
@@ -54,7 +68,7 @@ export default function StoryMars({ poster, label }: { poster?: string; label?: 
       const loader = new THREE.TextureLoader();
       const load = (url: string) => new Promise<InstanceType<typeof THREE.Texture>>((res, rej) => loader.load(url, res, undefined, rej));
       const color = await load(`/models/mars/surface/color-${narrow ? 2048 : 4096}.webp`).catch(() => null);
-      if (disposed || !color) { renderer.dispose(); return; }
+      if (disposed || !color) { renderer.dispose(); if (!disposed) setFailed(true); return; }
       color.colorSpace = THREE.SRGBColorSpace;
       color.anisotropy = renderer.capabilities.getMaxAnisotropy();
       const mars = new THREE.Mesh(new THREE.SphereGeometry(50, 128, 96),
@@ -111,7 +125,10 @@ export default function StoryMars({ poster, label }: { poster?: string; label?: 
         if (layer && layer.style.visibility === "hidden") { last = now; return; }
         const dt = Math.min((now - last) / 1000, 0.05);
         last = now;
-        if (!still) t += dt;
+        const v = view.current;
+        v.idle += dt;
+        // the planet's own spin pauses while someone is turning it, and resumes a few seconds later
+        if (!still && v.idle > 4) t += dt;
         const lp = Number(mover?.dataset.lp ?? 0) || 0;
         shown += (lp - shown) * Math.min(1, dt * 4);
         const e = shown * shown * (3 - 2 * shown);
@@ -120,11 +137,12 @@ export default function StoryMars({ poster, label }: { poster?: string; label?: 
         const narrowView = camera.aspect < 1;
         camera.position.set(narrowView ? 0 : -18 + 10 * e, 6 - 4 * e, dist * (narrowView ? 1.35 : 1));
         camera.lookAt(narrowView ? 0 : -14 + 6 * e, 0, 0);
-        spin.rotation.y = t * 0.06 + 2.2;
+        spin.rotation.y = t * 0.06 + 2.2 + v.yaw;
+        spin.rotation.x = v.pitch;
         // the spacecraft sits in front of the camera, lower left, drifting toward Mars
         const cd = 22;
         tilt.position.set(camera.position.x + (narrowView ? -2.5 : -8.5), camera.position.y - (narrowView ? 5 : 3.6), camera.position.z - cd);
-        craft.rotation.y = t * 0.21; // Pathfinder spun at about 2 rpm during cruise
+        craft.rotation.y = (still ? 0 : now / 1000) * 0.21; // Pathfinder spun at about 2 rpm during cruise
         renderer.render(scene, camera);
       };
       raf = requestAnimationFrame(frame);
@@ -152,12 +170,49 @@ export default function StoryMars({ poster, label }: { poster?: string; label?: 
   }, []);
 
   return (
-    <div ref={box} className="ss-mars" role="img" aria-label={label ?? "Mars in 3D, growing closer as Mars Pathfinder approaches"}>
+    <div
+      ref={box}
+      className="ss-mars"
+      role="group"
+      aria-roledescription="3D model"
+      aria-label={label ?? "Mars in 3D, growing closer as Mars Pathfinder approaches"}
+      aria-describedby={hint}
+      tabIndex={ready ? 0 : undefined}
+      onPointerDown={(event) => {
+        if (!ready || event.button !== 0 || !event.isPrimary) return;
+        drag.current = { id: event.pointerId, x: event.clientX, y: event.clientY };
+        event.currentTarget.setPointerCapture(event.pointerId);
+      }}
+      onPointerMove={(event) => {
+        const previous = drag.current;
+        if (previous?.id !== event.pointerId) return;
+        // on touch screens only sideways drags turn Mars, so up and down still scroll the story
+        rotate((event.clientX - previous.x) * 0.009, event.pointerType === "touch" ? 0 : (event.clientY - previous.y) * 0.009);
+        drag.current = { id: event.pointerId, x: event.clientX, y: event.clientY };
+      }}
+      onPointerUp={() => { drag.current = null; }}
+      onPointerCancel={() => { drag.current = null; }}
+      onLostPointerCapture={() => { drag.current = null; }}
+      onKeyDown={(event) => {
+        switch (event.key) {
+          case "ArrowLeft": rotate(-0.18, 0); break;
+          case "ArrowRight": rotate(0.18, 0); break;
+          case "ArrowUp": rotate(0, -0.18); break;
+          case "ArrowDown": rotate(0, 0.18); break;
+          case "Home": view.current = { yaw: 0, pitch: 0, idle: 0 }; break;
+          default: return;
+        }
+        event.preventDefault();
+      }}
+    >
       {poster && (
         // eslint-disable-next-line @next/next/no-img-element
         <img className="ss-mars__poster" src={poster} alt="" aria-hidden="true" style={{ opacity: ready ? 0 : 1 }} />
       )}
-      <canvas ref={canvas} className="ss-mars__canvas" style={{ opacity: ready ? 1 : 0 }} />
+      <canvas ref={canvas} className="ss-mars__canvas" style={{ opacity: ready ? 1 : 0 }} aria-hidden="true" />
+      <p id={hint} className="ss-mars__hint" role={failed ? "status" : undefined}>
+        {failed ? "The 3D Mars is unavailable on this device, so the painting is shown." : ready ? "Drag or use arrow keys to rotate Mars. Home resets." : "Loading Mars…"}
+      </p>
     </div>
   );
 }
