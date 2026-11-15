@@ -1,30 +1,53 @@
 "use client";
 
 import Link from "next/link";
-import { useEffect, useMemo, useRef, useState } from "react";
+import { Fragment, useEffect, useMemo, useRef, useState, type CSSProperties } from "react";
+import ScrollPicker from "@/components/rovers/ScrollPicker";
+import type { EmphasisRange } from "./emphasis";
 import { useNarration } from "./useNarration";
 import styles from "./reader.module.css";
 
-type Edition = {
-  author: string;
-  chapters: { title: string | null; paragraphs: string[]; background: string }[];
+type Chapter = {
+  title: string | null;
+  paragraphs: string[];
+  background: string;
+  emphasis: EmphasisRange[][];
 };
 
-export default function NovelReader({ editions }: { editions: Edition[] }) {
+type Edition = { author: string; chapters: Chapter[] };
+
+function emphasizedParagraph(text: string, ranges: EmphasisRange[]) {
+  let cursor = 0;
+  const parts = ranges.map(({ start, end }) => {
+    if (start < cursor) return null;
+    const plain = text.slice(cursor, start);
+    cursor = end;
+    return <Fragment key={start}>{plain}<em className={styles.emphasis}>{text.slice(start, end)}</em></Fragment>;
+  });
+  return <>{parts}{text.slice(cursor)}</>;
+}
+
+export default function NovelReader({ editions, fontClassName }: { editions: Edition[]; fontClassName: string }) {
   const [editionIndex, setEditionIndex] = useState(0);
   const [chapterIndex, setChapterIndex] = useState(0);
-  const [menu, setMenu] = useState<"contents" | "settings" | null>(null);
+  const [contentsOpen, setContentsOpen] = useState(true);
+  const [settingsOpen, setSettingsOpen] = useState(false);
   const [audioOpen, setAudioOpen] = useState(false);
   const [dark, setDark] = useState(true);
-  const [textSize, setTextSize] = useState(22);
+  const [textSize, setTextSize] = useState(24);
   const [progress, setProgress] = useState(0);
   const reader = useRef<HTMLElement>(null);
   const article = useRef<HTMLElement>(null);
   const audioButton = useRef<HTMLButtonElement>(null);
   const contentsButton = useRef<HTMLButtonElement>(null);
   const settingsButton = useRef<HTMLButtonElement>(null);
-  const edition = editions[editionIndex];
-  const chapter = edition.chapters[chapterIndex];
+  const chapters = editions[editionIndex].chapters;
+  const chapterItems = useMemo(() => chapters.map((entry, index) => ({
+    id: String(index),
+    name: entry.title ? (index + 1) + ". " + entry.title : "Chapter " + (index + 1),
+    index,
+  })), [chapters]);
+  const chapter = chapters[chapterIndex];
   const chapterLabel = "Chapter " + (chapterIndex + 1);
   const title = chapter.title ? chapterLabel + " · " + chapter.title : chapterLabel;
   const narrationText = useMemo(() => chapter.paragraphs.join("\n\n"), [chapter]);
@@ -50,19 +73,17 @@ export default function NovelReader({ editions }: { editions: Edition[] }) {
   }, []);
 
   function openChapter(nextEdition: number, nextChapter: number) {
-    if (nextEdition !== editionIndex || nextChapter !== chapterIndex) {
-      narration.reset();
-      setEditionIndex(nextEdition);
-      setChapterIndex(nextChapter);
-      reader.current?.scrollTo({ top: 0, behavior: "instant" });
-      setProgress(0);
-    }
-    setMenu(null);
+    if (nextEdition === editionIndex && nextChapter === chapterIndex) return;
+    narration.reset();
+    setEditionIndex(nextEdition);
+    setChapterIndex(nextChapter);
+    reader.current?.scrollTo({ top: 0, behavior: "instant" });
+    setProgress(0);
   }
 
-  function goToChapter(index: number) {
+  function goToChapter(index: number, focusReader = true) {
     openChapter(editionIndex, index);
-    reader.current?.focus({ preventScroll: true });
+    if (focusReader) reader.current?.focus({ preventScroll: true });
   }
 
   function closeAudio() {
@@ -73,16 +94,20 @@ export default function NovelReader({ editions }: { editions: Edition[] }) {
 
   return (
     <div
-      className={styles.novel}
+      className={styles.novel + " " + fontClassName}
+      data-contents-open={contentsOpen}
       data-appearance={dark ? "dark" : "light"}
       data-audio-open={audioOpen}
       onKeyDown={(event) => {
         if (event.key !== "Escape") return;
-        if (menu) {
-          setMenu(null);
-          const trigger = menu === "contents" ? contentsButton : settingsButton;
-          trigger.current?.focus();
+        if (settingsOpen) {
+          setSettingsOpen(false);
+          settingsButton.current?.focus();
         } else if (audioOpen) closeAudio();
+        else if (contentsOpen) {
+          setContentsOpen(false);
+          contentsButton.current?.focus();
+        }
       }}
     >
       <div
@@ -97,17 +122,17 @@ export default function NovelReader({ editions }: { editions: Edition[] }) {
           <button
             ref={contentsButton}
             type="button"
-            aria-expanded={menu === "contents"}
+            aria-expanded={contentsOpen}
             aria-controls="novel-contents"
-            onClick={() => setMenu(menu === "contents" ? null : "contents")}
+            onClick={() => setContentsOpen((open) => !open)}
           >Contents</button>
           <button
             ref={settingsButton}
             type="button"
             aria-label="Reading options"
-            aria-expanded={menu === "settings"}
+            aria-expanded={settingsOpen}
             aria-controls="novel-settings"
-            onClick={() => setMenu(menu === "settings" ? null : "settings")}
+            onClick={() => setSettingsOpen((open) => !open)}
           >Aa</button>
           <button
             ref={audioButton}
@@ -117,7 +142,7 @@ export default function NovelReader({ editions }: { editions: Edition[] }) {
             onClick={() => {
               if (audioOpen) closeAudio();
               else {
-                setMenu(null);
+                setSettingsOpen(false);
                 setAudioOpen(true);
               }
             }}
@@ -141,20 +166,7 @@ export default function NovelReader({ editions }: { editions: Edition[] }) {
         </div>
         )}
 
-        <nav id="novel-contents" className={styles.popover} aria-label="Chapters" hidden={menu !== "contents"}>
-          {edition.chapters.map((entry, index) => (
-            <button
-              key={index}
-              type="button"
-              aria-current={index === chapterIndex ? "true" : undefined}
-              onClick={() => goToChapter(index)}
-            >
-              {entry.title ? (index + 1) + ". " + entry.title : "Chapter " + (index + 1)}
-            </button>
-          ))}
-        </nav>
-
-        <div id="novel-settings" className={styles.popover} hidden={menu !== "settings"}>
+        <div id="novel-settings" className={styles.popover} hidden={!settingsOpen}>
           <div className={styles.settingsRow} role="group" aria-label="Appearance">
             <button type="button" aria-pressed={!dark} onClick={() => setDark(false)}>Light</button>
             <button type="button" aria-pressed={dark} onClick={() => setDark(true)}>Dark</button>
@@ -166,14 +178,24 @@ export default function NovelReader({ editions }: { editions: Edition[] }) {
         </div>
       </header>
 
+      <nav id="novel-contents" className={styles.contents} aria-labelledby="novel-chapter-picker" hidden={!contentsOpen}>
+        <h2 id="novel-chapter-picker">Chapters</h2>
+        <ScrollPicker
+          items={chapterItems}
+          selected={String(chapterIndex)}
+          label="Choose a chapter"
+          onSelect={(item) => goToChapter(item.index, false)}
+        />
+      </nav>
+
       <main ref={reader} className={styles.reader} tabIndex={0} aria-label="Chapter text">
-        <article ref={article} className={styles.prose} style={{ fontSize: textSize }}>
-          {chapter.paragraphs.map((paragraph, index) => <p key={index}>{paragraph}</p>)}
+        <article ref={article} className={styles.prose} style={{ "--novel-type-size": textSize + "px" } as CSSProperties}>
+          {chapter.paragraphs.map((paragraph, index) => <p key={index}>{emphasizedParagraph(paragraph, chapter.emphasis[index])}</p>)}
           <div className={styles.chapterLinks}>
             {chapterIndex > 0 && (
               <button type="button" onClick={() => goToChapter(chapterIndex - 1)}>← Previous chapter</button>
             )}
-            {chapterIndex + 1 < edition.chapters.length && (
+            {chapterIndex + 1 < chapters.length && (
               <button type="button" onClick={() => goToChapter(chapterIndex + 1)}>Next chapter →</button>
             )}
           </div>

@@ -11,10 +11,12 @@
   --selected: #723c4914;
   --fade-bottom: 112px;
   --end-padding: 150px;
+  --novel-rail-width: clamp(234px, 23vw, 312px);
+  --novel-reading-offset: 0px;
   position: relative;
   isolation: isolate;
   display: grid;
-  grid-template-rows: auto minmax(0, 1fr);
+  grid-template: auto minmax(0, 1fr) / minmax(0, 1fr);
   width: 100%;
   height: 100dvh;
   overflow: hidden;
@@ -61,18 +63,19 @@
   background: linear-gradient(
     to right,
     var(--photo-edge),
-    var(--photo-center) max(12%, calc(50% - 275px)),
-    var(--photo-center) min(88%, calc(50% + 275px)),
+    var(--photo-center) max(10%, calc(50% + var(--novel-reading-offset) - 325px)),
+    var(--photo-center) min(93%, calc(50% + var(--novel-reading-offset) + 325px)),
     var(--photo-edge)
   );
   pointer-events: none;
 }
 
 .header {
+  grid-area: 1 / 1 / 2 / -1;
   position: relative;
   z-index: 2;
   display: grid;
-  grid-template-columns: 1fr minmax(14rem, auto) 1fr;
+  grid-template-columns: minmax(max-content, 1fr) minmax(0, 2fr) minmax(0, 1fr);
   align-items: center;
   gap: 0.5rem 1.2rem;
   min-height: 94px;
@@ -83,7 +86,7 @@
 .title {
   margin: 0;
   text-align: center;
-  font: normal clamp(15px, 1.65vw, 19px)/1.35 Georgia, serif;
+  font: 600 clamp(23px, 2.7vw, 36px)/1.12 var(--novel-display-font, Georgia), Georgia, serif;
   color: var(--ink);
 }
 
@@ -94,6 +97,8 @@
 }
 
 .versions { justify-content: flex-end; }
+.novel .versions button { border: 1px solid var(--line); }
+.versions span { font-size: .9em; }
 
 .novel button, .home {
   min-height: 44px;
@@ -132,9 +137,6 @@
   outline-offset: 2px;
 }
 
-.versions button { border: 1px solid var(--line); }
-.versions span { font-size: .9em; }
-
 .popover {
   position: absolute;
   inset-block-start: 100%;
@@ -153,23 +155,55 @@
 }
 
 .popover button { white-space: normal; }
-.popover[aria-label="Chapters"] button {
-  padding: 12px;
+.contents {
+  --picker-row-height: 42px;
+  --surface: var(--panel);
+  --text: var(--ink);
+  --line-strong: var(--line);
+  --primary: var(--accent);
+  grid-area: 2 / 1;
+  align-self: start;
+  margin: 9px 12px 0;
+  padding: 10px 12px 8px;
+  border: 1px solid var(--line);
+  border-radius: 14px;
+  background: var(--panel);
+  box-shadow: 0 12px 36px #17111212;
+}
+
+.contents h2 {
+  margin: 2px 8px 6px;
+  color: var(--muted);
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: .12em;
+  text-transform: uppercase;
+}
+
+.novel .contents button {
+  min-height: 0;
+  padding: 3px 8px;
   text-align: start;
-  font: 16px/1.4 Georgia, serif;
+  white-space: normal;
+  font: 400 17px/1.12 var(--novel-prose-font, Georgia), Georgia, serif;
+}
+
+.novel .contents button[aria-pressed="true"] {
+  font-weight: 600;
 }
 
 .settingsRow { display: flex; gap: 8px; }
 .settingsRow + .settingsRow { border-top: 1px solid var(--line); padding-top: 4px; }
 
 .reader {
+  grid-area: 2 / -2 / 3 / -1;
   overflow-y: auto;
   overscroll-behavior: contain;
   scrollbar-width: none;
   mask-image: linear-gradient(
     to bottom,
     transparent,
-    #000 min(66px, 14%),
+    #000 min(38px, 10%),
     #000 max(calc(100% - var(--fade-bottom)), 64%),
     transparent calc(100% - 10px)
   );
@@ -181,18 +215,31 @@
 .prose {
   max-width: 820px;
   margin: 0 auto;
-  padding: clamp(52px, 10vh, 78px) clamp(27px, 8vw, 60px) var(--end-padding);
-  font-family: Georgia, serif;
-  line-height: 1.92;
+  padding: clamp(40px, 7vh, 68px) clamp(24px, 6vw, 62px) var(--end-padding);
+  font-family: var(--novel-prose-font, Georgia), Georgia, serif;
+  font-size: var(--novel-type-size);
+  line-height: 1.65;
   overflow-wrap: break-word;
 }
+
+.novel[data-contents-open="true"] .prose { max-width: 700px; }
 
 .prose p {
   margin: 0 0 1.28em;
   white-space: pre-line;
 }
 
+.emphasis {
+  color: var(--accent);
+  font-family: var(--novel-display-font, Georgia), Georgia, serif;
+  font-style: italic;
+  font-weight: 600;
+  font-size: 1.1em;
+  line-height: 1;
+}
+
 .prose p:first-child::first-letter {
+  font-family: var(--novel-display-font, Georgia), Georgia, serif;
   float: left;
   margin: .095em .14em 0 0;
   font-size: 3.15em;
@@ -263,9 +310,23 @@
 .player input { accent-color: var(--accent); cursor: pointer; }
 .seek { display: block; width: 100%; height: 16px; margin: 4px 0 0; }
 
+@media (min-width: 941px) {
+  .novel[data-contents-open="true"] {
+    --novel-reading-offset: calc(var(--novel-rail-width) / 2);
+    grid-template-columns: var(--novel-rail-width) minmax(0, 1fr);
+  }
+  .contents { margin: 20px 0 0 clamp(16px, 3vw, 34px); padding: 14px 12px 11px; }
+  .novel[data-contents-open="true"] .progress { inset-inline-start: var(--novel-rail-width); }
+}
+
 @media (max-width: 940px) {
-  .header { grid-template-columns: 1fr auto; min-height: 0; gap: 4px 8px; }
-  .title { grid-area: 2 / 1 / 3 / 3; }
+  .novel[data-contents-open="true"] { grid-template-rows: auto auto minmax(0, 1fr); }
+  .novel[data-contents-open="true"] .reader { grid-row: 3; }
+  .contents { --picker-row-height: 32px; width: min(400px, calc(100% - 24px)); justify-self: center; margin-inline: 0; }
+  .novel .contents button { font-size: 15px; }
+  .header { grid-template-columns: minmax(0, 1fr); min-height: 0; gap: 4px 8px; }
+  .header:has(.versions) { grid-template-columns: minmax(0, 1fr) auto; }
+  .header:has(.versions) .title { grid-row: 2; grid-column: 1 / -1; }
 }
 
 @media (max-width: 640px) {
@@ -273,12 +334,13 @@
 }
 
 @media (max-width: 540px) {
-  .header { grid-template-columns: minmax(0, 1fr); justify-items: center; gap: 2px; padding-inline: 8px; }
-  .title { grid-area: auto; grid-row: 3; padding: 3px 8px 0; }
+  .header { justify-items: center; gap: 2px; padding-inline: 8px; }
+  .title { padding: 3px 8px 0; }
+  .header:has(.versions) { grid-template-columns: minmax(0, 1fr); }
+  .header:has(.versions) .title { grid-row: 3; }
   .tools, .versions { justify-content: center; }
-  .novel .tools :is(button, a), .versions button { padding-inline: 8px; }
-  .versions button { min-height: 36px; }
-  .prose { padding-top: 61px; line-height: 1.75; }
+  .novel .tools :is(button, a) { padding-inline: 8px; }
+  .prose { padding-top: 32px; font-size: calc(16px + (var(--novel-type-size) - 16px) * .76); line-height: 1.58; }
   .novel[data-audio-open="true"] { --fade-bottom: 205px; --end-padding: 234px; }
   .player { width: calc(100% - 20px); padding: 6px 11px 8px; }
   .audioRow { grid-template-columns: 1fr auto auto; gap: 2px 7px; }
@@ -287,6 +349,16 @@
   .transport { grid-column: 1 / 3; }
   .player .transport button { min-width: 39px; }
   .volume input { width: 58px; }
+}
+
+@media (min-width: 620px) and (max-width: 940px) and (max-height: 500px) and (orientation: landscape) {
+  .novel[data-contents-open="true"] {
+    --novel-rail-width: 218px;
+    --novel-reading-offset: calc(var(--novel-rail-width) / 2);
+    grid-template: auto minmax(0, 1fr) / var(--novel-rail-width) minmax(0, 1fr);
+  }
+  .novel[data-contents-open="true"] .reader { grid-row: 2; }
+  .contents { width: auto; justify-self: stretch; margin-inline: 12px; }
 }
 
 @media (max-height: 500px) and (orientation: landscape) {
