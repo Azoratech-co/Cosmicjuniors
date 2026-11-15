@@ -2,7 +2,7 @@
 
 /** YouTube video ids for the two group videos. Leave empty until the videos are uploaded. */
 export const GROUP_VIDEOS: { title: string; youtubeId: string }[] = [
-  { title: "Video 01 — Sojourner", youtubeId: "imYD6vMtNtQ" },
+  { title: "Video 01 — Sojourner", youtubeId: "Mnco84l18qs" },
   { title: "Video 02 — Mars Rovers", youtubeId: "" },
 ];
 
