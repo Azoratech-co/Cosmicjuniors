@@ -3,7 +3,8 @@ import Starfield from "@/components/Starfield";
 import BackLink from "@/components/site/BackLink";
 import SiteFooter from "@/components/site/SiteFooter";
 import SiteHeader from "@/components/site/SiteHeader";
-import { PODCAST_YOUTUBE_ID } from "@/lib/home";
+import VideoCover from "@/components/site/VideoCover";
+import { PODCAST_COVER, PODCAST_YOUTUBE_ID } from "@/lib/home";
 
 export const metadata: Metadata = {
   title: "Podcast · Cosmic Juniors",
@@ -24,13 +25,7 @@ export default function PodcastPage() {
           <BackLink href="/" label="Back to home" />
         </div>
         <div className="video-card">
-          <iframe
-            src={`https://www.youtube-nocookie.com/embed/${PODCAST_YOUTUBE_ID}`}
-            title="Cosmic Juniors podcast"
-            allow="accelerometer; encrypted-media; gyroscope; picture-in-picture"
-            allowFullScreen
-            loading="lazy"
-          />
+          <VideoCover youtubeId={PODCAST_YOUTUBE_ID} title="Cosmic Juniors podcast" cover={PODCAST_COVER} />
         </div>
       </main>
       <SiteFooter />
