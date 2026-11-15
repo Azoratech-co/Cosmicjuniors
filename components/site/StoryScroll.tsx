@@ -26,6 +26,8 @@ interface Props {
 const StoryMars = dynamic(() => import("./StoryMars"), { ssr: false });
 const StorySojourner = dynamic(() => import("./StorySojourner"), { ssr: false });
 
+const MODEL_NAMES: Record<NonNullable<StoryScene["model"]>, string> = { mars: "3D Mars", sojourner: "3D Sojourner" };
+
 const clamp = (v: number, a = 0, b = 1) => Math.max(a, Math.min(b, v));
 const smooth = (v: number) => {
   const x = clamp(v);
@@ -451,6 +453,25 @@ export default function StoryScroll({ scenes, storyTitle, storySubtitle, chapter
                 />
               );
             })}
+            {scenes.map((sc, i) =>
+              sc.model ? (
+                // checkpoints: the scenes you can play with (3D models)
+                <button
+                  key={`cp${i}`}
+                  type="button"
+                  className={`ss-rail__cp${active === i ? " is-on" : ""}${active > i ? " is-past" : ""}`}
+                  style={{ left: `${(i / last) * 100}%` }}
+                  onClick={() => goTo(i)}
+                  aria-label={`Interactive checkpoint: ${MODEL_NAMES[sc.model]}`}
+                  title={`Interactive: ${MODEL_NAMES[sc.model]}`}
+                >
+                  <span className="ss-rail__cp-label" aria-hidden="true">
+                    <b>Interactive</b>
+                    <span>{MODEL_NAMES[sc.model]}</span>
+                  </span>
+                </button>
+              ) : null,
+            )}
             <span className="ss-rail__rover" ref={rover} aria-hidden="true">
               <svg viewBox="0 0 32 20" width="30" height="19">
                 <rect x="5" y="3" width="22" height="3" rx="1" fill="#f3c87a" />
