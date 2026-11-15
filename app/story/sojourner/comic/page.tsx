@@ -36,7 +36,6 @@ export default function SojournerComicPage() {
           <p className="page-tagline">A Little Explorer in a Vast, Unknown World</p>
           <p>Scroll to read or jump to a page. Select any comic image to open it at full size.</p>
           <Link className="btn-ghost cta" href="/story/sojourner">Explore the animated story</Link>
-          <Link className="btn-ghost cta" href="/story/sojourner/text">Read the text story</Link>
         </header>
         <nav className={styles.navigation} aria-label="Comic pages">
           <span>Page</span>

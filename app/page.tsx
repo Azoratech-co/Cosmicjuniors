@@ -27,6 +27,15 @@ const MISSIONS: { n: string; title: string; text: string; cta: string; href: str
   },
   {
     n: "02",
+    title: "Comic Book",
+    text: "Read Sojourner's journey in eight illustrated comic pages.",
+    cta: "Read the comic",
+    href: "/story/sojourner/comic",
+    img: "/figma/home-comic.webp",
+    alt: "Comic page showing Sojourner, a rocket launch and Earth from space",
+  },
+  {
+    n: "03",
     title: "Wiki",
     text: "Meet the rovers and landers that explored Mars and the Moon, and the other technology NASA left behind.",
     cta: "Discover the robots",
@@ -35,7 +44,7 @@ const MISSIONS: { n: string; title: string; text: string; cta: string; href: str
     alt: "Mars rovers on the Martian surface",
   },
   {
-    n: "03",
+    n: "04",
     title: "AI Chatbot",
     text: "Chat with Cosmo for more info, with real NASA sources.",
     cta: "Start chatting",
@@ -43,7 +52,7 @@ const MISSIONS: { n: string; title: string; text: string; cta: string; href: str
     art: "cosmo",
   },
   {
-    n: "04",
+    n: "05",
     title: "Games",
     text: "Rebuild Sojourner, launch a real rocket to Mars, and land like the real missions did.",
     cta: "Play now",
@@ -52,14 +61,14 @@ const MISSIONS: { n: string; title: string; text: string; cta: string; href: str
     alt: "Illustration of NASA's Perseverance rover firing its engines as it lands on Mars",
   },
   {
-    n: "05",
+    n: "06",
     title: "Podcast",
     text: "Listen to the Cosmic Juniors podcast.",
     cta: "Open podcast",
     href: "/podcast",
   },
   {
-    n: "06",
+    n: "07",
     title: "Novel",
     text: "Read the Cosmic Juniors novel at your own pace.",
     cta: "Open novel",
