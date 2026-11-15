@@ -269,7 +269,8 @@
 /* ---------- Story scroll (/story/[id]): one continuous scroll, a framed clip on a starry stage ---------- */
 /* The stage is always night, whatever the site theme, so it keeps its own colours. */
 .ss { position: relative; --ss-text: #f2f3ff; --ss-muted: #aab2d6; --ss-gold: #f3c87a; --ss-lav: #b7a4ff; --ss-ink: #070b1d;
-  --ss-w: min(1240px, calc(100vw - 48px), calc((100svh - 148px) * 16 / 9)); }
+  --ss-story-width: min(1240px, calc(100vw - 48px), calc((100svh - 148px) * 16 / 9));
+  --ss-w: var(--ss-story-width); }
 html.ss-snap { scroll-snap-type: y proximity; }
 .ss-snap-pt { position: absolute; left: 0; width: 1px; height: 1px; scroll-snap-align: start; pointer-events: none; }
 .ss-snap-pt.is-activity { scroll-snap-stop: always; }
@@ -453,13 +454,51 @@ html.ss-snap { scroll-snap-type: y proximity; }
 .ss-exit__link { display: flex; align-items: center; gap: 10px; padding: 10px 12px; border-radius: 10px; font-size: 14px; font-weight: 600; color: var(--ss-text); text-decoration: none; }
 .ss-exit__link:hover { background: rgb(255 255 255 / 0.07); color: var(--ss-gold); }
 
+.ss-stage.has-signed-scene {
+  --ss-sign-space: calc(100vw - 52px);
+  --ss-sign-gap: 14px;
+  --ss-sign-width: min(340px, calc(var(--ss-sign-space) * .32 - var(--ss-sign-gap)));
+  --ss-w: min(var(--ss-story-width), calc(var(--ss-sign-space) * .63));
+  --ss-sign-shift: max(16px, calc(var(--ss-sign-width) + var(--ss-sign-gap) - (var(--ss-sign-space) - var(--ss-w)) / 2));
+}
+.ss-stage.has-signed-scene .ss-view,
+.ss-stage.has-signed-scene .ss-caption { transition: translate .36s cubic-bezier(.22, .8, .35, 1); }
+.ss-stage.shows-sign .ss-view,
+.ss-stage.shows-sign .ss-caption { translate: var(--ss-sign-shift) 0; }
+.ss-language-controls { position: absolute; top: 14px; right: 16px; z-index: 5; display: flex; gap: 6px; }
+.ss-language-controls .ss-exit__btn[aria-pressed="true"]:not(:disabled) { border-color: var(--ss-gold); color: var(--ss-gold); }
+.ss-language-controls .ss-exit__btn:disabled { opacity: .45; cursor: default; }
+.ss-sign-panel {
+  position: absolute; inset-block-start: 0; inset-inline-end: calc(100% + var(--ss-sign-gap));
+  width: var(--ss-sign-width); overflow: hidden; z-index: 4;
+  border: 1px solid rgb(183 164 255 / .45); border-radius: 14px; background: #111833;
+  animation: ss-signer-in .14s ease .19s both;
+}
+.ss-sign-panel[hidden] { display: none; }
+@keyframes ss-signer-in { from { opacity: 0; } to { opacity: 1; } }
+.ss-sign-panel video { display: block; width: 100%; aspect-ratio: 16 / 9; object-fit: contain; background: #000; }
+.ss-sign-controls { display: flex; justify-content: center; padding: 4px; }
+.ss-sign-controls .ss-btn { width: auto; padding-inline: 10px; min-height: 36px; }
+.ss-signed-line { color: inherit; background: transparent; text-decoration: underline var(--ss-gold); text-underline-offset: .16em; }
+@media (pointer: coarse) {
+  .ss-sign-controls .ss-btn { min-height: 44px; min-width: 44px; }
+}
+
 .ss-after { position: relative; z-index: 1; display: flex; flex-wrap: wrap; justify-content: center; gap: 12px; padding: 40px 16px 60px; }
 
 /* Phones and tall screens: a 4:5 window, the story line under it */
 @media (max-width: 760px), (max-aspect-ratio: 1/1) {
-  .ss { --ss-w: min(calc(100vw - 32px), calc((100svh - 380px) * 4 / 5)); }
+  .ss { --ss-story-width: min(calc(100vw - 32px), calc((100svh - 380px) * 4 / 5)); }
   .ss-stage { padding-top: max(64px, calc(env(safe-area-inset-top) + 56px)); gap: 10px; }
-  .ss-exit { top: max(12px, calc(env(safe-area-inset-top) + 8px)); }
+  .ss-exit, .ss-language-controls { top: max(12px, calc(env(safe-area-inset-top) + 8px)); }
+  .ss-language-controls { right: 12px; }
+  .ss-language-controls .ss-exit__btn { padding-inline: 8px; font-size: 13px; }
+  .ss-stage.has-signed-scene {
+    --ss-sign-space: calc(100vw - 30px);
+    --ss-sign-gap: 9px;
+    --ss-sign-width: min(280px, calc(var(--ss-sign-space) * .41 - var(--ss-sign-gap)));
+    --ss-w: min(var(--ss-story-width), calc(var(--ss-sign-space) * .57));
+  }
   .ss-view { aspect-ratio: 4 / 5; border-radius: 18px; }
   .ss-frame { border-radius: 16px; }
   .ss-corner { width: 16px; height: 16px; }
@@ -478,6 +517,10 @@ html.ss-snap { scroll-snap-type: y proximity; }
   .ss-ask, .ss-btn { width: 36px; padding: 0; }
   .ss-quiz-link { width: auto; padding-inline: 10px; white-space: nowrap; }
 }
+@media (max-width: 400px) {
+  .ss-stage.has-quiz-return { padding-top: max(106px, calc(env(safe-area-inset-top) + 98px)); }
+  .ss-stage.has-quiz-return .ss-language-controls { top: max(56px, calc(env(safe-area-inset-top) + 52px)); }
+}
 @media (max-width: 760px), (max-aspect-ratio: 1/1), (max-height: 540px) {
   .ss-stage.is-activity {
     --ss-w: min(1240px, calc(100vw - 32px));
@@ -486,7 +529,9 @@ html.ss-snap { scroll-snap-type: y proximity; }
   .ss-stage.is-activity .ss-view { flex: 1; min-height: 0; aspect-ratio: auto; }
 }
 @media (prefers-reduced-motion: reduce) {
-  .ss-card__hint, .ss-sky__stars { animation: none; }
+  .ss-card__hint, .ss-sky__stars, .ss-sign-panel { animation: none; }
+  .ss-stage.has-signed-scene .ss-view,
+  .ss-stage.has-signed-scene .ss-caption { transition: none; }
 }
 /* the story stage takes the whole screen; the site header scrolls away above it */
 .site-page.story-scroll-page > .site-header { position: relative; }

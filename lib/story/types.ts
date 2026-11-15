@@ -2,6 +2,11 @@ import type { StorySoundPreset } from "@/lib/storySound";
 
 export type StoryActivity = "story-quiz";
 
+export interface StorySignVideo {
+  src: string;
+  cues: readonly { start: number; text: string }[];
+}
+
 /** One step in the scrolling story: a chapter card, a narrated scene, or an interactive activity. */
 export interface StoryScene {
   chapter: number;
@@ -9,6 +14,7 @@ export interface StoryScene {
   /** Identifier of an activity rendered in the story frame. */
   activity?: StoryActivity;
   text?: string;
+  signVideo?: StorySignVideo;
   /** Picture shown in the frame (also the video's poster). */
   image?: string;
   /** Video clip for this scene (in the same folder as the pictures), when the team has made one. */

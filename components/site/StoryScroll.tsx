@@ -4,6 +4,7 @@ import Link from "next/link";
 import { type ReactNode, useCallback, useEffect, useRef, useState } from "react";
 import type { StoryActivity, StoryScene } from "@/lib/story/types";
 import { TABS } from "@/components/NavTabs";
+import StorySignLanguage from "./StorySignLanguage";
 import dynamic from "next/dynamic";
 import { disableStorySound, duckStorySound, enableStorySound, setStorySound } from "@/lib/storySound";
 
@@ -36,6 +37,12 @@ const smooth = (v: number) => {
 // the second half of each scene's scroll blends it into the next one
 const FADE_FROM = 0.45;
 
+function signedCaption(text: string, signedText?: string) {
+  const startsAt = signedText ? text.indexOf(signedText) : -1;
+  if (!signedText || startsAt < 0) return text;
+  return <>{text.slice(0, startsAt)}<mark className="ss-signed-line">{signedText}</mark>{text.slice(startsAt + signedText.length)}</>;
+}
+
 export default function StoryScroll({ scenes, storyTitle, storySubtitle, chapters, folder, activities, comicHref }: Props) {
   const wrap = useRef<HTMLDivElement>(null);
   const frame = useRef<HTMLDivElement>(null);
@@ -54,6 +61,9 @@ export default function StoryScroll({ scenes, storyTitle, storySubtitle, chapter
   const [pastStory, setPastStory] = useState(false);
   const [quizVisited, setQuizVisited] = useState(false);
   const [menu, setMenu] = useState(false);
+  const [signLanguage, setSignLanguage] = useState(true);
+  const [subtitles, setSubtitles] = useState(true);
+  const [signIndex, setSignIndex] = useState(0);
   const menuRef = useRef<HTMLDivElement>(null);
   const activeRef = useRef(0);
   const pastStoryRef = useRef(false);
@@ -149,6 +159,7 @@ export default function StoryScroll({ scenes, storyTitle, storySubtitle, chapter
       if (now !== activeRef.current) {
         activeRef.current = now;
         setActive(now);
+        setSignIndex(0);
         if (scenes[now].activity === "story-quiz") setQuizVisited(true);
       }
       setNear((n) => (Math.abs(n - k) >= 1 ? k : n));
@@ -200,7 +211,7 @@ export default function StoryScroll({ scenes, storyTitle, storySubtitle, chapter
     const onKey = (e: KeyboardEvent) => {
       if (e.defaultPrevented || e.altKey || e.ctrlKey || e.metaKey) return;
       const target = e.target;
-      if (target instanceof Element && target.closest(".ss-activity, .ss-model, input, textarea, select")) return;
+      if (target instanceof Element && target.closest(".ss-activity, .ss-model, .ss-sign-panel, input, textarea, select")) return;
       const r = wrap.current?.getBoundingClientRect();
       if (!r || r.top > 1 || r.bottom < r.height / (last + 1) - 1) return; // only while the stage fills the screen
       const next = e.key === "ArrowDown" || e.key === "ArrowRight" || e.key === "PageDown";
@@ -282,7 +293,13 @@ export default function StoryScroll({ scenes, storyTitle, storySubtitle, chapter
   const cur = scenes[active];
   const onCard = !!cur.card;
   const onActivity = !!cur.activity;
+  const hasSignedScene = !!cur.signVideo;
+  const showSign = hasSignedScene && signLanguage && !pastStory;
+  const showLanguageControls = cur.chapter > 0 && !onActivity && !pastStory && scenes.some((scene) => scene.signVideo);
+  const hideSignedSubtitles = showSign && !subtitles;
+  const signedText = showSign && subtitles ? cur.signVideo?.cues[signIndex]?.text : undefined;
   const nextIsQuiz = scenes[active + 1]?.activity === "story-quiz";
+  const showQuizReturn = quizVisited && !onActivity && !nextIsQuiz;
   const sceneNo = scenes.slice(0, active + 1).filter((s) => !s.card && !s.activity).length;
   const sceneCount = scenes.filter((s) => !s.card && !s.activity).length;
   const firstOf = (c: number) => scenes.findIndex((s) => s.chapter === c);
@@ -305,7 +322,7 @@ export default function StoryScroll({ scenes, storyTitle, storySubtitle, chapter
         />
       ))}
 
-      <div className={`ss-stage${onActivity ? " is-activity" : ""}`}>
+      <div className={`ss-stage${onActivity ? " is-activity" : ""}${hasSignedScene ? " has-signed-scene" : ""}${showSign ? " shows-sign" : ""}${showQuizReturn ? " has-quiz-return" : ""}`}>
         <div className="ss-sky" aria-hidden="true">
           <div className="ss-sky__stars" ref={sky} />
         </div>
@@ -325,7 +342,7 @@ export default function StoryScroll({ scenes, storyTitle, storySubtitle, chapter
           {active === 0 && comicHref && (
             <Link className="ss-exit__btn" href={comicHref}>Read the comic</Link>
           )}
-          {quizVisited && !onActivity && !nextIsQuiz && (
+          {showQuizReturn && (
             <a className="ss-exit__btn" href="#story-quiz">Back to quiz</a>
           )}
           {menu && (
@@ -340,7 +357,33 @@ export default function StoryScroll({ scenes, storyTitle, storySubtitle, chapter
           )}
         </div>
 
+        {showLanguageControls && (
+          <div className="ss-language-controls" role="group" aria-label="Story language settings">
+            <button
+              type="button"
+              className="ss-exit__btn"
+              aria-pressed={signLanguage}
+              aria-controls={hasSignedScene ? "story-sign-language-panel" : undefined}
+              onClick={() => setSignLanguage((visible) => !visible)}
+            >
+              Sign language
+            </button>
+            <button
+              type="button"
+              className="ss-exit__btn"
+              aria-pressed={subtitles}
+              disabled={!signLanguage}
+              onClick={() => setSubtitles((visible) => !visible)}
+            >
+              Subtitles
+            </button>
+          </div>
+        )}
+
         <div className="ss-view">
+          {cur.signVideo && (
+            <StorySignLanguage key={active} signVideo={cur.signVideo} open={showSign} onCueChange={setSignIndex} />
+          )}
           <div className="ss-frame" ref={frame}>
             {scenes.map((sc, i) => {
               const load = Math.abs(i - near) <= 3;
@@ -419,7 +462,7 @@ export default function StoryScroll({ scenes, storyTitle, storySubtitle, chapter
             {scenes.map((sc, i) =>
               sc.text ? (
                 <div key={`l${i}`} className="ss-line" ref={(el) => { lines.current[i] = el; }}>
-                  <p>{sc.text}</p>
+                  {!(i === active && hideSignedSubtitles) && <p>{signedCaption(sc.text, i === active ? signedText : undefined)}</p>}
                 </div>
               ) : null,
             )}
@@ -440,7 +483,11 @@ export default function StoryScroll({ scenes, storyTitle, storySubtitle, chapter
           <span className="ss-corner ss-corner--br" aria-hidden="true" />
         </div>
 
-        {!onActivity && <p className={`ss-caption${onCard ? " is-hidden" : ""}`}>{cur.text}</p>}
+        {!onActivity && (
+          <p className={`ss-caption${onCard || hideSignedSubtitles ? " is-hidden" : ""}`} aria-hidden={onCard || hideSignedSubtitles}>
+            {!hideSignedSubtitles && cur.text && signedCaption(cur.text, signedText)}
+          </p>
+        )}
 
         <div className="ss-rail">
           <span className="ss-rail__end">Earth</span>
