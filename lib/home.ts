@@ -14,4 +14,4 @@ export const ABOUT_US =
 export const PODCAST_YOUTUBE_ID = "vHGVErnfwQw";
 
 /** Picture shown on the podcast card and before the podcast plays. */
-export const PODCAST_COVER = "/home/podcast-card.webp";
+export const PODCAST_COVER = "/home/podcast-cover.webp";

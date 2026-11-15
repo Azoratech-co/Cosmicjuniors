@@ -67,8 +67,8 @@ const MISSIONS: { n: string; title: string; text: string; cta: string; href: str
     text: "Listen to the Cosmic Juniors podcast.",
     cta: "Open podcast",
     href: "/podcast",
-    img: "/home/podcast-card.webp",
-    alt: "Painted night sky with stars and lavender clouds above Mars",
+    img: "/home/podcast-cover.webp",
+    alt: "Two Cosmic Juniors hosts recording the podcast in front of a NASA Space Apps Beirut screen",
   },
   {
     n: "07",
