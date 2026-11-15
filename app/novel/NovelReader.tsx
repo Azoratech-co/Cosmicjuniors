@@ -15,7 +15,7 @@ export default function NovelReader({ editions }: { editions: Edition[] }) {
   const [chapterIndex, setChapterIndex] = useState(0);
   const [menu, setMenu] = useState<"contents" | "settings" | null>(null);
   const [audioOpen, setAudioOpen] = useState(false);
-  const [dark, setDark] = useState(false);
+  const [dark, setDark] = useState(true);
   const [textSize, setTextSize] = useState(22);
   const [progress, setProgress] = useState(0);
   const reader = useRef<HTMLElement>(null);
@@ -126,6 +126,7 @@ export default function NovelReader({ editions }: { editions: Edition[] }) {
 
         <h1 className={styles.title} aria-live="polite">{title}</h1>
 
+        {editions.length > 1 && (
         <div className={styles.versions} role="group" aria-label="Manuscript version">
           {editions.map((version, index) => (
             <button
@@ -138,6 +139,7 @@ export default function NovelReader({ editions }: { editions: Edition[] }) {
             </button>
           ))}
         </div>
+        )}
 
         <nav id="novel-contents" className={styles.popover} aria-label="Chapters" hidden={menu !== "contents"}>
           {edition.chapters.map((entry, index) => (

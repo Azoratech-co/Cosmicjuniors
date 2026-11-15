@@ -4,7 +4,7 @@ import manuscripts from "./manuscripts.json";
 
 export const metadata: Metadata = {
   title: "Novel · Cosmic Juniors",
-  description: "Read or listen to two versions of Sojourner's story.",
+  description: "Read or listen to Sojourner's story.",
 };
 
 export const viewport: Viewport = {
@@ -12,7 +12,7 @@ export const viewport: Viewport = {
   initialScale: 1,
   maximumScale: 5,
   viewportFit: "cover",
-  themeColor: "#f5f1e9",
+  themeColor: "#171a20",
 };
 
 export default function NovelPage() {
