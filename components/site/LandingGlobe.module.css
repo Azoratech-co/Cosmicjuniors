@@ -8,7 +8,6 @@
 }
 .header { position: relative; padding: 24px 76px 0 24px; }
 .header h2 { margin: 4px 0 10px; font-size: clamp(22px, 3vw, 30px); }
-.header p { margin: 0 0 8px; }
 .eyebrow { color: var(--muted); font-size: 12px; font-weight: 700; letter-spacing: 0.05em; }
 .explorer { position: relative; isolation: isolate; display: grid; grid-template-columns: minmax(0, 1.05fr) minmax(0, 1fr); align-items: start; }
 .globePanel { min-width: 0; padding: 0 20px 20px; }
@@ -31,7 +30,7 @@
 .expandButton svg { width: 19px; height: 19px; }
 .globe { height: 320px; min-width: 0; border-radius: var(--r-lg); touch-action: pan-y; cursor: grab; }
 .globe:active { cursor: grabbing; }
-.hint, .note, .coordinates, .date { color: var(--muted); }
+.hint, .note { color: var(--muted); }
 .hint { margin: 0 0 12px; font-size: 12px; line-height: 1.5; }
 .note { font-size: 13px; line-height: 1.5; }
 .findButton {
@@ -66,11 +65,7 @@
 .locateButton svg { width: 15px; height: 15px; }
 .locateButton:hover:not(:disabled) { border-color: var(--primary); }
 .locateButton:disabled { opacity: 0.55; cursor: default; }
-.details p, .landingInfo p { margin: 6px 0; }
-.landingInfo .place { font-weight: 700; }
-.coordinates { font-size: 13px; font-variant-numeric: tabular-nums; }
-.date { font-size: 12px; line-height: 1.6; }
-.landingInfo .summary { margin-block: 16px; font-size: 14px; line-height: 1.6; }
+.details > .eyebrow { margin: 6px 0; }
 .marker {
   display: inline-flex;
   flex: 0 0 auto;
@@ -84,9 +79,8 @@
   line-height: 1;
 }
 .marker[data-approximate="true"] { border-style: dashed; font-size: 0; }
-.comparison { margin-bottom: 16px; }
-.comparison summary { width: fit-content; padding: 8px 0; color: var(--text); font-size: 13px; cursor: pointer; }
-.comparison summary:focus-visible { outline: 2px solid var(--primary); outline-offset: 3px; }
+.comparison { margin: 16px 0; }
+.comparison h4 { margin: 0 0 8px; font-size: 14px; }
 .comparison .note { font-size: 11px; }
 .sources { display: flex; flex-wrap: wrap; gap: 8px 14px; font-size: 12px; }
 .sources a { color: inherit; text-decoration: underline; text-underline-offset: 3px; }
@@ -103,26 +97,47 @@
   /* stacked layout: the info sits under the globe, so a pointer line would cross the text */
   .leader { display: none; }
 }
-.journeySummary { margin-top: 18px; padding-top: 16px; border-top: 1px solid var(--line-strong); font-size: 12px; line-height: 1.6; }
-.journeySummary > strong { font-size: 13px; }
-.journeySummary > p { color: var(--muted); margin-block: 8px; }
-
-.landingInfo :is(.coordinates, .date, .note) { color: var(--landing-muted, var(--muted)); }
+.journeySummary { position: relative; z-index: 2; grid-column: 1 / -1; padding: 0 24px 20px; }
+@media (min-width: 641px) {
+  .journeySummary > .infoCard {
+    display: grid;
+    grid-template-columns: minmax(0, 1.15fr) minmax(0, 1fr);
+    gap: 12px 24px;
+  }
+  .journeySummary .infoIntro > .summary { margin-bottom: 0; }
+  .journeySummary > .infoCard > .sources { grid-column: 1 / -1; margin-top: 0; }
+}
+@media (max-width: 640px) { .journeySummary { padding-inline: 18px; } }
 
 .infoCard {
   --landing-muted: #dfcdb7;
   margin-bottom: 10px;
-  padding: 14px;
+  padding: 16px;
+  border: 1px solid rgb(255 227 189 / 14%);
   border-radius: 8px;
   background: rgb(32 21 15 / 94%);
   color: #fff2e0;
   font-size: 14px;
   line-height: 1.5;
+}
+.infoCard p { margin: 0; }
+.infoCard .infoLabel { margin: 0 0 4px; color: var(--landing-muted); font-size: 12px; font-weight: 700; }
+.infoTitle { margin: 0 0 6px; font-size: clamp(19px, 2.2vw, 23px); font-weight: 750; line-height: 1.25; }
+.infoCard .summary { margin-bottom: 12px; }
+.metadata { display: grid; gap: 3px; margin: 0; color: var(--landing-muted); font-size: 12px; font-variant-numeric: tabular-nums; }
+.metadata dt, .metadata dd { display: inline; margin: 0; }
+.metadata dt { color: #fff2e0; font-weight: 700; }
+.infoHighlight { margin-top: 12px; padding-top: 12px; border-top: 1px solid rgb(255 227 189 / 18%); }
+.infoHighlight h6 { margin: 0 0 3px; font-size: 14px; }
+.infoCard .sources { margin-top: 12px; }
+.infoCard .sources a { color: inherit; }
+
+.callout {
   opacity: 0;
   transform: translateY(4px);
   transition: opacity 160ms ease, transform 160ms ease;
 }
-.infoCard[data-visible="true"] { opacity: 1; transform: none; }
+.callout[data-visible="true"] { opacity: 1; transform: none; }
 
 .leader {
   position: absolute;
@@ -139,10 +154,9 @@
 .leader[data-visible="true"][data-connected="true"] { opacity: 1; }
 
 .comparisonCard { position: relative; z-index: 2; }
-.infoCard h4 { margin: 0 0 6px; font-size: 15px; }
 
 @media (prefers-reduced-motion: reduce) {
-  .infoCard, .leader { transition: none; }
+  .callout, .leader { transition: none; }
 }
 
 .infoCard .findButton { margin-top: 12px; background: transparent; color: inherit; }

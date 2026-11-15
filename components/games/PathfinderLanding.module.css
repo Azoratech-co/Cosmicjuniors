@@ -3,6 +3,17 @@
 .stage { position: relative; width: 100%; aspect-ratio: 16 / 9; min-height: 340px; max-height: 78svh; overflow: hidden; border-radius: 18px; background: #05060c;
   border: 1px solid rgb(243 200 122 / 0.28); box-shadow: 0 30px 80px rgb(2 4 16 / 0.6); isolation: isolate; user-select: none; -webkit-user-select: none; }
 .canvas { position: absolute; inset: 0; width: 100%; height: 100%; display: block; }
+.dustFront {
+  position: absolute; inset: 0; width: 100%; height: 100%; pointer-events: none; opacity: 0.86;
+}
+.dustFront[data-inside="true"] { opacity: 1; }
+.vortex { fill: none; stroke: rgb(255 227 181 / 72%); stroke-width: 3; stroke-linecap: round; }
+.stormLabel {
+  position: absolute; inset-inline: 12px; bottom: 14px; display: grid; gap: 2px;
+  justify-items: center; pointer-events: none; text-shadow: 0 1px 6px #000;
+}
+.stormLabel small { color: #f3c87a; }
+.stormLabel strong { font-size: clamp(17px, 3vw, 24px); }
 /* soft cinematic letterbox */
 .bars { position: absolute; inset: 0; pointer-events: none;
   background: linear-gradient(180deg, rgb(0 0 0 / 0.55), transparent 16%, transparent 80%, rgb(0 0 0 / 0.6)), radial-gradient(120% 90% at 50% 50%, transparent 60%, rgb(0 0 0 / 0.35)); }

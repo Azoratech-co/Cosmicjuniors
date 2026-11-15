@@ -1,11 +1,12 @@
 "use client";
 
 import Link from "next/link";
-import { useEffect, useRef, useState, type PointerEvent } from "react";
+import { useEffect, useId, useRef, useState, type PointerEvent } from "react";
 import { addStars } from "@/lib/stars";
 import { loadJSON, saveJSON } from "@/lib/missions";
 import {
-  advanceFlight, canFire, canSteer, freshFlight, inBrakeWindow, isFlying, startBraking, switchPhase,
+  advanceFlight, canFire, canSteer, dustFront, freshFlight, inBrakeWindow, isFlying, startBraking, switchPhase,
+  STORM_ARENA, STORM_PATTERNS, STORM_SHIELDS,
   type FlightControl, type FlightPhase,
 } from "./pathfinderFlight";
 import type { PathfinderScene } from "./pathfinder3d";
@@ -57,7 +58,8 @@ const arrows = [
   { control: "right", symbol: "→", label: "Steer right" },
 ] as const;
 
-export default function PathfinderLanding() {
+export default function PathfinderLanding({ stormEntry = false }: { stormEntry?: boolean }) {
+  const dustPaint = useId();
   const canvas = useRef<HTMLCanvasElement>(null);
   const stage = useRef<HTMLDivElement>(null);
   const flight = useRef(freshFlight());
@@ -75,7 +77,12 @@ export default function PathfinderLanding() {
     keyboard.current.clear();
     pointers.current.clear();
     flight.current = freshFlight();
-    switchPhase(flight.current, "cruise");
+    switchPhase(flight.current, stormEntry ? "entry" : "cruise");
+    if (stormEntry) {
+      flight.current.x = 0;
+      flight.current.depth = 0;
+    }
+    setTitle(null);
     pausedRef.current = false;
     setPaused(false);
     setAwarded(0);
@@ -125,22 +132,28 @@ export default function PathfinderLanding() {
         const running = isFlying(sim) && !pausedRef.current;
         if (running) {
           const controls = new Set<FlightControl>([...keyboard.current, ...pointers.current.values()]);
-          advanceFlight(sim, controls, dt);
+          advanceFlight(sim, controls, dt, stormEntry);
           if (sim.phase === "success" && oldPhase !== "success") {
             const stars = sim.grade === "perfect" ? 5 : 3;
             addStars(stars);
             setAwarded(stars);
-            // remember the best landing (the "Safe landing" badge reads this)
-            const save = loadJSON<{ best: Record<string, number> }>("cj-landing", { best: {} });
-            const dist = Math.round(Math.hypot(sim.x, sim.depth));
-            save.best = { ...save.best, pathfinder: Math.min(save.best?.pathfinder ?? Infinity, dist) };
-            saveJSON("cj-landing", save);
+            if (!stormEntry) {
+              // remember the best landing (the "Safe landing" badge reads this)
+              const save = loadJSON<{ best: Record<string, number> }>("cj-landing", { best: {} });
+              const dist = Math.round(Math.hypot(sim.x, sim.depth));
+              save.best = { ...save.best, pathfinder: Math.min(save.best?.pathfinder ?? Infinity, dist) };
+              saveJSON("cj-landing", save);
+            }
           }
           if (sim.phase !== oldPhase && titles[sim.phase]) setTitle({ key: time, text: titles[sim.phase]! });
-          if (time - lastHud > 80 || sim.phase !== oldPhase) { setHud({ ...sim }); lastHud = time; }
+          if (time - lastHud > (stormEntry ? 32 : 80) || sim.phase !== oldPhase) { setHud({ ...sim }); lastHud = time; }
         }
         if (!pausedRef.current) clock += reduced ? 0 : dt;
-        scene!.render(sim, pausedRef.current ? 0 : dt, clock);
+        const visualFlight = stormEntry && sim.phase === "success" ? { ...sim, phase: "chute" as const }
+          : stormEntry && sim.phase === "failure" ? { ...sim, phase: "entry" as const } : sim;
+        const entryOffset = stormEntry && visualFlight.phase === "entry"
+          ? { x: sim.x / STORM_ARENA.width, y: sim.depth / STORM_ARENA.height } : undefined;
+        scene!.render(visualFlight, pausedRef.current ? 0 : dt, clock, entryOffset);
         frame = requestAnimationFrame(tick);
       };
       frame = requestAnimationFrame(tick);
@@ -151,7 +164,7 @@ export default function PathfinderLanding() {
       observer.disconnect();
       scene?.dispose();
     };
-  }, []);
+  }, [stormEntry]);
 
   // keyboard
   useEffect(() => {
@@ -159,7 +172,7 @@ export default function PathfinderLanding() {
     const down = (e: KeyboardEvent) => {
       if (!isFlying(flight.current) || pausedRef.current || e.altKey || e.ctrlKey || e.metaKey) return;
       const control = arrowKeys[e.key];
-      if (control && canSteer(flight.current)) { e.preventDefault(); keyboard.current.add(control); }
+      if (control && canSteer(flight.current, stormEntry)) { e.preventDefault(); keyboard.current.add(control); }
       else if (e.code === "Space" && canFire(flight.current)) { e.preventDefault(); if (!e.repeat) fire(); }
       else if (e.key === "p" || e.key === "P") togglePause();
     };
@@ -175,15 +188,16 @@ export default function PathfinderLanding() {
       window.removeEventListener("blur", clear);
       document.removeEventListener("visibilitychange", hidden);
     };
-  }, []);
+  }, [stormEntry]);
 
   const hold = (e: PointerEvent<HTMLButtonElement>, c: FlightControl) => { e.currentTarget.setPointerCapture(e.pointerId); pointers.current.set(e.pointerId, c); };
   const release = (e: PointerEvent<HTMLButtonElement>) => { pointers.current.delete(e.pointerId); };
 
   const phase = hud.phase;
+  const storm = stormEntry ? dustFront(hud) : null;
   const ended = phase === "success" || phase === "failure";
   const flying = isFlying(hud);
-  const steering = canSteer(hud) && !paused;
+  const steering = canSteer(hud, stormEntry) && !paused;
   const rocketAvailable = canFire(hud) && !paused;
   const rocketReady = rocketAvailable && inBrakeWindow(hud.altitude);
   const distance = Math.round(Math.hypot(hud.x, hud.depth));
@@ -191,22 +205,42 @@ export default function PathfinderLanding() {
   const showAltitude = phase === "entry" || canSteer(hud) || phase === "braking" || phase === "freefall";
   const wind = Math.abs(hud.wind) < 0.3 ? "Calm" : `${hud.wind > 0 ? "→" : "←"} ${Math.abs(hud.wind).toFixed(1)} m/s`;
   const stepIndex = steps.findIndex((s) => s.phases.includes(phase));
-  const result = hud.grade === "perfect" ? "Perfect landing!" : hud.grade === "safe" ? "Safe landing" : "Landing failed";
-  const resultText = hud.grade === "unsafe" ? "The retrorockets have to fire between 125 m and 72 m, or the lander hits the ground too fast."
+  const result = stormEntry ? (phase === "success" ? "Parachute deployed!" : "Entry failed")
+    : hud.grade === "perfect" ? "Perfect landing!" : hud.grade === "safe" ? "Safe landing" : "Landing failed";
+  const resultText = stormEntry ? (phase === "success"
+    ? "You made it past all four storms and reached parachute deployment."
+    : "You faced all four storms. Avoid more dust on your next flight to reach parachute deployment.")
+    : hud.grade === "unsafe" ? "The retrorockets have to fire between 125 m and 72 m, or the lander hits the ground too fast."
     : hud.grade === "missed" ? `Pathfinder came down ${distance} m from the center, outside the target.`
     : `${distance} m from the center of the target.`;
 
   return (
-    <section className={styles.game} aria-label="Mars Pathfinder landing game">
+    <section className={styles.game} aria-label={stormEntry ? "Mars Dust Storm Entry game" : "Mars Pathfinder landing game"}>
       <div className={styles.stage} ref={stage}>
         <canvas ref={canvas} className={styles.canvas} role="img" aria-label="3D view of Mars Pathfinder landing at Ares Vallis" />
+        {storm && (
+          <svg aria-hidden="true" className={styles.dustFront} data-inside={storm.inside}
+            viewBox={`${-STORM_ARENA.width / 2} ${-STORM_ARENA.height / 2} ${STORM_ARENA.width} ${STORM_ARENA.height}`}
+            preserveAspectRatio="none">
+            <defs><radialGradient id={dustPaint}>
+              <stop stopColor="#ffcd91" stopOpacity=".9" />
+              <stop offset=".58" stopColor="#c96d3f" stopOpacity=".79" />
+              <stop offset="1" stopColor="#a24524" stopOpacity="0" />
+            </radialGradient></defs>
+            <g transform={`translate(${storm.x} ${-storm.y}) rotate(${-storm.angle})`}>
+              <ellipse rx={storm.radius[0]} ry={storm.radius[1]} fill={`url(#${dustPaint})`} />
+              {storm.curl !== 0 && <path className={styles.vortex} d="M -46 -15 C -20 -56 46 -40 48 -5 C 50 30 -1 48 -23 24 C -38 6 -12 -23 8 -13 C 25 -4 12 16 -1 10" />}
+            </g>
+          </svg>
+        )}
         <div className={styles.bars} aria-hidden="true" />
 
         <div className={styles.top}>
-          <span className={styles.mission}><b>Mars Pathfinder</b> Ares Vallis · July 4, 1997</span>
+          <span className={styles.mission}><b>{stormEntry ? "Dust Storm Entry" : "Mars Pathfinder"}</b>{stormEntry ? "Mars atmosphere · Arcade challenge" : "Ares Vallis · July 4, 1997"}</span>
           {flying && (
             <span className={styles.telemetry} aria-label="Flight instruments">
               {showAltitude && <span><small>Altitude</small><strong>{altitude}</strong></span>}
+              {storm && <span><small>Shield</small><strong>{Math.max(0, STORM_SHIELDS - hud.stormHits)} / {STORM_SHIELDS}</strong></span>}
               {canSteer(hud) && <span><small>Wind</small><strong>{wind}</strong></span>}
               {canSteer(hud) && <span data-good={distance <= 62}><small>Off target</small><strong>{distance} m</strong></span>}
             </span>
@@ -229,7 +263,13 @@ export default function PathfinderLanding() {
         {rocketAvailable && <div className={styles.fireCue} data-ready={rocketReady}>{rocketReady ? "Fire retrorockets now!" : "Get ready to fire…"}</div>}
         {paused && <div className={styles.pausedCue}>Paused</div>}
 
-        {flying && (
+        {storm && (
+          <div className={styles.stormLabel} aria-live="polite">
+            <small>Storm {storm.wave + 1} of {STORM_PATTERNS.length}</small>
+            <strong>{storm.name}</strong>
+          </div>
+        )}
+        {flying && !stormEntry && (
           <ol className={styles.timeline} aria-label="Landing sequence">
             {steps.map((s, i) => <li key={s.label} data-state={i < stepIndex ? "done" : i === stepIndex ? "now" : "next"}>{s.label}</li>)}
           </ol>
@@ -237,13 +277,18 @@ export default function PathfinderLanding() {
 
         {phase === "ready" && (
           <div className={styles.card}>
-            <span className={styles.kicker}>Mission 03 · Simulator</span>
-            <h2>Land Mars Pathfinder</h2>
-            <p>On July 4, 1997, Pathfinder hit the top of Mars’ atmosphere at about 26,000 km/h and had to stop on the surface a few minutes later, with Sojourner folded inside. Fly the same sequence in 3D.</p>
-            <ul>
-              <li><b>Steer</b> the parachute with the arrow keys (or the buttons) toward the orange target.</li>
-              <li><b>Fire</b> the retrorockets with Space between 125 m and 72 m.</li>
-            </ul>
+            <span className={styles.kicker}>{stormEntry ? "Mission 04 · Arcade" : "Mission 03 · Simulator"}</span>
+            <h2>{stormEntry ? "Fly through Mars entry" : "Land Mars Pathfinder"}</h2>
+            {stormEntry ? <>
+              <p>Use the arrow keys or on-screen controls to dodge four storms before the parachute opens. Each storm you touch costs one shield.</p>
+              <ul>{STORM_PATTERNS.map(({ name }) => <li key={name}>{name}</li>)}</ul>
+            </> : <>
+              <p>On July 4, 1997, Pathfinder hit the top of Mars’ atmosphere at about 26,000 km/h and had to stop on the surface a few minutes later, with Sojourner folded inside. Fly the same sequence in 3D.</p>
+              <ul>
+                <li><b>Steer</b> the parachute with the arrow keys (or the buttons) toward the orange target.</li>
+                <li><b>Fire</b> the retrorockets with Space between 125 m and 72 m.</li>
+              </ul>
+            </>}
             <button type="button" className={styles.primary} disabled={load !== "ready"} onClick={start}>
               {load === "loading" ? "Loading Mars…" : load === "error" ? "3D is not available on this device" : "Begin flight"}
             </button>
@@ -255,7 +300,7 @@ export default function PathfinderLanding() {
             <span className={styles.kicker}>{phase === "success" ? "Mission successful" : "Mission over"}</span>
             <h2>{result}</h2>
             <p>{resultText}</p>
-            {phase === "success" && (
+            {phase === "success" && !stormEntry && (
               <figure className={styles.photo}>
                 {/* eslint-disable-next-line @next/next/no-img-element */}
                 <img src="/story/sojourner/landed.jpg" alt="NASA photo: Pathfinder on Mars, with Sojourner still folded on its petal" />
@@ -265,7 +310,9 @@ export default function PathfinderLanding() {
             {awarded > 0 && <span className={styles.stars}>+{awarded} stars</span>}
             <div className={styles.cardActions}>
               <button type="button" className={styles.primary} onClick={start}>Fly again</button>
-              <Link className={styles.secondary} href="/story/sojourner">Read Sojourner’s story</Link>
+              {stormEntry
+                ? <Link className={styles.secondary} href="/games/landing">Play the full landing</Link>
+                : <Link className={styles.secondary} href="/story/sojourner">Read Sojourner’s story</Link>}
             </div>
           </div>
         )}
@@ -274,21 +321,22 @@ export default function PathfinderLanding() {
       <div className={styles.deck} hidden={!flying}>
         <div className={styles.pad} role="group" aria-label="Steering">
           {arrows.map(({ control, symbol, label }) => (
-            <button key={control} type="button" data-dir={control} className={styles.control} disabled={!steering} aria-label={label}
+            <button key={control} type="button" data-dir={control} className={styles.control} disabled={!steering}
+              aria-label={stormEntry ? `Steer ${control}` : label}
               onPointerDown={(e) => hold(e, control)} onPointerUp={release} onPointerCancel={release} onLostPointerCapture={release}>{symbol}</button>
           ))}
         </div>
-        <button type="button" className={styles.control} disabled={!steering}
-          onPointerDown={(e) => hold(e, "stabilize")} onPointerUp={release} onPointerCancel={release} onLostPointerCapture={release}>Stabilize</button>
-        <p className={styles.hint}>{paused ? "Flight paused." : hints[phase]}</p>
-        <button type="button" className={styles.fire} disabled={!rocketAvailable} data-ready={rocketReady} onClick={fire}>Fire retrorockets</button>
+        {!stormEntry && <button type="button" className={styles.control} disabled={!steering}
+          onPointerDown={(e) => hold(e, "stabilize")} onPointerUp={release} onPointerCancel={release} onLostPointerCapture={release}>Stabilize</button>}
+        <p className={styles.hint}>{paused ? "Flight paused." : storm?.inside ? "Shield hit! Steer out of the dust." : storm?.hint ?? hints[phase]}</p>
+        {!stormEntry && <button type="button" className={styles.fire} disabled={!rocketAvailable} data-ready={rocketReady} onClick={fire}>Fire retrorockets</button>}
         <button type="button" className={styles.control} onClick={togglePause}>{paused ? "Resume" : "Pause"}</button>
       </div>
 
       <details className={styles.sources}>
         <summary>How this compares with the real landing</summary>
         <p>The sequence and altitudes follow NASA’s record of the landing: entry at about 130 km, parachute at about 9.4 km, heat shield released, the lander lowered on a 20 m bridle, airbags inflated at about 355 m, three retrorockets fired at about 98 m and the bridle cut at about 21 m. Pathfinder then bounced about 15 times before rolling to a stop.</p>
-        <p>The flight is shortened to about a minute. The real landing was automatic: steering, the orange target and the timing window are added to make it a game. The 3D Mars uses NASA’s colour and relief maps.</p>
+        <p>{stormEntry ? "The four storm patterns and manual steering are arcade mechanics. The real Pathfinder entry and parachute deployment were automatic." : "The flight is shortened to about a minute. The real landing was automatic: steering, the orange target and the timing window are added to make it a game."} The 3D Mars uses NASA’s colour and relief maps.</p>
         <ul>
           <li><a href={missionPage}>NASA: Mars Pathfinder mission</a></li>
           <li><a href={flightRecord}>NASA Planetary Data System: the entry, descent and landing record</a></li>

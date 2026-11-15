@@ -6,16 +6,17 @@ import SiteHeader from "@/components/site/SiteHeader";
 import SiteFooter from "@/components/site/SiteFooter";
 import Reveal from "@/components/site/Reveal";
 import RoverHero from "@/components/site/RoverHero";
-import MarsLandingGlobe from "@/components/site/LandingGlobe";
-import OpportunityOrbit from "@/components/site/OpportunityOrbit";
-import { marsRoverSites } from "@/lib/landing-sites";
+import LandingGlobe from "@/components/site/LandingGlobe";
+import FlightOrbit from "@/components/site/FlightOrbit";
+import { explorerFlights } from "@/lib/mission-flights";
 import MissionLandingGlobe from "@/components/site/MissionLandingGlobe";
-import { LANDING_GLOBES } from "@/lib/mission-landing-sites";
+import { LANDING_EXPLORERS, LANDING_GLOBES } from "@/lib/mission-landing-sites";
 import RoverViewer from "@/components/rovers/RoverViewer";
 import BackLink from "@/components/site/BackLink";
 import { EXPLORERS, explorerFacts, explorerSources, getExplorer } from "@/lib/explorers";
 import { getTopic } from "@/lib/cosmo/knowledge";
 import { getRoverModel } from "@/lib/rover-models";
+import ExplorerCard from "../ExplorerCard";
 
 type Props = { params: Promise<{ id: string }> };
 
@@ -36,7 +37,11 @@ export default async function ExplorerPage({ params }: Props) {
   const facts = explorerFacts(e);
   const sources = explorerSources(e);
   const model = getRoverModel(e.id);
-  const roverSite = marsRoverSites.find((site) => site.id === e.id);
+  const landingExplorer = LANDING_EXPLORERS[e.world];
+  const initialSite = landingExplorer.initialSites?.[e.id] ?? e.id;
+  const landingSite = landingExplorer.sites.find((site) => site.id === initialSite);
+  const otherLandingGlobe = LANDING_GLOBES[e.id];
+  const flights = explorerFlights[e.id];
   const others = EXPLORERS.filter((x) => x.world === e.world && x.id !== e.id).slice(0, 3);
 
   return (
@@ -93,8 +98,9 @@ export default async function ExplorerPage({ params }: Props) {
           </Reveal>
         )}
 
-        {roverSite ? <MarsLandingGlobe key={e.id} site={roverSite} /> : LANDING_GLOBES[e.id] && <MissionLandingGlobe key={e.id} data={LANDING_GLOBES[e.id]!} />}
-        {e.id === "opportunity" && <OpportunityOrbit />}
+        {landingSite ? <LandingGlobe key={e.id} config={landingExplorer} original={landingSite} /> :
+          otherLandingGlobe && <MissionLandingGlobe key={e.id} data={otherLandingGlobe} />}
+        {flights && <FlightOrbit missions={flights} />}
 
         <Reveal className="section-banner">
           <h2>{facts.length} amazing discoveries</h2>
@@ -132,8 +138,19 @@ export default async function ExplorerPage({ params }: Props) {
           )}
         </Reveal>
 
-        <Reveal className="sources-panel">
-          <h2 className="info-card__label">Official sources · Check the facts</h2>
+        {others.length > 0 && (
+          <section className="more-explorers" aria-labelledby="more-explorers">
+            <h2 id="more-explorers" className="display-subtitle">More explorers</h2>
+            <ul className="more-explorers__list">
+              {others.map((other) => (
+                <li key={other.id}><ExplorerCard explorer={other} /></li>
+              ))}
+            </ul>
+          </section>
+        )}
+
+        <Reveal as="section" className="sources-panel">
+          <h2 id="external-links" className="info-card__label">External links</h2>
           <ul>
             {sources.map((s) => (
               <li key={s.url}>
@@ -146,20 +163,6 @@ export default async function ExplorerPage({ params }: Props) {
           </ul>
         </Reveal>
 
-        {others.length > 0 && (
-          <section className="more-explorers">
-            <h2 className="display-subtitle">More explorers</h2>
-            <div className="mini-grid">
-              {others.map((o) => (
-                <Link key={o.id} href={`/explorers/${o.id}`} className={`mini-card ${o.world === "moon" ? "mini-card--violet" : "mini-card--rose"}`}>
-                  <span className={`chip-badge${o.world === "moon" ? " chip-badge--violet" : ""}`}>{o.world === "moon" ? "Moon" : "Mars"}</span>
-                  <span className="mini-card__name">{o.name}</span>
-                  <span className="mini-card__line">{o.tagline}</span>
-                </Link>
-              ))}
-            </div>
-          </section>
-        )}
       </main>
       <SiteFooter />
     </div>

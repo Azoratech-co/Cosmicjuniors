@@ -1,9 +1,9 @@
 import type { CSSProperties } from "react";
 import styles from "./TypedDescription.module.css";
 
-export default function TypedDescription({ text, active }: { text: string; active: boolean }) {
+export default function TypedDescription({ text, active, startAt = 0 }: { text: string; active: boolean; startAt?: number }) {
   const words = text.split(" ");
-  let offset = 0;
+  let offset = startAt;
   return (
     <>
       <span className={styles.visuallyHidden}>{text}</span>

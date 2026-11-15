@@ -1,29 +1,21 @@
-.page :global(.game-page) {
-  /* Clip horizontal decoration without creating a scroll container that
-     would prevent the exit toolbar from sticking to the viewport. */
-  overflow-x: clip;
-}
-
 .quiz {
-  width: min(100%, 820px);
-  margin: 0 auto;
+  margin-top: clamp(28px, 5vw, 52px);
+  scroll-margin-block-start: 88px;
   color: var(--text);
 }
 
-.toolbar {
-  position: sticky;
-  top: 8px;
-  z-index: 7;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 12px;
-  margin-bottom: 16px;
-  padding: 8px 10px 8px 18px;
-  border: 1px solid var(--line-strong);
-  border-radius: var(--r-md);
-  background: var(--surface);
-  box-shadow: var(--shadow-1);
+.heading {
+  margin: 0 0 6px;
+  font-family: var(--ff-display);
+  font-weight: var(--display-weight);
+  font-size: clamp(28px, 5vw, 38px);
+  line-height: 1.15;
+}
+
+.intro {
+  margin: 0 0 16px;
+  color: var(--muted);
+  line-height: 1.6;
 }
 
 .eyebrow {
@@ -35,7 +27,7 @@
   text-transform: uppercase;
 }
 
-.exit, .secondary, .primary {
+.secondary, .primary {
   display: inline-flex;
   align-items: center;
   justify-content: center;
@@ -47,15 +39,7 @@
   text-decoration: none;
 }
 
-.exit {
-  flex-shrink: 0;
-  padding: 8px 14px;
-  border: 1px solid var(--line-strong);
-  color: var(--text);
-}
-
-.exit > span { font-size: 23px; line-height: 1; }
-.exit:hover, .secondary:hover { background: var(--surface-2); }
+.secondary:not(:disabled):hover { background: var(--surface-2); }
 
 .card {
   padding: clamp(20px, 4vw, 38px);
@@ -79,7 +63,7 @@
 .progress > span[data-state="answered"] { background: var(--fact); }
 .progress > span[data-state="current"] { background: var(--primary); }
 .questionHead { margin-bottom: 26px; }
-.title { margin: 12px 0; font-size: clamp(23px, 3.5vw, 30px); line-height: 1.3; letter-spacing: -.02em; text-wrap: balance; }
+.title { margin: 12px 0; font-size: clamp(23px, 3.5vw, 30px); line-height: 1.3; letter-spacing: -.02em; text-wrap: balance; scroll-margin-block-start: 88px; }
 .title:focus { outline: none; }
 .title:focus-visible { outline: 2px solid var(--focus); outline-offset: 6px; }
 .hint { color: var(--muted); font-size: 14px; line-height: 1.6; }
@@ -122,15 +106,13 @@
 .wrongIcon { color: #f87171; }
 .bottom { display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 16px; margin-top: 26px; padding-top: 22px; border-top: 1px solid var(--line); }
 .bottom > p { color: var(--muted); font-size: 13px; }
+.navigation { display: flex; flex-wrap: wrap; gap: 8px; }
 .primary { padding: 12px 22px; background: var(--primary); color: var(--on-primary); }
 .primary:not(:disabled):hover { background: var(--primary-hover); }
-.primary:disabled { opacity: .45; cursor: not-allowed; }
+.primary:disabled, .secondary:disabled { opacity: .45; cursor: not-allowed; }
 .secondary { padding: 12px 22px; border: 1px solid var(--line-strong); color: var(--text); }
-.footnote { margin-top: 22px; text-align: center; color: var(--muted); font-size: 12px; line-height: 1.9; }
-.footnote a { text-underline-offset: 3px; }
 
 .result { padding: 8px 0 20px; text-align: center; }
-.resultIcon { display: grid; place-items: center; width: 64px; height: 64px; margin: 0 auto 24px; border: 1px solid color-mix(in srgb, var(--star) 40%, transparent); border-radius: 50%; background: color-mix(in srgb, var(--star) 10%, transparent); color: var(--star); font-size: 32px; }
 .score { color: var(--fact-ink); font-size: 76px; font-weight: 700; line-height: 1.3; letter-spacing: -.05em; }
 .score > span { color: var(--muted); font-size: 30px; font-weight: 400; letter-spacing: 0; }
 .resultMessage { max-width: 440px; margin: 12px auto 26px; color: var(--muted); line-height: 1.7; }
@@ -145,15 +127,46 @@
 .reviewQuestion > span:first-child { flex-shrink: 0; margin-top: 2px; }
 
 @media (max-width: 600px) {
-  .toolbar { padding-left: 12px; }
-  .toolbar .eyebrow { max-width: 130px; font-size: 10px; line-height: 1.6; }
-  .exit { gap: 8px; padding: 8px 12px; }
   .choices { grid-template-columns: 1fr; gap: 10px; }
   .choice { min-height: 76px; padding: 14px; font-size: 14px; }
   .progress { gap: 4px; margin-bottom: 26px; }
   .bottom { align-items: stretch; flex-direction: column-reverse; text-align: center; }
+  .navigation { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .navigation > button { padding-inline: 8px; gap: 6px; line-height: 1.25; }
   .feedbackContent { padding: 14px; }
 }
+
+.inFrame {
+  --bg: var(--ss-ink);
+  --surface-2: #192345;
+  --line: rgb(183 164 255 / 0.18);
+  --line-strong: rgb(183 164 255 / 0.32);
+  --text: var(--ss-text);
+  --muted: var(--ss-muted);
+  --primary: var(--ss-gold);
+  --primary-hover: #ffdaa0;
+  --on-primary: var(--ss-ink);
+  --fact: var(--ss-lav);
+  --fact-ink: #dfd5ff;
+  --focus: var(--ss-gold);
+  --good: #4ade80;
+  max-width: 900px;
+  margin: 0 auto;
+  padding: clamp(16px, 3vw, 32px);
+}
+
+.inFrame .heading { margin-bottom: 16px; font-size: clamp(23px, 3vw, 32px); }
+.inFrame .card { padding: 0; border: 0; background: transparent; box-shadow: none; }
+.inFrame .progress { margin: 8px 0 16px; }
+.inFrame .questionHead { margin-bottom: 14px; }
+.inFrame .title { margin: 6px 0; font-size: clamp(19px, 2.4vw, 28px); scroll-margin-block-start: 12px; }
+.inFrame .choice { min-height: 52px; padding: 10px 12px; gap: 10px; }
+.inFrame .letter { width: 28px; height: 28px; }
+.inFrame .feedback { margin-top: 0; }
+.inFrame .feedbackContent { margin-top: 12px; padding: 12px; }
+.inFrame .bottom { margin-top: 14px; padding-top: 12px; gap: 8px; }
+.inFrame .result { padding-top: 0; }
+.inFrame .score { font-size: clamp(44px, 9vw, 65px); }
 
 @media (prefers-reduced-motion: reduce) {
   .choice { transition: none; }

@@ -5,6 +5,7 @@ import SiteHeader from "@/components/site/SiteHeader";
 import SiteFooter from "@/components/site/SiteFooter";
 import BackLink from "@/components/site/BackLink";
 import StoryReader from "@/components/site/StoryReader";
+import StoryQuiz from "@/components/site/StoryQuiz";
 import { SIGN_VIDEOS, STORY_IDS, getStory } from "@/lib/storyline";
 
 /** The story as text: chapters, NASA photos, read-aloud and the sign language panel. */
@@ -35,7 +36,13 @@ export default function StoryText({ id }: { id: string }) {
             </Link>
           ))}
         </div>
+        {id === "sojourner" && (
+          <div className="cta-row">
+            <Link className="btn-ghost cta" href="/story/sojourner/comic">Read the comic</Link>
+          </div>
+        )}
         <StoryReader story={story} signVideos={SIGN_VIDEOS[id] ?? {}} nextStory={next ? { id: next.id, title: next.title.split(":")[0] } : undefined} />
+        {id === "sojourner" && <StoryQuiz />}
       </main>
       <SiteFooter />
     </div>

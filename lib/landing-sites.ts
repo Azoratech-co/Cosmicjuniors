@@ -6,17 +6,24 @@ export type MarsLandingSite = {
   source: string;
 };
 
-export type MarsRoverSite = MarsLandingSite & {
+export type LandingSiteDetails = MarsLandingSite & {
   id: string;
   rover: string;
   agency: string;
   region: string;
   /** Touchdown/impact date in UTC, not launch date or rover deployment date. */
   arrivalDate: string;
-  outcome: "explored" | "not-deployed";
+  arrivalLabel?: "Impact";
   approximate: boolean;
+  title: string;
   summary: string;
+  highlight: { title: string; description: string };
   coordinateSource: string;
+  coordinateSourceLabel?: string;
+};
+
+export type MarsRoverSite = LandingSiteDetails & {
+  outcome: "explored" | "not-deployed";
   coordinateNote: string;
 };
 
@@ -36,7 +43,9 @@ export const opportunityLanding: MarsRoverSite = {
   arrivalDate: "2004-01-25",
   outcome: "explored",
   approximate: false,
-  summary: "Opportunity began its long journey inside Eagle Crater, where it found evidence of ancient water.",
+  title: "Exploring Eagle Crater",
+  summary: "Opportunity began its journey on Mars here.",
+  highlight: { title: "Signs of Water", description: "It found clues in rocks that water existed long ago." },
   coordinateSource: "https://science.nasa.gov/mission/mer-opportunity/",
   coordinateNote: "Touchdown coordinates published in NASA's mission history; not its final position at Endeavour Crater.",
 };
@@ -62,7 +71,9 @@ export const marsRoverSites: readonly MarsRoverSite[] = [
     arrivalDate: "1997-07-04",
     outcome: "explored",
     approximate: false,
-    summary: "Carried by Mars Pathfinder, Sojourner became the first rover to explore the Martian surface.",
+    title: "Exploring Ares Vallis",
+    summary: "Mars Pathfinder carried Sojourner to the Carl Sagan Memorial Station.",
+    highlight: { title: "The First Mars Rover", description: "Sojourner was the first rover to drive on Mars and studied rocks near the lander." },
     coordinateSource: mars24,
     coordinateNote: "Pathfinder touchdown site, rounded to 0.01 degrees in NASA Mars24; Sojourner later drove away from the lander.",
   },
@@ -79,7 +90,9 @@ export const marsRoverSites: readonly MarsRoverSite[] = [
     arrivalDate: "2004-01-04",
     outcome: "explored",
     approximate: false,
-    summary: "Opportunity's twin landed on the other side of Mars and explored Gusev Crater and the Columbia Hills.",
+    title: "Exploring Gusev Crater",
+    summary: "Spirit landed at Columbia Memorial Station on the other side of Mars from Opportunity.",
+    highlight: { title: "The Columbia Hills", description: "Spirit crossed the crater plains and explored the hills." },
     coordinateSource: "https://science.nasa.gov/mission/mer-spirit/",
     coordinateNote: "Touchdown coordinates published in NASA's mission history; not Spirit's final resting place.",
   },
@@ -97,7 +110,9 @@ export const marsRoverSites: readonly MarsRoverSite[] = [
     arrivalDate: "2012-08-06",
     outcome: "explored",
     approximate: false,
-    summary: "Curiosity landed in Gale Crater to investigate whether Mars once had conditions suitable for microbial life.",
+    title: "Exploring Gale Crater",
+    summary: "Curiosity began its journey at Bradbury Landing.",
+    highlight: { title: "Could Mars Support Life?", description: "Curiosity investigates whether ancient Mars had conditions that could support microbial life." },
     coordinateSource: "https://ntrs.nasa.gov/citations/20130010129",
     coordinateNote: "Actual landing site in NASA's Mars Science Laboratory entry, descent and landing assessment; not a current rover position.",
   },
@@ -114,7 +129,9 @@ export const marsRoverSites: readonly MarsRoverSite[] = [
     arrivalDate: "2021-02-18",
     outcome: "explored",
     approximate: false,
-    summary: "Perseverance landed near an ancient river delta to study rocks and collect samples.",
+    title: "Exploring Jezero Crater",
+    summary: "Perseverance landed near an ancient river delta at Octavia E. Butler Landing.",
+    highlight: { title: "Collecting Rock Samples", description: "Perseverance studies rocks and collects samples as it explores." },
     coordinateSource: "https://ntrs.nasa.gov/citations/20210024644",
     coordinateNote: "Actual touchdown coordinates in NASA's Mars 2020 entry, descent and landing assessment; not a current rover position.",
   },
@@ -131,7 +148,9 @@ export const marsRoverSites: readonly MarsRoverSite[] = [
     arrivalDate: "2021-05-14",
     outcome: "explored",
     approximate: false,
-    summary: "China's Tianwen-1 mission delivered Zhurong to Utopia Planitia. The rover drove off its landing platform on May 22, 2021.",
+    title: "Exploring Utopia Planitia",
+    summary: "China’s Tianwen-1 mission delivered Zhurong to this plain.",
+    highlight: { title: "First Drive", description: "Zhurong drove off the landing platform on May 22, 2021." },
     coordinateSource: mars24,
     coordinateNote: "Rounded to 0.01 degrees in NASA Mars24, which cites Liu et al. (2022). May 14 UTC was May 15 in China.",
   },
@@ -146,9 +165,12 @@ export const marsRoverSites: readonly MarsRoverSite[] = [
     color: "#f472b6",
     source: sovietRovers,
     arrivalDate: "1971-11-27",
+    arrivalLabel: "Impact",
     outcome: "not-deployed",
     approximate: true,
-    summary: "The Mars 2 lander crashed during descent. Its small PrOP-M rover never explored the surface.",
+    title: "Mars 2 Impact",
+    summary: "The lander crashed during descent near Hellas Planitia.",
+    highlight: { title: "Rover Deployment", description: "Its PrOP-M rover never drove on Mars." },
     coordinateSource: mars24,
     coordinateNote: "Approximate lander impact location reported by NASA Mars24, not a confirmed rover location. No uncertainty radius is supplied.",
   },
@@ -165,7 +187,9 @@ export const marsRoverSites: readonly MarsRoverSite[] = [
     arrivalDate: "1971-12-02",
     outcome: "not-deployed",
     approximate: true,
-    summary: "Mars 3 soft-landed but stopped transmitting after about 20 seconds. Its PrOP-M rover could not be deployed.",
+    title: "Mars 3 Landing",
+    summary: "The lander touched down in the Terra Sirenum region.",
+    highlight: { title: "A Brief Signal", description: "Mars 3 stopped transmitting after about 20 seconds, before the PrOP-M rover could deploy." },
     coordinateSource: mars24,
     coordinateNote: "Approximate lander location reported by NASA Mars24, not a confirmed rover location. No uncertainty radius is supplied.",
   },
@@ -180,7 +204,7 @@ export function landingView(site: Coordinates) {
   };
 }
 
-/** Matches the existing Viking mosaic's -180-degree left edge on SphereGeometry. */
+/** Matches the world maps' -180-degree left edge on SphereGeometry. */
 export function marsSurfacePosition(site: Coordinates): [number, number, number] {
   const latitude = site.latitude * Math.PI / 180;
   const longitude = site.longitude * Math.PI / 180;

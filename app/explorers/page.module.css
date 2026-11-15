@@ -1,0 +1,121 @@
+.section + .section {
+  border-top: 1px solid var(--line-strong);
+  margin-top: 44px;
+  padding-top: 32px;
+}
+
+.heading {
+  margin-bottom: 18px;
+}
+
+.layout {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(200px, 28%);
+  gap: 22px;
+}
+
+.list {
+  display: grid;
+  gap: 12px;
+  min-width: 0;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.card {
+  --card-accent: var(--pink);
+  display: grid;
+  grid-template-columns: clamp(106px, 27%, 178px) minmax(0, 1fr);
+  align-items: center;
+  gap: clamp(12px, 2.2vw, 22px);
+  padding: 10px;
+  border-radius: 17px;
+  border: 1px solid var(--line-strong);
+  background: var(--surface);
+  color: var(--text);
+  text-decoration: none;
+  transition: border-color 180ms ease, background-color 180ms ease;
+}
+
+.card[data-world="moon"] {
+  --card-accent: color-mix(in srgb, var(--primary) 45%, var(--text));
+}
+
+.card:hover {
+  border-color: var(--card-accent);
+  background: color-mix(in srgb, var(--primary) 8%, var(--surface));
+}
+
+.card:focus-visible {
+  outline: 2px solid var(--card-accent);
+  outline-offset: 3px;
+}
+
+.photo {
+  display: block;
+  width: 100%;
+  height: auto;
+  aspect-ratio: 4 / 3;
+  border-radius: 10px;
+  object-fit: cover;
+  background: color-mix(in srgb, var(--primary) 12%, var(--surface));
+}
+
+.cardText {
+  display: grid;
+  justify-items: start;
+  gap: 4px;
+  padding: 4px 6px 4px 0;
+}
+
+.kind,
+.explore {
+  color: var(--card-accent);
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.045em;
+  text-transform: uppercase;
+}
+
+.name {
+  font-family: var(--ff-display);
+  font-size: clamp(18px, 2.7vw, 26px);
+  font-weight: var(--display-weight);
+  line-height: 1.16;
+}
+
+.line {
+  color: var(--muted);
+  font-size: 13px;
+  line-height: 1.4;
+}
+
+.explore {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  margin-top: 5px;
+}
+
+.credits {
+  margin: 18px 0 28px;
+  color: var(--muted);
+  font-size: 12px;
+}
+
+.credits a {
+  color: inherit;
+  text-underline-offset: 3px;
+}
+
+@media (max-width: 720px) {
+  .layout {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 16px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .card { transition: none; }
+}

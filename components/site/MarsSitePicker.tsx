@@ -1,12 +1,12 @@
 "use client";
 
 import { useEffect, useLayoutEffect, useRef } from "react";
-import { formatLandingCoordinates, marsRoverSites, type MarsRoverSite } from "@/lib/landing-sites";
+import { formatLandingCoordinates, type LandingSiteDetails } from "@/lib/landing-sites";
 import styles from "./MarsSitePicker.module.css";
 
-type Props = { selected: string; onSelect: (site: MarsRoverSite) => void };
+type Props = { sites: readonly LandingSiteDetails[]; selected: string; onSelect: (site: LandingSiteDetails) => void };
 
-export default function MarsSitePicker({ selected, onSelect }: Props) {
+export default function LandingSitePicker({ sites, selected, onSelect }: Props) {
   const wheel = useRef<HTMLDivElement>(null);
 
   const timer = useRef<number>(undefined);
@@ -30,7 +30,7 @@ export default function MarsSitePicker({ selected, onSelect }: Props) {
 
   return (
     <div className={styles.frame}>
-      <div ref={wheel} className={styles.wheel} role="group" aria-label="Choose a rover landing site"
+      <div ref={wheel} className={styles.wheel} role="group" aria-label="Choose a landing site"
         onScroll={(event) => {
           const list = event.currentTarget;
           window.clearTimeout(timer.current);
@@ -39,18 +39,18 @@ export default function MarsSitePicker({ selected, onSelect }: Props) {
             const middle = list.scrollTop + list.clientHeight / 2;
             const index = [...list.querySelectorAll("button")].findIndex((row) =>
               middle >= row.offsetTop && middle < row.offsetTop + row.offsetHeight);
-            const site = marsRoverSites[index];
+            const site = sites[index];
             if (site && site.id !== selected) onSelect(site);
           }, 140);
         }}>
-        {marsRoverSites.map((site, index) => (
+        {sites.map((site, index) => (
           <button key={site.id} type="button" className={styles.row} aria-pressed={selected === site.id}
             onClick={() => { window.clearTimeout(timer.current); onSelect(site); }}
             onKeyDown={(event) => {
               if (event.key !== "ArrowUp" && event.key !== "ArrowDown") return;
               event.preventDefault();
               const next = index + (event.key === "ArrowUp" ? -1 : 1);
-              const nextSite = marsRoverSites[next];
+              const nextSite = sites[next];
               if (!nextSite) return;
               window.clearTimeout(timer.current);
               onSelect(nextSite);

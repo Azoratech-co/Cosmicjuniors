@@ -1,11 +1,60 @@
 "use client";
 
 import { useId, useMemo, useState } from "react";
-import { closestStopIndex, detailedCoordinates, getJourneyDefinition, getRouteSnapshot, regionalPoint, solRange, type JourneyData, type SurfacePoint } from "@/lib/mars-journeys";
-import type { MarsRoverSite as Site } from "@/lib/landing-sites";
+import { closestStopIndex, detailedCoordinates, getJourneyDefinition, getRouteSnapshot, regionalPoint, solRange, type JourneyData, type JourneyLandmark, type SurfacePoint } from "@/lib/mars-journeys";
+import type { LandingSiteDetails as Site } from "@/lib/landing-sites";
+import MarsJourneyEndpoint from "./MarsJourneyEndpoint";
+import MarsInfo from "./MarsInfo";
+import infoStyles from "./LandingGlobe.module.css";
 import styles from "./MarsJourneyPanel.module.css";
 
 type Props = { site: Site; data?: JourneyData; loading: boolean; failed: boolean; retry: () => void };
+
+function LandmarkInfo({ landmark, reveal }: { landmark: JourneyLandmark; reveal?: boolean }) {
+  return (
+    <section className={infoStyles.infoCard} aria-label={landmark.name}>
+      <MarsInfo
+        reveal={reveal}
+        label="Documented visit"
+        title={landmark.name}
+        fields={landmark.sol === undefined ? undefined : [["Mission sol", landmark.sol]]}
+        more={{ content: landmark.description }}
+        sources={<a href={landmark.source} target="_blank" rel="noopener noreferrer">NASA visit reference</a>}
+      />
+    </section>
+  );
+}
+
+// Mars Trek's CTX tile grid has a (-180°, 90°) origin and 2 × 1 tiles at level 0.
+function terrainTiles(origin: SurfacePoint, project: (point: SurfacePoint) => number[]) {
+  const [originX, originY] = project(origin);
+  const [eastX, northY] = project([origin[0] + 1, origin[1] + 1]);
+  const pixelsPerLongitude = eastX - originX;
+  const pixelsPerLatitude = originY - northY;
+  const west = origin[0] - originX / pixelsPerLongitude;
+  const east = west + 1000 / pixelsPerLongitude;
+  const north = origin[1] + originY / pixelsPerLatitude;
+  const south = north - 700 / pixelsPerLatitude;
+  const degreesPerPixel = Math.max(1 / pixelsPerLongitude, 1 / pixelsPerLatitude);
+  const level = Math.max(0, Math.min(11, Math.floor(Math.log2(180 / (512 * degreesPerPixel)))));
+  const tileDegrees = 180 / 2 ** level;
+  const columnCount = 2 ** (level + 1);
+  const tiles = [];
+
+  for (let row = Math.max(0, Math.floor((90 - north) / tileDegrees)); row < Math.min(2 ** level, Math.ceil((90 - south) / tileDegrees)); row++) {
+    for (let col = Math.floor((west + 180) / tileDegrees); col < Math.ceil((east + 180) / tileDegrees); col++) {
+      const column = ((col % columnCount) + columnCount) % columnCount;
+      tiles.push({
+        href: `https://astro.arcgis.com/arcgis/rest/services/OnMars/CTX/MapServer/tile/${level}/${row}/${column}`,
+        x: (col * tileDegrees - 180 - west) * pixelsPerLongitude,
+        y: (north - (90 - row * tileDegrees)) * pixelsPerLatitude,
+        width: tileDegrees * pixelsPerLongitude,
+        height: tileDegrees * pixelsPerLatitude,
+      });
+    }
+  }
+  return tiles;
+}
 
 function RegionalRoute({ site, data }: { site: Site; data: JourneyData }) {
   const definition = getJourneyDefinition(site.id);
@@ -27,7 +76,7 @@ function RegionalRoute({ site, data }: { site: Site; data: JourneyData }) {
     };
     const path = data.segments.map((line) => line.map((point, i) => `${i ? "L" : "M"}${project(point).map((v) => v.toFixed(2)).join(",")}`).join(" ")).join(" ");
     const scaleMeters = Math.max(10, 10 ** Math.floor(Math.log10(160 / scale)));
-    return { project, path, scale, scaleMeters };
+    return { project, path, scale, scaleMeters, tiles: terrainTiles(origin, project) };
   }, [data]);
   const start = plot.project(data.stops[0]);
   const end = plot.project(data.stops[data.stops.length - 1]);
@@ -41,10 +90,15 @@ function RegionalRoute({ site, data }: { site: Site; data: JourneyData }) {
         <div className={styles.mapHeading}><h3>{site.rover} · recorded route</h3><span>{data.snapshotDate} snapshot</span></div>
         <svg className={styles.map} viewBox="0 0 1000 700" role="img" aria-labelledby={title}>
           <title id={title}>{site.rover} regional traverse, north up. Ring: first mapped position. Diamond: last published position. Gold crosshair: selected record.</title>
-          <defs><pattern id={`${title}-grid`} width="50" height="50" patternUnits="userSpaceOnUse"><path d="M50 0H0V50" fill="none" stroke="#263348" strokeWidth="1" /></pattern></defs>
           <rect width="1000" height="700" fill="#0b1321" />
-          <rect width="1000" height="700" fill={`url(#${title}-grid)`} />
-          <path d={plot.path} fill="none" stroke={site.color} strokeWidth="2.5" strokeLinejoin="round" strokeLinecap="round" />
+          <g aria-hidden="true">
+            {plot.tiles.map((tile) => <image key={tile.href} {...tile} preserveAspectRatio="none" />)}
+            <rect width="1000" height="700" fill="#0b1321" fillOpacity=".22" />
+          </g>
+          <g fill="none" strokeLinejoin="round" strokeLinecap="round">
+            <path d={plot.path} stroke="#0b1321" strokeWidth="6" />
+            <path d={plot.path} stroke={site.color} strokeWidth="3" />
+          </g>
           {definition.landmarks.map((entry, i) => {
             if (entry.sol === undefined) return null;
             const stop = data.stops[closestStopIndex(data.stops, entry.sol)];
@@ -59,23 +113,38 @@ function RegionalRoute({ site, data }: { site: Site; data: JourneyData }) {
             <path d="M-25 0h12m26 0h12M0-25v12m0 26v12" stroke="#ffdb79" strokeWidth="3" />
             <circle r="5" fill="#ffdb79" stroke="#0b1321" strokeWidth="2" />
           </g>
-          <path d="M940 85V40m-8 12 8-12 8 12" stroke="#c5d2ec" strokeWidth="2" fill="none" /><text x="940" y="30" textAnchor="middle" fill="#c5d2ec" fontSize="16">N</text>
-          <path d={`M55 625v9h${plot.scaleMeters * plot.scale}v-9`} stroke="white" strokeWidth="2" fill="none" />
-          <text x="55" y="657" fill="#b8c6e0" fontSize="14">{plot.scaleMeters >= 1000 ? `${plot.scaleMeters / 1000} km` : `${plot.scaleMeters} m`}</text>
+          <g className={styles.mapGuides}>
+            <path d="M940 85V40m-8 12 8-12 8 12" stroke="white" strokeWidth="2" fill="none" />
+            <text x="940" y="30" textAnchor="middle" fontSize="16">N</text>
+            <path d={`M55 625v9h${plot.scaleMeters * plot.scale}v-9`} stroke="white" strokeWidth="2" fill="none" />
+            <text x="55" y="657" fontSize="14">{plot.scaleMeters >= 1000 ? `${plot.scaleMeters / 1000} km` : `${plot.scaleMeters} m`}</text>
+          </g>
         </svg>
         <p className={styles.legend}>○ Start of mapped traverse <span style={{ color: site.color }}>◆ {definition.endpointLabel}</span> <span className={styles.cursorKey}>&#8853; Selected record</span></p>
-        <p className={styles.note}>North-up route diagram, not a terrain photograph. Separate source segments remain separate. A rover route is too small to inspect at whole-planet scale.</p>
-        <div className={styles.recordBox}>
-          <label>Recorded position <span>{index + 1} / {data.stops.length.toLocaleString("en")}</span>
-            <input aria-label="Recorded position" aria-valuetext={`${solRange(current)}, ${detailedCoordinates(current)}`} type="range" min="0" max={data.stops.length - 1} step="1" value={index} onChange={(event) => chooseRecord(Number(event.target.value))} />
-          </label>
-          <div className={styles.recordButtons}>
-            <button type="button" disabled={index === 0} onClick={() => chooseRecord(index - 1)}>Previous</button>
-            <label>Record <input aria-label="Record number" type="number" min="1" max={data.stops.length} value={index + 1} onChange={(event) => { if (event.target.value) chooseRecord(Number(event.target.value) - 1); }} /></label>
-            <button type="button" disabled={index === data.stops.length - 1} onClick={() => chooseRecord(index + 1)}>Next</button>
+        <p className={styles.note}>Orbital imagery: NASA/JPL-Caltech/MSSS/Murray Lab · <a href="https://murray-lab.caltech.edu/CTX/" target="_blank" rel="noopener noreferrer">Global CTX Mosaic</a>
+          {site.id === "opportunity" && <> · <a href={definition.endpointSource} target="_blank" rel="noopener noreferrer">NASA final traverse map</a></>}
+        </p>
+        <section className={infoStyles.infoCard} aria-label="Recorded position">
+          <div aria-live="polite">
+            <MarsInfo
+              title="Recorded position"
+              fields={[
+                ["Record", `${(index + 1).toLocaleString("en")} / ${data.stops.length.toLocaleString("en")}`],
+                ["Coordinates", detailedCoordinates(current)],
+                ["Coverage", solRange(current)],
+              ]}
+              more={{ content: <><strong>Site:</strong> {current[4]} · <strong>Drive:</strong> {current[5]}</> }}
+            />
           </div>
-          <p aria-live="polite"><strong>{solRange(current)}</strong> · {detailedCoordinates(current)}<br /><span>Site {current[4]} · Drive {current[5]}</span></p>
-        </div>
+          <div className={styles.recordControls}>
+            <input aria-label="Recorded position" aria-valuetext={`${solRange(current)}, ${detailedCoordinates(current)}`} type="range" min="0" max={data.stops.length - 1} step="1" value={index} onChange={(event) => chooseRecord(Number(event.target.value))} />
+            <div className={styles.recordButtons}>
+              <button type="button" disabled={index === 0} onClick={() => chooseRecord(index - 1)}>Previous</button>
+              <label>Record <input aria-label="Record number" type="number" min="1" max={data.stops.length} value={index + 1} onChange={(event) => { if (event.target.value) chooseRecord(Number(event.target.value) - 1); }} /></label>
+              <button type="button" disabled={index === data.stops.length - 1} onClick={() => chooseRecord(index + 1)}>Next</button>
+            </div>
+          </div>
+        </section>
       </div>
       <div className={styles.sidebar}>
         <h3>Places visited</h3>
@@ -86,8 +155,8 @@ function RegionalRoute({ site, data }: { site: Site; data: JourneyData }) {
             setRecord(closestStopIndex(data.stops, entry.sol)); setLandmarkIndex(i);
           }}><span>{i + 1}</span><span>{entry.name}<small>Documented visit · Sol {entry.sol}</small></span></button>
         </li>)}</ol>
-        {landmark && <div className={styles.landmarkInfo}><strong>{landmark.name}</strong><p>{landmark.description}</p><a href={landmark.source} target="_blank" rel="noopener noreferrer">NASA visit reference</a></div>}
-        <Endpoint site={site} />
+        {landmark && <LandmarkInfo key={landmark.name} landmark={landmark} reveal />}
+        <MarsJourneyEndpoint site={site} reveal />
         <button type="button" className={styles.endpointButton} onClick={() => chooseRecord(data.stops.length - 1)}>Select last published record</button>
         <p className={styles.note}>{definition.coverage}</p>
         <p className={styles.note}>Repeated stationary entries are retained. Records are localizations, not every wheel movement.</p>
@@ -95,18 +164,6 @@ function RegionalRoute({ site, data }: { site: Site; data: JourneyData }) {
       </div>
     </>
   );
-}
-
-export function Endpoint({ site }: { site: Site }) {
-  const definition = getJourneyDefinition(site.id);
-  const snapshot = getRouteSnapshot(site.id);
-  return <div className={styles.endpoint}>
-    <p className={styles.kicker}>{definition.endpointLabel}</p><strong>{definition.endpointArea}</strong>
-    {snapshot && <p>{detailedCoordinates(snapshot.last)}<br />{solRange(snapshot.last)} · snapshot {snapshot.snapshotDate}</p>}
-    {definition.contact && <p><strong>{definition.contact.label}</strong><br /><time dateTime={definition.contact.date}>{definition.contact.date}</time> <a href={definition.contact.source} target="_blank" rel="noopener noreferrer">NASA reference</a></p>}
-    <p className={styles.note}>{definition.endpointNote}</p>
-    <a href={definition.endpointSource} target="_blank" rel="noopener noreferrer">Endpoint evidence</a>
-  </div>;
 }
 
 export default function MarsJourneyPanel({ site, data, loading, failed, retry }: Props) {
@@ -121,13 +178,17 @@ export default function MarsJourneyPanel({ site, data, loading, failed, retry }:
         {definition.images?.map((image) => <figure className={styles.figure} key={image.file}>
           {/* eslint-disable-next-line @next/next/no-img-element */}
           <img src={image.file} alt={image.alt} loading="lazy" />
-          <figcaption>{image.caption} · {image.credit} <a href={image.source} target="_blank" rel="noopener noreferrer">NASA source</a></figcaption>
+          <figcaption className={infoStyles.infoCard}>
+            <MarsInfo title={image.title} fields={[["Image credit", image.credit]]}
+              more={{ content: image.caption }}
+              sources={<a href={image.source} target="_blank" rel="noopener noreferrer">Image source</a>} />
+          </figcaption>
         </figure>)}
         <p className={styles.note}>{definition.coverage}</p>
       </div>
       <div className={styles.sidebar}><h3>Documented places</h3>
-        {definition.landmarks.map((entry) => <div className={styles.landmarkInfo} key={entry.name}><strong>{entry.name}</strong><p>{entry.description}</p><a href={entry.source} target="_blank" rel="noopener noreferrer">NASA reference</a></div>)}
-        <Endpoint site={site} />
+        {definition.landmarks.map((entry) => <LandmarkInfo key={entry.name} landmark={entry} />)}
+        <MarsJourneyEndpoint site={site} reveal />
       </div>
     </>}
   </section>;

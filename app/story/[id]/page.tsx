@@ -4,6 +4,7 @@ import { notFound } from "next/navigation";
 import SiteHeader from "@/components/site/SiteHeader";
 import SiteFooter from "@/components/site/SiteFooter";
 import StoryScroll from "@/components/site/StoryScroll";
+import StoryQuiz from "@/components/site/StoryQuiz";
 import { STORY_IDS, getStory } from "@/lib/storyline";
 import { SOJOURNER_SCENES } from "@/lib/story/sojourner";
 import StoryText from "@/components/site/StoryText";
@@ -36,13 +37,22 @@ export default async function StoryPage({ params }: Props) {
   return (
     <div className="site-page story-scroll-page">
       <SiteHeader />
-      <StoryScroll scenes={scenes} storyTitle={name} storySubtitle={sub?.trim() ?? ""} chapters={chapters} folder={`/story/${id}/`} />
-      <div className="ss-after">
-        {id === "sojourner" && <Link className="btn-purple cta" href="/games/story-quiz">Take the story quiz · 10 questions</Link>}
-        <Link className="btn-purple cta" href={`/story/${id}/text`}>Read the full story</Link>
-        <Link className="btn-ghost cta" href="/chat?mode=story">Ask Cosmo about the story</Link>
-        <Link className="btn-ghost cta" href="/story/spirit">Next: Spirit&apos;s story</Link>
-      </div>
+      <main>
+        <StoryScroll
+          scenes={scenes}
+          storyTitle={name}
+          storySubtitle={sub?.trim() ?? ""}
+          chapters={chapters}
+          folder={`/story/${id}/`}
+          activities={{ "story-quiz": <StoryQuiz inFrame /> }}
+          comicHref={id === "sojourner" ? "/story/sojourner/comic" : undefined}
+        />
+        <div className="ss-after">
+          <Link className="btn-purple cta" href={`/story/${id}/text`}>Read the full story</Link>
+          <Link className="btn-ghost cta" href="/chat?mode=story">Ask Cosmo about the story</Link>
+          <Link className="btn-ghost cta" href="/story/spirit">Next: Spirit&apos;s story</Link>
+        </div>
+      </main>
       <SiteFooter />
     </div>
   );

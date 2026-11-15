@@ -1,0 +1,35 @@
+Mars and Moon Explorers image credits
+
+Earth — NASA's Blue Marble 2012 composite. NASA / NOAA / GSFC / Suomi NPP / VIIRS / Norman Kuring.
+https://science.nasa.gov/image-detail/amf-gsfc_20171208_archive_e001386/
+
+Mars — Still rendered from Cosmic Juniors' 3D globe with Viking imagery and MOLA elevation. NASA / JPL / USGS.
+https://trek.nasa.gov/tiles/apidoc/trekAPI.html?body=mars
+https://pds-geosciences.wustl.edu/missions/mgs/megdr.html
+
+Moon — Still rendered from Cosmic Juniors' 3D globe with LRO imagery and LOLA elevation. NASA Scientific Visualization Studio / LROC / LOLA.
+https://svs.gsfc.nasa.gov/4720/
+
+Sojourner — Mars Pathfinder photograph, PIA01122. NASA / JPL.
+https://science.nasa.gov/photojournal/sojourner-rover-near-the-dice/
+
+Spirit — Photograph of Mars Exploration Rover 1 before launch, PIA04834. NASA / JPL.
+https://www.jpl.nasa.gov/images/pia04834-mars-exploration-rover-1/
+
+Opportunity — Photograph during preflight processing, PIA05840. NASA / JPL.
+https://science.nasa.gov/photojournal/one-year-before-mission-success/
+
+InSight — Artist's concept, PIA22957. NASA / JPL-Caltech.
+https://science.nasa.gov/photojournal/insight-collecting-mars-weather-data-artists-concept/
+
+Phoenix — Artist's concept, PIA09344. NASA / JPL / University of Arizona / Lockheed Martin.
+https://science.nasa.gov/photojournal/phoenix-lander-on-mars-artists-concept/
+
+Lunar Roving Vehicle — Apollo 15 photograph, AS15-86-11603. NASA.
+https://images.nasa.gov/details/as15-86-11603
+
+Surveyor 3 — Apollo 12 photograph, AS12-48-7136. NASA.
+https://images.nasa.gov/details/as12-48-7136
+
+Apollo 11 site — Photograph at Tranquility Base, AS11-40-5874. NASA.
+https://images.nasa.gov/details/as11-40-5874

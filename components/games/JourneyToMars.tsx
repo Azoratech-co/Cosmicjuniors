@@ -1,5 +1,7 @@
 "use client";
 
+import { ARCADE_SPEED } from "./pathfinderFlight";
+
 import Link from "next/link";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { WinPanel } from "./GameShell";
@@ -574,7 +576,7 @@ function ascend(g: Game, dt: number, steer: number) {
 }
 
 function cruiseStep(g: Game, dt: number, sx: number, sy: number, onFact: (i: number) => void, onHit: (left: number) => void) {
-  const speed = 270;
+  const speed = ARCADE_SPEED;
   let dx = sx, dy = sy;
   if (dx || dy) {
     const len = Math.hypot(dx, dy) || 1;

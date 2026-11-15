@@ -13,6 +13,11 @@
   animation: showLetter 1ms var(--letter-delay) step-start forwards;
 }
 
+:is(a, button):focus-visible .description .word > span {
+  animation: none;
+  opacity: 1;
+}
+
 @keyframes showLetter { from, to { opacity: 1; } }
 
 @media (prefers-reduced-motion: reduce) {

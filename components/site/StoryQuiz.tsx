@@ -1,12 +1,10 @@
 "use client";
 
-import Link from "next/link";
 import { useEffect, useRef, useState } from "react";
 import { SOJOURNER_QUIZ } from "@/lib/sojourner-quiz";
 import styles from "./StoryQuiz.module.css";
 
 const LETTERS = ["A", "B", "C", "D"];
-const STORY_HREF = "/story/sojourner/text";
 
 function AnswerMark({ correct }: { correct: boolean }) {
   return (
@@ -16,10 +14,11 @@ function AnswerMark({ correct }: { correct: boolean }) {
   );
 }
 
-export default function StoryQuiz() {
+export default function StoryQuiz({ inFrame = false }: { inFrame?: boolean }) {
   const [current, setCurrent] = useState(0);
   const [answers, setAnswers] = useState<number[]>([]);
   const [finished, setFinished] = useState(false);
+  const quiz = useRef<HTMLElement>(null);
   const heading = useRef<HTMLHeadingElement>(null);
   const navigated = useRef(false);
   const question = SOJOURNER_QUIZ[current];
@@ -29,10 +28,12 @@ export default function StoryQuiz() {
   const score = answers.filter((answer, i) => answer === SOJOURNER_QUIZ[i].correctIndex).length;
   const total = SOJOURNER_QUIZ.length;
 
-  // Keep keyboard and screen-reader users at the new question after Next/Retry.
+  // Keep keyboard and screen-reader users at the new question after navigating or restarting.
   useEffect(() => {
-    if (navigated.current) heading.current?.focus();
-  }, [current, finished]);
+    if (!navigated.current) return;
+    if (inFrame) quiz.current?.parentElement?.scrollTo({ top: 0 });
+    heading.current?.focus({ preventScroll: inFrame });
+  }, [current, finished, inFrame]);
 
   function choose(index: number) {
     // One scored answer per question, including rapid repeated taps.
@@ -43,7 +44,13 @@ export default function StoryQuiz() {
     if (!answered) return;
     navigated.current = true;
     if (current === total - 1) setFinished(true);
-    else setCurrent((value) => value + 1);
+    else setCurrent(current + 1);
+  }
+
+  function previous() {
+    if (current === 0) return;
+    navigated.current = true;
+    setCurrent(current - 1);
   }
 
   function restart() {
@@ -54,20 +61,19 @@ export default function StoryQuiz() {
   }
 
   return (
-    <div className={styles.quiz}>
-      <div className={styles.toolbar}>
-        <span className={styles.eyebrow}>Story check · Sojourner</span>
-        <Link className={styles.exit} href={STORY_HREF}>
-          <span aria-hidden="true">×</span> Exit quiz
-        </Link>
-      </div>
+    <section
+      ref={quiz}
+      id={inFrame ? undefined : "story-quiz"}
+      className={`${styles.quiz}${inFrame ? ` ${styles.inFrame}` : ""}`}
+      aria-labelledby="story-quiz-title"
+    >
+      <h2 id="story-quiz-title" className={styles.heading}>Story quiz</h2>
+      {!inFrame && <p className={styles.intro}>{total} questions about Sojourner&apos;s journey.</p>}
 
       {finished ? (
         <section className={styles.card} aria-labelledby="quiz-result-title">
           <div className={styles.result}>
-            <span className={styles.resultIcon} aria-hidden="true">★</span>
-            <p className={styles.eyebrow}>Adventure remembered</p>
-            <h2 id="quiz-result-title" ref={heading} tabIndex={-1} className={styles.title}>Quiz complete!</h2>
+            <h3 id="quiz-result-title" ref={heading} tabIndex={-1} className={styles.title}>Quiz complete!</h3>
             <p className={styles.score} aria-label={`${score} out of ${total} correct`}>
               {score}<span> / {total}</span>
             </p>
@@ -80,7 +86,7 @@ export default function StoryQuiz() {
             </p>
             <div className={styles.resultActions}>
               <button type="button" className={styles.primary} onClick={restart}>Try again <span aria-hidden="true">↻</span></button>
-              <Link className={styles.secondary} href={STORY_HREF}>Read the story</Link>
+              <a className={styles.secondary} href="#chapter-1">Reread the story</a>
             </div>
           </div>
 
@@ -98,7 +104,7 @@ export default function StoryQuiz() {
                     {!right && <p>Your answer: {item.choices[answers[i]]}</p>}
                     <p><strong>Correct answer:</strong> {item.choices[item.correctIndex]}</p>
                     <p>{item.explanation}</p>
-                    <Link href={`${STORY_HREF}#chapter-${item.chapter}`}>Revisit chapter {item.chapter} <span aria-hidden="true">↗</span></Link>
+                    <a href={`#chapter-${item.chapter}`}>Revisit chapter {item.chapter}</a>
                   </li>
                 );
               })}
@@ -118,9 +124,9 @@ export default function StoryQuiz() {
           </div>
 
           <div className={styles.questionHead}>
-            <p className={styles.eyebrow}>Chapter {String(question.chapter).padStart(2, "0")}</p>
-            <h2 id="quiz-question-title" ref={heading} tabIndex={-1} className={styles.title}>{question.question}</h2>
-            <p className={styles.hint}>Choose one answer. Every answer is in the story.</p>
+            <p className={styles.eyebrow}>Chapter {question.chapter}</p>
+            <h3 id="quiz-question-title" ref={heading} tabIndex={-1} className={styles.title}>{question.question}</h3>
+            <p className={styles.hint}>Choose one answer.</p>
           </div>
 
           <div className={styles.choices} role="group" aria-labelledby="quiz-question-title">
@@ -157,7 +163,7 @@ export default function StoryQuiz() {
                 <div>
                   <p className={styles.feedbackTitle}>{correct ? "Good job! You got it right." : "Not quite. Here's the story reminder."}</p>
                   <p>{question.explanation}</p>
-                  <Link href={`${STORY_HREF}#chapter-${question.chapter}`}>Revisit chapter {question.chapter} <span aria-hidden="true">↗</span></Link>
+                  <a href={`#chapter-${question.chapter}`}>Revisit chapter {question.chapter}</a>
                 </div>
               </div>
             )}
@@ -165,13 +171,17 @@ export default function StoryQuiz() {
 
           <div className={styles.bottom}>
             <p>No timer. Take your time.</p>
-            <button type="button" className={styles.primary} onClick={next} disabled={!answered}>
-              {current === total - 1 ? "See results" : "Next question"} <span aria-hidden="true">→</span>
-            </button>
+            <div className={styles.navigation}>
+              <button type="button" className={styles.secondary} onClick={previous} disabled={current === 0}>
+                <span aria-hidden="true">←</span> Previous question
+              </button>
+              <button type="button" className={styles.primary} onClick={next} disabled={!answered}>
+                {current === total - 1 ? "See results" : "Next question"} <span aria-hidden="true">→</span>
+              </button>
+            </div>
           </div>
         </section>
       )}
-      <p className={styles.footnote}>Based on <Link href={STORY_HREF}>Sojourner: The Journey Through the Stars</Link>.<br />Ten questions, one from each chapter. You can leave whenever you like.</p>
-    </div>
+    </section>
   );
 }

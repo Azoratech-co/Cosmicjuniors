@@ -5,9 +5,9 @@ import Explorer from "@/components/Explorer";
 
 export const metadata: Metadata = {
   title: "Mission Games · Cosmic Juniors",
-  description: "Rebuild Sojourner, fly NASA missions to Mars, land Mars Pathfinder in 3D, and test your story knowledge.",
-  openGraph: { title: "Mission Games · Cosmic Juniors", description: "Rebuild Sojourner, fly NASA missions to Mars, land Mars Pathfinder in 3D, and test your story knowledge.", url: "/games", siteName: "Cosmic Juniors", type: "website" },
-  twitter: { card: "summary_large_image", title: "Mission Games · Cosmic Juniors", description: "Rebuild Sojourner, fly NASA missions to Mars, land Mars Pathfinder in 3D, and test your story knowledge." },
+  description: "Rebuild Sojourner, fly NASA missions to Mars, and land Mars Pathfinder in 3D.",
+  openGraph: { title: "Mission Games · Cosmic Juniors", description: "Rebuild Sojourner, fly NASA missions to Mars, and land Mars Pathfinder in 3D.", url: "/games", siteName: "Cosmic Juniors", type: "website" },
+  twitter: { card: "summary_large_image", title: "Mission Games · Cosmic Juniors", description: "Rebuild Sojourner, fly NASA missions to Mars, and land Mars Pathfinder in 3D." },
 };
 
 const GAMES = [
@@ -42,14 +42,14 @@ const GAMES = [
     alt: "NASA photograph of the Mars Pathfinder lander on Mars, with Sojourner folded on its petal",
   },
   {
-    href: "/games/story-quiz",
-    tag: "Mission 04 · Story quiz",
-    title: "Sojourner Story Quiz",
-    text: "Read the adventure, then test what you remember. Ten questions, four choices, all from the story.",
-    level: 1,
-    levelName: "All readers",
+    href: "/games/dust-storm-landing",
+    tag: "Mission 04 · Arcade",
+    title: "Dust Storm Entry",
+    text: "Steer Pathfinder through four dust storms before the parachute opens.",
+    level: 3,
+    levelName: "Hard",
     img: "/story/sojourner/landed.jpg",
-    alt: "NASA photograph of Pathfinder with Sojourner on its petal on Mars",
+    alt: "NASA photograph of the Mars Pathfinder lander at Ares Vallis",
   },
 ];
 

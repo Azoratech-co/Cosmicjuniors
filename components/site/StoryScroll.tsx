@@ -1,8 +1,8 @@
 "use client";
 
 import Link from "next/link";
-import { useCallback, useEffect, useRef, useState } from "react";
-import type { StoryScene } from "@/lib/story/types";
+import { type ReactNode, useCallback, useEffect, useRef, useState } from "react";
+import type { StoryActivity, StoryScene } from "@/lib/story/types";
 import { TABS } from "@/components/NavTabs";
 import { disableStorySound, duckStorySound, enableStorySound, setStorySound } from "@/lib/storySound";
 
@@ -13,11 +13,13 @@ import { disableStorySound, duckStorySound, enableStorySound, setStorySound } fr
 // snaps onto each scene, and can be driven with the arrow keys, the buttons or the journey rail.
 
 interface Props {
+  comicHref?: string;
   scenes: StoryScene[];
   storyTitle: string;
   storySubtitle: string;
   chapters: Record<number, string>;
   folder: string;
+  activities?: Partial<Record<StoryActivity, ReactNode>>;
 }
 
 const clamp = (v: number, a = 0, b = 1) => Math.max(a, Math.min(b, v));
@@ -28,7 +30,7 @@ const smooth = (v: number) => {
 // the second half of each scene's scroll blends it into the next one
 const FADE_FROM = 0.45;
 
-export default function StoryScroll({ scenes, storyTitle, storySubtitle, chapters, folder }: Props) {
+export default function StoryScroll({ scenes, storyTitle, storySubtitle, chapters, folder, activities, comicHref }: Props) {
   const wrap = useRef<HTMLDivElement>(null);
   const frame = useRef<HTMLDivElement>(null);
   const sky = useRef<HTMLDivElement>(null);
@@ -43,9 +45,13 @@ export default function StoryScroll({ scenes, storyTitle, storySubtitle, chapter
   const [near, setNear] = useState(0);
   const [voice, setVoice] = useState(false);
   const [sound, setSound] = useState(false);
+  const [pastStory, setPastStory] = useState(false);
+  const [quizVisited, setQuizVisited] = useState(false);
   const [menu, setMenu] = useState(false);
   const menuRef = useRef<HTMLDivElement>(null);
   const activeRef = useRef(0);
+  const pastStoryRef = useRef(false);
+  const focusActivity = useRef(false);
 
   const chapterNos = [...new Set(scenes.map((s) => s.chapter).filter((c) => c > 0))];
   const hasAudio = scenes.some((s) => s.audio);
@@ -61,15 +67,21 @@ export default function StoryScroll({ scenes, storyTitle, storySubtitle, chapter
     const target = () => {
       const el = wrap.current;
       if (!el) return 0;
-      const top = el.getBoundingClientRect().top + window.scrollY;
-      return clamp((window.scrollY - top) / window.innerHeight, 0, last);
+      const { top, height } = el.getBoundingClientRect();
+      return clamp(-top / (height / scenes.length), 0, last);
     };
 
     const draw = (p: number) => {
       const k = Math.floor(p);
       const f = p - k;
       const cross = k < last ? smooth((f - FADE_FROM) / (1 - FADE_FROM)) : 0;
+      const now = cross > 0.5 ? k + 1 : k;
       const fw = frame.current?.clientWidth ?? 1;
+      const pastStory = (frame.current?.getBoundingClientRect().bottom ?? 1) <= 0;
+      if (pastStoryRef.current !== pastStory) {
+        pastStoryRef.current = pastStory;
+        setPastStory(pastStory);
+      }
 
       scenes.forEach((sc, i) => {
         const layer = layers.current[i];
@@ -99,8 +111,9 @@ export default function StoryScroll({ scenes, storyTitle, storySubtitle, chapter
 
         const v = videos.current[i];
         if (v) {
-          if (o > 0.01 && v.paused) v.play().catch(() => {});
-          else if (o <= 0.01 && !v.paused) v.pause();
+          const shouldPlay = !pastStory && !scenes[now].activity && o > 0.01;
+          if (shouldPlay && v.paused) v.play().catch(() => {});
+          else if (!shouldPlay && !v.paused) v.pause();
         }
 
         // the story line settles in once its picture is mostly on screen, and leaves early
@@ -117,10 +130,10 @@ export default function StoryScroll({ scenes, storyTitle, storySubtitle, chapter
       if (sky.current && !still) sky.current.style.transform = `translate3d(0,${-p * 9}px,0)`;
       if (rover.current) rover.current.style.left = `${(p / last) * 100}%`;
 
-      const now = cross > 0.5 ? k + 1 : k;
       if (now !== activeRef.current) {
         activeRef.current = now;
         setActive(now);
+        if (scenes[now].activity === "story-quiz") setQuizVisited(true);
       }
       setNear((n) => (Math.abs(n - k) >= 1 ? k : n));
     };
@@ -159,20 +172,21 @@ export default function StoryScroll({ scenes, storyTitle, storySubtitle, chapter
     (i: number) => {
       const el = wrap.current;
       if (!el) return;
-      const top = el.getBoundingClientRect().top + window.scrollY;
+      const { top, height } = el.getBoundingClientRect();
       const still = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-      window.scrollTo({ top: top + clamp(i, 0, last) * window.innerHeight, behavior: still ? "auto" : "smooth" });
+      const sceneTop = top + window.scrollY + clamp(i, 0, last) * (height / (last + 1));
+      window.scrollTo({ top: sceneTop, behavior: still ? "auto" : "smooth" });
     },
     [last],
   );
 
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
-      if (e.altKey || e.ctrlKey || e.metaKey) return;
-      const tag = (e.target as HTMLElement | null)?.tagName;
-      if (tag === "INPUT" || tag === "TEXTAREA" || tag === "SELECT") return;
+      if (e.defaultPrevented || e.altKey || e.ctrlKey || e.metaKey) return;
+      const target = e.target;
+      if (target instanceof Element && target.closest(".ss-activity, input, textarea, select")) return;
       const r = wrap.current?.getBoundingClientRect();
-      if (!r || r.top > 1 || r.bottom < window.innerHeight - 1) return; // only while the stage fills the screen
+      if (!r || r.top > 1 || r.bottom < r.height / (last + 1) - 1) return; // only while the stage fills the screen
       const next = e.key === "ArrowDown" || e.key === "ArrowRight" || e.key === "PageDown";
       const prev = e.key === "ArrowUp" || e.key === "ArrowLeft" || e.key === "PageUp";
       if (!next && !prev) return;
@@ -190,7 +204,7 @@ export default function StoryScroll({ scenes, storyTitle, storySubtitle, chapter
     const a = audio.current;
     if (!a) return;
     const src = scenes[active]?.audio;
-    if (!voice || !src) {
+    if (pastStory || !voice || !src) {
       a.pause();
       return;
     }
@@ -198,7 +212,7 @@ export default function StoryScroll({ scenes, storyTitle, storySubtitle, chapter
     if (!a.src.endsWith(url)) a.src = url;
     a.currentTime = 0;
     a.play().catch(() => {});
-  }, [active, voice, scenes, folder]);
+  }, [active, voice, scenes, folder, pastStory]);
 
   // ---------- the way out: a menu of the site's other tabs ----------
   useEffect(() => {
@@ -217,11 +231,11 @@ export default function StoryScroll({ scenes, storyTitle, storySubtitle, chapter
   // ---------- sound effects: follow the scene on screen ----------
   useEffect(() => {
     const sc = scenes[active];
-    setStorySound(sc?.sound ?? (sc?.card ? "card" : undefined));
-  }, [active, scenes]);
+    setStorySound(pastStory ? undefined : sc?.sound ?? (sc?.card ? "card" : undefined));
+  }, [active, scenes, pastStory]);
   useEffect(() => {
-    duckStorySound(voice && !!scenes[active]?.audio);
-  }, [voice, active, scenes]);
+    duckStorySound(!pastStory && voice && !!scenes[active]?.audio);
+  }, [voice, active, scenes, pastStory]);
   useEffect(() => () => disableStorySound(), []);
   const toggleSound = () => {
     if (sound) disableStorySound();
@@ -251,17 +265,31 @@ export default function StoryScroll({ scenes, storyTitle, storySubtitle, chapter
 
   const cur = scenes[active];
   const onCard = !!cur.card;
-  const sceneNo = scenes.slice(0, active + 1).filter((s) => !s.card).length;
-  const sceneCount = scenes.filter((s) => !s.card).length;
+  const onActivity = !!cur.activity;
+  const nextIsQuiz = scenes[active + 1]?.activity === "story-quiz";
+  const sceneNo = scenes.slice(0, active + 1).filter((s) => !s.card && !s.activity).length;
+  const sceneCount = scenes.filter((s) => !s.card && !s.activity).length;
   const firstOf = (c: number) => scenes.findIndex((s) => s.chapter === c);
+
+  useEffect(() => {
+    if (!onActivity || !focusActivity.current) return;
+    focusActivity.current = false;
+    layers.current[active]?.querySelector<HTMLElement>(".ss-activity")?.focus({ preventScroll: true });
+  }, [active, onActivity]);
 
   return (
     <div className="ss" ref={wrap} style={{ height: `${scenes.length * 100}svh` }}>
-      {scenes.map((_, i) => (
-        <span key={`s${i}`} className="ss-snap-pt" style={{ top: `${i * 100}svh` }} aria-hidden="true" />
+      {scenes.map((scene, i) => (
+        <span
+          key={`s${i}`}
+          id={scene.activity ?? (scene.card && scene.chapter > 0 ? `chapter-${scene.chapter}` : undefined)}
+          className={`ss-snap-pt${scene.activity ? " is-activity" : ""}`}
+          style={{ top: `${i * 100}svh` }}
+          aria-hidden="true"
+        />
       ))}
 
-      <div className="ss-stage">
+      <div className={`ss-stage${onActivity ? " is-activity" : ""}`}>
         <div className="ss-sky" aria-hidden="true">
           <div className="ss-sky__stars" ref={sky} />
         </div>
@@ -278,6 +306,12 @@ export default function StoryScroll({ scenes, storyTitle, storySubtitle, chapter
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d="M15 6l-6 6 6 6" /></svg>
             Back
           </button>
+          {active === 0 && comicHref && (
+            <Link className="ss-exit__btn" href={comicHref}>Read the comic</Link>
+          )}
+          {quizVisited && !onActivity && !nextIsQuiz && (
+            <a className="ss-exit__btn" href="#story-quiz">Back to quiz</a>
+          )}
           {menu && (
             <nav className="ss-exit__menu" aria-label="Main">
               {TABS.filter((t) => !t.href.startsWith("/story")).map((t) => (
@@ -295,8 +329,18 @@ export default function StoryScroll({ scenes, storyTitle, storySubtitle, chapter
             {scenes.map((sc, i) => {
               const load = Math.abs(i - near) <= 3;
               return (
-                <div key={i} className={`ss-layer${sc.card ? " is-card" : ""}`} ref={(el) => { layers.current[i] = el; }} aria-hidden={i !== active}>
-                  {sc.card ? (
+                <div
+                  key={i}
+                  className={`ss-layer${sc.activity ? " is-activity" : sc.card ? " is-card" : ""}`}
+                  ref={(el) => { layers.current[i] = el; }}
+                  inert={i !== active}
+                  aria-hidden={i !== active}
+                >
+                  {sc.activity ? (
+                    <div className="ss-activity" tabIndex={-1}>
+                      {activities?.[sc.activity]}
+                    </div>
+                  ) : sc.card ? (
                     <div className="ss-card">
                       {sc.chapter ? (
                         <>
@@ -338,7 +382,7 @@ export default function StoryScroll({ scenes, storyTitle, storySubtitle, chapter
                             // a clip that finishes loading while its scene is on screen starts right away
                             const v = e.currentTarget;
                             const layer = v.closest(".ss-layer") as HTMLElement | null;
-                            if (layer && Number(layer.style.opacity) > 0.01 && v.paused) v.play().catch(() => {});
+                            if (!pastStoryRef.current && !scenes[activeRef.current].activity && layer && Number(layer.style.opacity) > 0.01 && v.paused) v.play().catch(() => {});
                           }}
                         />
                       ) : load ? (
@@ -360,13 +404,15 @@ export default function StoryScroll({ scenes, storyTitle, storySubtitle, chapter
               ) : null,
             )}
 
-            <div className={`ss-chips${onCard ? " is-hidden" : ""}`} aria-live="polite">
-              <span className="ss-chip">
-                <b>Chapter {cur.chapter}</b>
-                <span>{chapters[cur.chapter]}</span>
-              </span>
-              {cur.stamp && <span className="ss-stamp">{cur.stamp}</span>}
-            </div>
+            {!onActivity && (
+              <div className={`ss-chips${onCard ? " is-hidden" : ""}`} aria-live="polite">
+                <span className="ss-chip">
+                  <b>Chapter {cur.chapter}</b>
+                  <span>{chapters[cur.chapter]}</span>
+                </span>
+                {cur.stamp && <span className="ss-stamp">{cur.stamp}</span>}
+              </div>
+            )}
           </div>
           <span className="ss-corner ss-corner--tl" aria-hidden="true" />
           <span className="ss-corner ss-corner--tr" aria-hidden="true" />
@@ -374,7 +420,7 @@ export default function StoryScroll({ scenes, storyTitle, storySubtitle, chapter
           <span className="ss-corner ss-corner--br" aria-hidden="true" />
         </div>
 
-        <p className={`ss-caption${onCard ? " is-hidden" : ""}`}>{cur.text}</p>
+        {!onActivity && <p className={`ss-caption${onCard ? " is-hidden" : ""}`}>{cur.text}</p>}
 
         <div className="ss-rail">
           <span className="ss-rail__end">Earth</span>
@@ -437,9 +483,20 @@ export default function StoryScroll({ scenes, storyTitle, storySubtitle, chapter
               <button type="button" className="ss-btn ss-btn--icon" onClick={() => goTo(active - 1)} disabled={active === 0} aria-label="Previous scene">
                 <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d="M18 15l-6-6-6 6" /></svg>
               </button>
-              <span className="ss-count">{onCard ? "·" : `${sceneNo} / ${sceneCount}`}</span>
-              <button type="button" className="ss-btn ss-btn--icon" onClick={() => goTo(active + 1)} disabled={active === last} aria-label="Next scene">
-                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d="M6 9l6 6 6-6" /></svg>
+              <span className="ss-count">{onCard || onActivity ? "·" : `${sceneNo} / ${sceneCount}`}</span>
+              <button
+                type="button"
+                className={`ss-btn ${nextIsQuiz ? "is-on ss-quiz-link" : "ss-btn--icon"}`}
+                onClick={() => {
+                  if (nextIsQuiz) focusActivity.current = true;
+                  goTo(active + 1);
+                }}
+                disabled={active === last}
+                aria-label={nextIsQuiz ? "Take the quiz" : "Next scene"}
+              >
+                {nextIsQuiz ? "Take the quiz" : (
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d="M6 9l6 6 6-6" /></svg>
+                )}
               </button>
             </span>
           </span>

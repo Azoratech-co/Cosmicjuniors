@@ -6,7 +6,7 @@
 
 .frame::before {
   position: absolute;
-  inset: calc(50% - var(--row-height) / 2) 2px auto;
+  inset: calc(50% - var(--row-height) / 2) 13px auto 2px;
   height: var(--row-height);
   content: "";
   border-block: 1px solid currentColor;
@@ -20,12 +20,18 @@
   height: calc(var(--row-height) * 3);
   padding-block: var(--row-height);
   box-sizing: border-box;
-  overflow-y: auto;
+  overflow-y: scroll;
   overscroll-behavior-y: contain;
   scroll-snap-type: y mandatory;
-  scrollbar-width: thin;
-  scrollbar-color: #7f89a8 transparent;
-  mask-image: linear-gradient(transparent, #000 5%, #000 95%, transparent);
+}
+
+.wheel::-webkit-scrollbar { width: 11px; }
+.wheel::-webkit-scrollbar-track { background: #1a2337; border-radius: 8px; }
+.wheel::-webkit-scrollbar-thumb { background: #818dad; border: 2px solid #1a2337; border-radius: 8px; }
+
+.wheel { scrollbar-gutter: stable; }
+@supports not selector(::-webkit-scrollbar) {
+  .wheel { scrollbar-width: thin; scrollbar-color: #818dad #1a2337; }
 }
 
 .row {

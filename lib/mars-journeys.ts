@@ -34,7 +34,7 @@ export type JourneyDefinition = {
   endpointSource: string;
   contact?: { label: string; date: string; source: string };
   landmarks: JourneyLandmark[];
-  images?: { file: string; alt: string; caption: string; source: string; credit: string }[];
+  images?: { file: string; title: string; alt: string; caption: string; source: string; credit: string }[];
 };
 
 const notebook = "https://an.rsl.wustl.edu/mera/AN/pages/mer/mer_traverse.htm";
@@ -53,7 +53,7 @@ const definitions: Record<string, JourneyDefinition> = {
     kind: "mapped", source: notebook,
     coverage: "The published, corrected rover traverse is preserved, including repeated stationary localization records. Its last record spans sols 5076–5081; the file label advertises a later coverage bound.",
     endpointLabel: "Last mapped position", endpointArea: "Perseverance Valley, Endeavour Crater",
-    endpointNote: "Expected resting area. This marker uses the final published localization, not a new measurement on the date of last contact. Map-frame landing positions can differ slightly from mission-history coordinates.",
+    endpointNote: "Opportunity’s final published position marks its expected resting area. The rover’s last radio contact was a separate event.",
     endpointSource: "https://science.nasa.gov/photojournal/opportunitys-final-traverse-map/",
     contact: { label: "Last radio contact", date: "2018-06-10", source: "https://science.nasa.gov/resource/opportunitys-last-message/" },
     landmarks: [
@@ -118,7 +118,7 @@ const definitions: Record<string, JourneyDefinition> = {
       { name: "Yogi", source: "https://science.nasa.gov/resource/sojourner-barnacle-bill-yogi/", description: "Sojourner examined this larger rock using its camera and chemical instrument." },
       { name: "Chimp", sol: 80, source: "https://www.jpl.nasa.gov/images/pia00970-sojourners-apxs-at-chimp-left-eye/", description: "NASA documented Sojourner's chemical instrument against Chimp on sol 80, near the end of the mission." },
     ],
-    images: [{ file: "/models/mars/routes/sojourner-map.jpg", alt: "NASA projected panorama with Sojourner's route labeled from sol 1 through sols 78–83 around Pathfinder", caption: "NASA's published 83-sol traverse. The projection is local; no global coordinates have been inferred from image pixels.", source: sojournerMap, credit: "NASA/JPL" }],
+    images: [{ file: "/models/mars/routes/sojourner-map.jpg", title: "Sojourner’s traverse around Pathfinder", alt: "NASA projected panorama with Sojourner's route labeled from sol 1 through sols 78–83 around Pathfinder", caption: "NASA’s local panorama traces Sojourner’s 83-sol journey around the lander.", source: sojournerMap, credit: "NASA/JPL" }],
   },
   zhurong: {
     kind: "imagery", source: zhurongTracks,
@@ -133,8 +133,8 @@ const definitions: Record<string, JourneyDefinition> = {
       { name: "Stationary observation area", source: zhurongLast, description: "The September 2022 and February 2023 orbital views show the rover at the same place." },
     ],
     images: [
-      { file: "/models/mars/routes/zhurong-tracks.jpg", alt: "NASA HiRISE image showing the Zhurong rover and wheel tracks in southern Utopia Planitia", caption: "Wheel tracks documented March 11, 2022. This image covers part of the journey; it is not a complete coordinate track.", source: zhurongTracks, credit: "NASA/JPL-Caltech/UArizona" },
-      { file: "/models/mars/routes/zhurong-last.jpg", alt: "Three NASA HiRISE cutouts comparing Zhurong in March 2022, September 2022, and February 2023", caption: "No movement was seen between September 8, 2022 and February 7, 2023. These are observation dates, not radio-contact dates.", source: zhurongLast, credit: "NASA/JPL-Caltech/UArizona" },
+      { file: "/models/mars/routes/zhurong-tracks.jpg", title: "Zhurong’s wheel tracks", alt: "NASA HiRISE image showing the Zhurong rover and wheel tracks in southern Utopia Planitia", caption: "A March 11, 2022 orbital image shows part of Zhurong’s route.", source: zhurongTracks, credit: "NASA/JPL-Caltech/UArizona" },
+      { file: "/models/mars/routes/zhurong-last.jpg", title: "Zhurong’s position from orbit", alt: "Three NASA HiRISE cutouts comparing Zhurong in March 2022, September 2022, and February 2023", caption: "Orbital images show Zhurong in the same spot on September 8, 2022 and February 7, 2023.", source: zhurongLast, credit: "NASA/JPL-Caltech/UArizona" },
     ],
   },
 };
@@ -142,7 +142,7 @@ const noDrive: JourneyDefinition = {
   kind: "not-deployed", source: "https://www.nasa.gov/history/50-years-ago-mariner-9-launches-to-orbit-mars/",
   coverage: "This PrOP-M rover never deployed and never drove on Mars. There is no rover traverse to draw.",
   endpointLabel: "No rover journey", endpointArea: "Approximate lander arrival area",
-  endpointNote: "Keep the existing approximate lander marker; do not invent a rover route or a separate last-drive position.",
+    endpointNote: "The marker shows the lander’s approximate arrival area. The rover never deployed.",
   endpointSource: "https://www.giss.nasa.gov/tools/mars24/help/landers.html", landmarks: [],
 };
 export function getJourneyDefinition(id: string): JourneyDefinition {

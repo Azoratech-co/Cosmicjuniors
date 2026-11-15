@@ -1,0 +1,23 @@
+.reader { position: relative; width: min(100% - 32px, 980px); margin: 0 auto; padding: 36px 0 60px; }
+.intro { max-width: 720px; margin: 0 auto 28px; text-align: center; }
+.intro > p { line-height: 1.7; }
+.intro a { display: inline-flex; margin: 8px 6px; }
+.navigation { position: sticky; top: 72px; z-index: 20; display: flex; justify-content: center; align-items: center; flex-wrap: wrap; gap: 6px; width: fit-content; max-width: 100%; margin: 0 auto 28px; padding: 8px 12px; border: 1px solid #ffd16655; border-radius: 18px; background: #071733; color: #fff; box-shadow: 0 8px 28px #0005; }
+.navigation > span { padding: 0 8px; font-size: 14px; }
+.navigation a { display: grid; place-items: center; min-width: 44px; min-height: 44px; border-radius: 10px; color: #fff; text-decoration: none; font-weight: 700; }
+.navigation a:hover, .navigation a:focus-visible { background: #7c2847; outline: 2px solid #ffd166; outline-offset: 2px; }
+.page { margin: 0 0 40px; scroll-margin-top: 152px; }
+.page figcaption { margin: 0 0 12px; }
+.page figcaption span { font-size: 13px; opacity: .8; }
+.page h2 { margin: 4px 0; font-size: clamp(18px, 3vw, 26px); }
+.page > a { display: block; background: #071733; }
+.page > a:focus-visible { outline: 3px solid #ffd166; outline-offset: 5px; }
+.page img { display: block; width: 100%; height: auto; }
+.end { text-align: center; }
+.end a { display: inline-flex; margin: 8px; }
+@media (max-width: 540px) {
+  .reader { width: min(100% - 16px, 980px); padding-top: 24px; }
+  .navigation { gap: 0; padding: 6px; }
+  .navigation > span { display: none; }
+  .navigation a { min-width: 34px; min-height: 44px; }
+}

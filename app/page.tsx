@@ -51,6 +51,20 @@ const MISSIONS: { n: string; title: string; text: string; cta: string; href: str
     img: "https://images-assets.nasa.gov/image/PIA24318/PIA24318~medium.jpg",
     alt: "Illustration of NASA's Perseverance rover firing its engines as it lands on Mars",
   },
+  {
+    n: "05",
+    title: "Podcast",
+    text: "Listen to the Cosmic Juniors podcast.",
+    cta: "Open podcast",
+    href: "/podcast",
+  },
+  {
+    n: "06",
+    title: "Novel",
+    text: "Read the Cosmic Juniors novel at your own pace.",
+    cta: "Open novel",
+    href: "/novel",
+  },
 ];
 
 export default function HomePage() {
@@ -74,13 +88,15 @@ export default function HomePage() {
           {MISSIONS.map((m, i) => (
             <Reveal key={m.n} delay={i * 90}>
               <Link href={m.href} className="mission-card">
-                <span className="mission-card__media">
-                  {m.img ? (
-                    <Image src={m.img} alt={m.alt ?? ""} width={1536} height={864} sizes="(max-width: 700px) 92vw, 360px" />
-                  ) : (
-                    <ChatCardArt />
-                  )}
-                </span>
+                {(m.img || m.art) && (
+                  <span className="mission-card__media">
+                    {m.img ? (
+                      <Image src={m.img} alt={m.alt ?? ""} width={1536} height={864} sizes="(max-width: 700px) 92vw, 360px" />
+                    ) : (
+                      <ChatCardArt />
+                    )}
+                  </span>
+                )}
                 <span className="mission-card__n">{m.n}</span>
                 <span className="mission-card__title">{m.title}</span>
                 <span className="mission-card__text">{m.text}</span>

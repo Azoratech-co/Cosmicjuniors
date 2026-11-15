@@ -3,13 +3,14 @@
 import dynamic from "next/dynamic";
 import { Component, useCallback, useEffect, useId, useRef, useState, type ReactNode } from "react";
 import type { Group } from "three";
-import { marsRoverSites, opportunityLanding, type MarsLandingSite, type MarsRoverSite } from "@/lib/landing-sites";
+import type { LandingSiteDetails } from "@/lib/landing-sites";
+import { GLOBE_MAPS, type LandingExplorerConfig } from "@/lib/mission-landing-sites";
 import styles from "./LandingGlobe.module.css";
-import { detailedCoordinates, getJourneyDefinition, getRouteSnapshot, solRange } from "@/lib/mars-journeys";
 import type { LandingMarkerProjection } from "./LandingGlobeScene";
 import { positionMarsLeader } from "./positionMarsLeader";
-import MarsLandingInfo from "./MarsLandingInfo";
-import MarsSitePicker from "./MarsSitePicker";
+import LandingSiteInfo from "./MarsLandingInfo";
+import MarsJourneyEndpoint from "./MarsJourneyEndpoint";
+import LandingSitePicker from "./MarsSitePicker";
 import { useMarsJourney } from "./useMarsJourney";
 
 const Scene = dynamic(() => import("./LandingGlobeScene"), { ssr: false });
@@ -22,19 +23,15 @@ class GlobeBoundary extends Component<{ children: ReactNode; onError: () => void
   render() { return this.state.failed ? null : this.props.children; }
 }
 
-export default function MarsLandingGlobe({ site }: { site: MarsLandingSite }) {
-  // Keep the existing page's site prop: no explorer page integration change needed.
-  const original = marsRoverSites.find((entry) =>
-    entry.latitude === site.latitude && entry.longitude === site.longitude) ?? opportunityLanding;
+export default function LandingGlobe({ config, original }: { config: LandingExplorerConfig; original: LandingSiteDetails }) {
+  const { name, sites, world, surfaceJourneys } = config;
+  const imagery = GLOBE_MAPS[world];
   const [selected, setSelected] = useState(original);
   const comparison = selected.id !== original.id ? selected : null;
-  const [revealedComparison, setRevealedComparison] = useState<string | null>(null);
   const [focusVersion, setFocusVersion] = useState(0);
   const [expanded, setExpanded] = useState(false);
   const [windowMode, setWindowMode] = useState<"globe" | "journey">("globe");
   const journey = useMarsJourney(selected.id);
-  const definition = getJourneyDefinition(original.id);
-  const originalSnapshot = getRouteSnapshot(original.id);
   const [status, setStatus] = useState<"loading" | "ready" | "failed">("loading");
   const heading = useId();
   const instructions = useId();
@@ -62,9 +59,7 @@ export default function MarsLandingGlobe({ site }: { site: MarsLandingSite }) {
     drawLeaders();
   }, [drawLeaders]);
   const projectComparison = useCallback((point: LandingMarkerProjection | null) => {
-    const previous = comparisonPoint.current?.siteId;
     comparisonPoint.current = point;
-    if (point && point.siteId !== previous) setRevealedComparison(point.siteId);
     drawLeaders();
   }, [drawLeaders]);
 
@@ -88,31 +83,29 @@ export default function MarsLandingGlobe({ site }: { site: MarsLandingSite }) {
     redraw.current?.();
   }
 
-  function selectSite(next: MarsRoverSite) {
+  function selectSite(next: LandingSiteDetails) {
     drag.current = null;
-    if (next.id !== selected.id) setRevealedComparison(null);
     setSelected(next);
-    // Also re-center when the visitor picks the already selected rover after dragging.
+    // Also re-center when the visitor picks the already selected site after dragging.
     setFocusVersion((version) => version + 1);
   }
 
   return (
     <section className={styles.card} aria-labelledby={heading}>
       <header className={styles.header}>
-        <button type="button" className={styles.expandButton} aria-label="Expand Mars explorer" title="Expand Mars explorer"
+        <button type="button" className={styles.expandButton} aria-label={`Expand ${name} explorer`} title={`Expand ${name} explorer`}
           aria-haspopup="dialog" onClick={() => { setWindowMode("globe"); setExpanded(true); }}>
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" aria-hidden="true">
             <path d="M9 4H4v5m11 11h5v-5M4 4l6 6m10 10-6-6M15 4h5v5M9 20H4v-5m16-11-6 6M4 20l6-6" />
           </svg>
         </button>
-        <h2 id={heading}>Where the Mars rovers landed</h2>
-        <p>Six rovers explored Mars. Two earlier rovers were sent there but never got to drive.</p>
+        <h2 id={heading}>{config.title}</h2>
       </header>
 
       <div ref={explorer} className={styles.explorer}>
         <div className={styles.globePanel}>
           <div className={styles.globeStage}>
-            <div ref={viewport} className={styles.globe} role="group" aria-label="Interactive Mars landing-site globe"
+            <div ref={viewport} className={styles.globe} role="group" aria-label={`Interactive ${name} landing-site globe`}
               aria-describedby={instructions} tabIndex={status === "ready" ? 0 : undefined}
               onPointerDown={(event) => {
                 if (event.button !== 0 || !event.isPrimary || !globe.current) return;
@@ -142,25 +135,26 @@ export default function MarsLandingGlobe({ site }: { site: MarsLandingSite }) {
               }}>
               {status !== "failed" && (
                 <GlobeBoundary onError={onError}>
-                  <Scene site={selected} sites={marsRoverSites} focusVersion={focusVersion} globe={globe}
+                  <Scene world={world} site={selected} sites={sites} focusVersion={focusVersion} globe={globe}
                     redraw={redraw} cancelFocus={cancelFocus} onReady={onReady} onError={onError} journey={journey.data}
+                    showJourneyEndpoints={surfaceJourneys}
                     referenceSite={original} onProjectReference={projectOriginal} onProjectMarker={projectComparison} />
                 </GlobeBoundary>
               )}
             </div>
             {status !== "ready" && <p className={styles.notice} role="status">
-              {status === "loading" ? "Loading Mars…" : "The 3D globe is unavailable. You can still compare rover landing coordinates."}
+              {status === "loading" ? `Loading ${name}…` : "The 3D globe is unavailable. You can still compare landing coordinates."}
             </p>}
           </div>
-          <p id={instructions} className={styles.hint}>Drag or use arrow keys to rotate Mars.</p>
+          <p id={instructions} className={styles.hint}>Drag or use arrow keys to rotate {world === "moon" ? "the Moon" : name}.</p>
           {comparison && (
-            <section key={comparison.id} ref={comparisonCard} className={`${styles.infoCard} ${styles.comparisonCard}`} data-visible="true"
+            <section key={comparison.id} ref={comparisonCard} className={`${styles.infoCard} ${styles.comparisonCard}`}
               aria-label={`${comparison.rover} comparison information`} aria-live="polite">
-              <h4>{comparison.rover}</h4>
-              <MarsLandingInfo site={comparison} reveal={status !== "ready" || revealedComparison === comparison.id} />
-              <button type="button" className={styles.findButton} onClick={() => { setWindowMode("journey"); setExpanded(true); }}>
-                Explore {comparison.rover} journey
-              </button>
+              <LandingSiteInfo site={comparison} showMission reveal action={surfaceJourneys &&
+                <button type="button" className={styles.findButton} onClick={() => { setWindowMode("journey"); setExpanded(true); }}>
+                  {`Explore ${comparison.rover} journey`}
+                </button>
+              } />
             </section>
           )}
         </div>
@@ -190,30 +184,28 @@ export default function MarsLandingGlobe({ site }: { site: MarsLandingSite }) {
               Locate it
             </button>
           </div>
-          <section ref={originalCard} className={styles.infoCard} data-visible="true" aria-label={`${original.rover} landing information`}>
-            <MarsLandingInfo site={original} />
+          <section ref={originalCard} className={styles.infoCard} aria-label={`${original.rover} landing information`}>
+            <LandingSiteInfo site={original} />
           </section>
-          <details className={styles.comparison}>
-            <summary>Compare different landing positions</summary>
-            <MarsSitePicker selected={selected.id} onSelect={selectSite} />
-            <p className={styles.note}>Dashed markers show approximate arrival sites for the two 1971 PrOP-M attempts.</p>
-          </details>
-          <div className={styles.journeySummary}>
-            <strong>{definition.endpointLabel} · {definition.endpointArea}</strong>
-            {originalSnapshot && <p>{detailedCoordinates(originalSnapshot.last)}<br />{solRange(originalSnapshot.last)} &middot; snapshot {originalSnapshot.snapshotDate}</p>}
-            {definition.contact && <p>{definition.contact.label}: {definition.contact.date}</p>}
-            <button type="button" className={styles.findButton} onClick={() => { selectSite(original); setWindowMode("journey"); setExpanded(true); }}>Explore {original.rover} journey</button>
-          </div>
+          <section className={styles.comparison} aria-labelledby={`${heading}-comparison`}>
+            <h4 id={`${heading}-comparison`}>Compare different landing positions</h4>
+            <LandingSitePicker sites={sites} selected={selected.id} onSelect={selectSite} />
+            <p className={styles.note}>{config.comparisonNote}</p>
+          </section>
         </div>
+        {surfaceJourneys && <div className={styles.journeySummary}>
+          <MarsJourneyEndpoint site={original} />
+          <button type="button" className={styles.findButton} onClick={() => { selectSite(original); setWindowMode("journey"); setExpanded(true); }}>Explore {original.rover} journey</button>
+        </div>}
       </div>
 
       <footer className={styles.footer}>
         <div className={styles.sources}>
-          <a href="https://www.giss.nasa.gov/tools/mars24/help/landers.html" target="_blank" rel="noopener noreferrer">NASA Mars24 · landing locations</a>
-          <a href="https://trek.nasa.gov/tiles/apidoc/trekAPI.html?body=mars" target="_blank" rel="noopener noreferrer">NASA Mars Trek imagery</a>
+          <a href={config.coordinateReference.url} target="_blank" rel="noopener noreferrer">{config.coordinateReference.label}</a>
+          <a href={imagery.url} target="_blank" rel="noopener noreferrer">{imagery.label}</a>
         </div>
       </footer>
-      {expanded && <ExplorerWindow site={selected} initialMode={windowMode} onSelect={selectSite} onClose={() => setExpanded(false)} />}
+      {expanded && <ExplorerWindow config={config} site={selected} initialMode={windowMode} onSelect={selectSite} onClose={() => setExpanded(false)} />}
     </section>
   );
 }

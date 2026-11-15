@@ -8,6 +8,8 @@
 }
 .card h2 { margin: 0 0 5px; font-size: clamp(20px, 3vw, 28px); }
 .card p { margin: 0; }
+.missionPicker { width: min(100%, 290px); margin-top: 14px; }
+.missionPicker h3, .moreInfo h3 { margin: 0 0 6px; font-size: 15px; }
 .viewport {
   position: relative;
   margin-block: 16px;
@@ -48,8 +50,9 @@
 .timeline label { display: grid; gap: 6px; font-weight: 700; }
 .timeline input { width: 100%; accent-color: var(--primary); }
 .timeline output { display: block; margin-block: 4px 10px; color: var(--muted); font-variant-numeric: tabular-nums; }
-.controls, .sources { display: flex; flex-wrap: wrap; gap: 8px; }
-.controls button {
+.controls, .sources, .viewModes { display: flex; flex-wrap: wrap; gap: 8px; }
+.viewModes { margin-top: 14px; }
+.controls button, .viewModes button {
   min-height: 44px;
   padding-inline: 12px;
   border: 1px solid var(--line-strong);
@@ -59,7 +62,10 @@
   font: inherit;
   cursor: pointer;
 }
-.card .note { margin-top: 14px; color: var(--muted); font-size: 13px; }
+.moreInfo { margin-top: 16px; padding-top: 12px; border-top: 1px solid var(--line-strong); }
+.moreInfo p { color: var(--muted); font-size: 13px; }
+.moreInfo p + p { margin-top: 6px; }
 .sources { margin-top: 8px; font-size: 13px; }
 .sources a { color: inherit; text-decoration: underline; }
+.viewModes button[aria-pressed="true"] { background: color-mix(in srgb, var(--primary) 18%, var(--surface)); border-color: var(--primary); }
 .card :is(button, a, input):focus-visible { outline: 2px solid var(--primary); outline-offset: 2px; }

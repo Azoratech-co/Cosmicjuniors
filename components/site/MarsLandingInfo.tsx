@@ -1,23 +1,33 @@
-import { formatLandingCoordinates, type MarsRoverSite } from "@/lib/landing-sites";
-import TypedDescription from "./TypedDescription";
-import styles from "./LandingGlobe.module.css";
+import { formatLandingCoordinates, type LandingSiteDetails } from "@/lib/landing-sites";
+import type { ReactNode } from "react";
+import MarsInfo from "./MarsInfo";
 
 const dateFormat = new Intl.DateTimeFormat("en", { dateStyle: "medium", timeZone: "UTC" });
 
-export default function MarsLandingInfo({ site, reveal }: { site: MarsRoverSite; reveal?: boolean }) {
+export default function LandingSiteInfo({ site, reveal, showMission, action }: {
+  site: LandingSiteDetails;
+  reveal?: boolean;
+  showMission?: boolean;
+  action?: ReactNode;
+}) {
   return (
-    <div className={styles.landingInfo}>
-      <p className={styles.place}>{site.name}</p>
-      <p>{site.region}</p>
-      <p className={styles.coordinates}>{formatLandingCoordinates(site, site.approximate)}</p>
-      <p className={styles.date}>{site.agency} · {site.id === "mars-2-prop-m" ? "Impact" : "Landed"}{" "}
-        <time dateTime={site.arrivalDate}>{dateFormat.format(new Date(`${site.arrivalDate}T00:00:00Z`))}</time> UTC</p>
-      <p className={styles.summary}>{reveal === undefined ? site.summary : <TypedDescription key={site.id} text={site.summary} active={reveal} />}</p>
-      {site.approximate && <p className={styles.note}>Dashed marker: approximate lander location. This rover never drove on Mars.</p>}
-      <div className={styles.sources}>
+    <MarsInfo
+      key={site.id}
+      label={showMission ? site.rover : undefined}
+      title={site.title}
+      summary={site.summary}
+      reveal={reveal}
+      action={action}
+      fields={[
+        ["Coordinates", formatLandingCoordinates(site, site.approximate)],
+        ["Agency", <>{site.agency} · {site.arrivalLabel ?? "Landed"}{" "}
+          <time dateTime={site.arrivalDate}>{dateFormat.format(new Date(`${site.arrivalDate}T00:00:00Z`))}</time> UTC</>],
+      ]}
+      more={{ title: site.highlight.title, content: site.highlight.description }}
+      sources={<>
         <a href={site.source} target="_blank" rel="noopener noreferrer">NASA mission reference</a>
-        {site.coordinateSource !== site.source && <a href={site.coordinateSource} target="_blank" rel="noopener noreferrer">NASA coordinates</a>}
-      </div>
-    </div>
+        {site.coordinateSource !== site.source && <a href={site.coordinateSource} target="_blank" rel="noopener noreferrer">{site.coordinateSourceLabel ?? "NASA coordinates"}</a>}
+      </>}
+    />
   );
 }

@@ -425,12 +425,12 @@ export class PathfinderScene {
     return 125 * Math.log(1 + alt / 30) / Math.log(1 + EDL.chute / 30);
   }
 
-  render(f: PathfinderFlight, dt: number, time: number) {
+  render(f: PathfinderFlight, dt: number, time: number, entryOffset?: { x: number; y: number }) {
     const phase = f.phase;
     if (phase !== this.lastPhase) this.onPhase(phase, f);
     this.lastPhase = phase;
     const inSpace = phase === "ready" || phase === "cruise" || phase === "approach" || phase === "entry";
-    if (inSpace) this.drawSpace(f, time);
+    if (inSpace) this.drawSpace(f, time, entryOffset, dt);
     else this.drawGround(f, dt, time);
     this.shake = Math.max(0, this.shake - dt * 1.6);
     if (this.shake > 0) {
@@ -454,7 +454,7 @@ export class PathfinderScene {
   }
 
   // ------------------------------------------------------------ space and entry
-  private drawSpace(f: PathfinderFlight, time: number) {
+  private drawSpace(f: PathfinderFlight, time: number, entryOffset?: { x: number; y: number }, dt = 0) {
     const phase = f.phase;
     const st = f.stageTime;
     const cam = this.camera;
@@ -468,6 +468,16 @@ export class PathfinderScene {
       const heat = Math.sin(Math.PI * clamp(st / 4.6));
       const d = 60 - k * 4.5;
       const pos = new THREE.Vector3(Math.sin(0.25 + k * 0.05) * d * 0.25, Math.cos(0.25) * d, 4 - k * 8);
+      const camTarget = pos.clone().add(new THREE.Vector3(5.5, 3.5, 9));
+      if (entryOffset) {
+        // Match the capsule's screen position to the arcade playfield.
+        if (st < 0.1) cam.position.copy(camTarget);
+        else cam.position.lerp(camTarget, 1 - Math.exp(-5 * dt));
+        cam.lookAt(pos);
+        const viewHeight = 2 * cam.position.distanceTo(pos) * Math.tan(25 * Math.PI / 180);
+        const offset = new THREE.Vector3(entryOffset.x * viewHeight * cam.aspect, entryOffset.y * viewHeight, 0);
+        pos.add(offset.applyQuaternion(cam.quaternion));
+      }
       this.craft.position.copy(pos);
       this.craft.lookAt(0, 0, 0);
       this.craft.rotateX(-Math.PI / 2);
@@ -486,9 +496,10 @@ export class PathfinderScene {
       }
       tp.needsUpdate = true;
       (this.trail.material as THREE.PointsMaterial).opacity = 0.75 * heat;
-      const camTarget = pos.clone().add(new THREE.Vector3(5.5, 3.5, 9));
-      cam.position.lerp(camTarget, 0.08);
-      cam.lookAt(pos.clone().lerp(new THREE.Vector3(0, 0, 0), 0.02));
+      if (!entryOffset) {
+        cam.position.lerp(camTarget, 0.08);
+        cam.lookAt(pos.clone().lerp(new THREE.Vector3(0, 0, 0), 0.02));
+      }
       cam.fov = 50;
       cam.updateProjectionMatrix();
       return;

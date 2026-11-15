@@ -49,6 +49,7 @@
 }
 .titlebar h2 { margin: 0; font-size: 17px; font-weight: 600; letter-spacing: -0.02em; }
 .planetIcon { width: 30px; height: 30px; border-radius: 50%; background: radial-gradient(circle at 30% 25%, #f9c592, #c46d4e 50%, #602e2a 85%); box-shadow: inset -4px -3px 9px #0008; }
+[data-world="moon"] .planetIcon { background: url("/models/moon/surface/color-2048.webp") center / auto 100%; }
 .close { margin-inline-start: auto; width: 44px; height: 44px; display: grid; place-items: center; border: 1px solid #30394e; border-radius: 50%; color: #d2daed; background: #192133; cursor: pointer; }
 .close:hover { background: #303d55; color: white; }
 .close svg { width: 24px; height: 24px; }
@@ -70,7 +71,7 @@
 .sitePanel, .cameraPanel {
   background: rgb(6 9 15 / 76%);
 }
-.panelToggle {
+.siteHeading, .panelToggle {
   min-height: 42px;
   box-sizing: border-box;
   margin: 0;

@@ -1,9 +1,13 @@
 import type { StorySoundPreset } from "@/lib/storySound";
 
-/** One step of the scrolling story. Chapter cards have `card`; scenes have a picture (or video) and a line of the story. */
+export type StoryActivity = "story-quiz";
+
+/** One step in the scrolling story: a chapter card, a narrated scene, or an interactive activity. */
 export interface StoryScene {
   chapter: number;
   card?: boolean;
+  /** Identifier of an activity rendered in the story frame. */
+  activity?: StoryActivity;
   text?: string;
   /** Picture shown in the frame (also the video's poster). */
   image?: string;

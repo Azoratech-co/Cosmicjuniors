@@ -198,4 +198,5 @@ export const SOJOURNER_SCENES: StoryScene[] = [
     credit: AI + "Pathfinder and Sojourner at Ares Vallis · NASA/JPL, painted at night",
     text: "Somewhere on Mars, the little rover remains. Abandoned. But never forgotten.",
   }),
+  { chapter: 10, activity: "story-quiz" },
 ];
