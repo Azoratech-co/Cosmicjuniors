@@ -406,7 +406,8 @@ html.ss-snap { scroll-snap-type: y proximity; }
 .ss-rail__end { font-size: 11px; font-weight: 700; letter-spacing: 0.14em; text-transform: uppercase; color: var(--ss-muted); }
 .ss-rail__end:first-child { color: #7fb4ff; }
 .ss-rail__end:last-child { color: #ff9a6b; }
-.ss-rail__track { position: relative; flex: 1; height: 26px; }
+.ss-rail__track { position: relative; flex: 1; height: 26px; cursor: pointer; touch-action: none; }
+.ss-rail__track:hover .ss-rail__line { height: 4px; }
 .ss-rail__line { position: absolute; left: 0; right: 0; top: 50%; height: 2px; translate: 0 -50%; border-radius: 2px;
   background: linear-gradient(90deg, #7fb4ff, var(--ss-lav) 45%, #ff9a6b 75%, rgb(170 178 214 / 0.45)); opacity: 0.55; }
 .ss-rail__dot { position: absolute; top: 50%; width: 22px; height: 22px; translate: -50% -50%; padding: 0; border: 0; background: none; cursor: pointer; }

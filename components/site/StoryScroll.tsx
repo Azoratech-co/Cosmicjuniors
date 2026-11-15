@@ -59,6 +59,13 @@ export default function StoryScroll({ scenes, storyTitle, storySubtitle, chapter
   const pastStoryRef = useRef(false);
   const focusActivity = useRef(false);
 
+  // the journey rail: which scene sits under the pointer
+  const railDrag = useRef(false);
+  const railScene = (e: { clientX: number; currentTarget: Element }) => {
+    const r = e.currentTarget.getBoundingClientRect();
+    return Math.round(clamp((e.clientX - r.left) / r.width) * last);
+  };
+
   const chapterNos = [...new Set(scenes.map((s) => s.chapter).filter((c) => c > 0))];
   const hasAudio = scenes.some((s) => s.audio);
   const last = scenes.length - 1;
@@ -178,11 +185,11 @@ export default function StoryScroll({ scenes, storyTitle, storySubtitle, chapter
 
   // ---------- moving around: buttons, rail and arrow keys ----------
   const goTo = useCallback(
-    (i: number) => {
+    (i: number, instant = false) => {
       const el = wrap.current;
       if (!el) return;
       const { top, height } = el.getBoundingClientRect();
-      const still = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+      const still = instant || window.matchMedia("(prefers-reduced-motion: reduce)").matches;
       const sceneTop = top + window.scrollY + clamp(i, 0, last) * (height / (last + 1));
       window.scrollTo({ top: sceneTop, behavior: still ? "auto" : "smooth" });
     },
@@ -437,7 +444,20 @@ export default function StoryScroll({ scenes, storyTitle, storySubtitle, chapter
 
         <div className="ss-rail">
           <span className="ss-rail__end">Earth</span>
-          <div className="ss-rail__track">
+          <div
+            className="ss-rail__track"
+            title="Click or drag along the line to jump to that part of the story"
+            onPointerDown={(e) => {
+              // anywhere on the line jumps there; the dots and checkpoints keep their own clicks
+              if (e.button !== 0 || (e.target as Element).closest("button")) return;
+              railDrag.current = true;
+              e.currentTarget.setPointerCapture(e.pointerId);
+              goTo(railScene(e), false);
+            }}
+            onPointerMove={(e) => { if (railDrag.current) goTo(railScene(e), true); }}
+            onPointerUp={() => { railDrag.current = false; }}
+            onPointerCancel={() => { railDrag.current = false; }}
+          >
             <span className="ss-rail__line" />
             {chapterNos.map((c) => {
               const at = firstOf(c);
