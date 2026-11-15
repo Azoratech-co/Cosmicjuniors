@@ -135,9 +135,9 @@ export default function HomePage() {
                   {/* eslint-disable-next-line @next/next/no-img-element */}
                   <img className="video-card__play" src="/figma/play.svg" alt="" width={72} height={72} />
                   <span className="video-card__soon">Coming soon</span>
+                  <span className="video-card__title">{v.title}</span>
                 </>
               )}
-              <span className="video-card__title">{v.title}</span>
             </div>
           ))}
         </Reveal>
